@@ -3,6 +3,7 @@ import { stdin as input, stdout as output } from "node:process";
 import { Logger } from "../logging/logger.js";
 import { WinNestError } from "../shared/errors.js";
 import { scanExecutables, type ExecutableCandidate } from "./executables.js";
+import { scanShortcutFiles } from "./shortcuts.js";
 
 export async function detectMainExecutable(
   prefixPath: string,
@@ -10,6 +11,7 @@ export async function detectMainExecutable(
   logger: Logger,
   options: { onSelectionRequired?: () => Promise<void>; referenceTimeMs?: number } = {}
 ): Promise<ExecutableCandidate> {
+  await scanShortcutFiles(prefixPath, logger);
   const scanOptions = options.referenceTimeMs === undefined ? { logger } : { logger, referenceTimeMs: options.referenceTimeMs };
   const candidates = await scanExecutables(prefixPath, appHint, scanOptions);
   await logger.info("scanner candidates", {
