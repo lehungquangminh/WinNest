@@ -12,6 +12,7 @@ WinNest is a TypeScript-only Linux CLI and future Electron desktop app for manag
 - `src/shared/`: typed errors, result objects, safe spawning, and shared utilities.
 - `src/logging/`: log path helpers and JSON-line logger.
 - `src/dev/`: development-only helpers such as path torture tests.
+- `tests/`: all automated tests should live here once added.
 
 Build output goes to `dist/`. Do not edit generated files.
 
@@ -31,11 +32,11 @@ Folder names provide context, so filenames should be short: `src/wine/runner.ts`
 
 ## Testing Guidelines
 
-There is no full test framework yet. For now, every change should pass `npm run check`, `npm run build`, and relevant smoke tests. Use `npm run test:path-torture` when touching process spawning, path handling, install flow, or logging.
+There is no full test framework yet. Put all new automated tests under `tests/`. For now, every change should pass `npm run check`, `npm run build`, and relevant smoke tests. Use `npm run test:path-torture` when touching process spawning, path handling, install flow, or logging.
 
 ## Commit & Pull Request Guidelines
 
-History uses clear imperative messages, for example `Add install state tracking` and `fix: update contact email for reporting unacceptable behavior and security vulnerabilities`. Keep commits small and focused. Pull requests should include a concise summary, commands tested, known limitations, and screenshots only when UI work is introduced.
+History uses clear imperative messages, for example `Add install state tracking` and `fix: update contact email for reporting unacceptable behavior and security vulnerabilities`. Keep commits small and focused. Configure commits with `Lê Hùng Quang Minh <lhquangmink@gmail.com>`, not generated agent identity. Pull requests should include a concise summary, commands tested, known limitations, and screenshots only when UI work is introduced.
 
 ## Security & Architecture Notes
 
