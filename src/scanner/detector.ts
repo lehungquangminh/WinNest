@@ -4,6 +4,7 @@ import { Logger } from "../logging/logger.js";
 import { WinNestError } from "../shared/errors.js";
 import { scanExecutables, type ExecutableCandidate } from "./executables.js";
 import { scanShortcutFiles } from "./shortcuts.js";
+import { scanRegistryUninstallEntries } from "./registry.js";
 
 export async function detectMainExecutable(
   prefixPath: string,
@@ -12,7 +13,11 @@ export async function detectMainExecutable(
   options: { onSelectionRequired?: () => Promise<void>; referenceTimeMs?: number } = {}
 ): Promise<ExecutableCandidate> {
   await scanShortcutFiles(prefixPath, logger);
-  const scanOptions = options.referenceTimeMs === undefined ? { logger } : { logger, referenceTimeMs: options.referenceTimeMs };
+  const registryHints = await scanRegistryUninstallEntries(prefixPath, logger);
+  const scanOptions =
+    options.referenceTimeMs === undefined
+      ? { logger, registryHints }
+      : { logger, referenceTimeMs: options.referenceTimeMs, registryHints };
   const candidates = await scanExecutables(prefixPath, appHint, scanOptions);
   await logger.info("scanner candidates", {
     count: candidates.length,

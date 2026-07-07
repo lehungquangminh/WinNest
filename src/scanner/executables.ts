@@ -1,6 +1,7 @@
 import { readdir, stat } from "node:fs/promises";
 import { basename, join, relative, sep } from "node:path";
 import type { Logger } from "../logging/logger.js";
+import type { RegistryUninstallHint } from "./registry.js";
 
 export type ExecutableCandidate = {
   windowsPath: string;
@@ -24,6 +25,7 @@ const BAD_NAME_PARTS = ["unins", "uninstall", "update", "crash", "crashreporter"
 export type ExecutableScanOptions = {
   logger?: Logger;
   referenceTimeMs?: number;
+  registryHints?: RegistryUninstallHint[];
 };
 
 export async function scanExecutables(
@@ -46,7 +48,7 @@ export async function scanExecutables(
       }
 
       exeFilesFound += 1;
-      candidates.push(await scoreExecutable(prefixPath, path, appHint, options.referenceTimeMs));
+      candidates.push(await scoreExecutable(prefixPath, path, appHint, options.referenceTimeMs, options.registryHints ?? []));
     });
   }
 
@@ -100,7 +102,8 @@ async function scoreExecutable(
   prefixPath: string,
   linuxPath: string,
   appHint: string,
-  referenceTimeMs: number | undefined
+  referenceTimeMs: number | undefined,
+  registryHints: readonly RegistryUninstallHint[]
 ): Promise<ExecutableCandidate> {
   const info = await stat(linuxPath);
   const name = basename(linuxPath);
@@ -156,6 +159,11 @@ async function scoreExecutable(
     reasons.push("recently modified");
   }
 
+  if (matchesRegistryHint(prefixPath, linuxPath, registryHints)) {
+    score += 10;
+    reasons.push("matches registry uninstall hint");
+  }
+
   return {
     windowsPath: toWindowsPath(prefixPath, linuxPath),
     linuxPath,
@@ -165,6 +173,36 @@ async function scoreExecutable(
     sizeBytes: info.size,
     modifiedAt: info.mtime.toISOString()
   };
+}
+
+function matchesRegistryHint(
+  prefixPath: string,
+  linuxPath: string,
+  registryHints: readonly RegistryUninstallHint[]
+): boolean {
+  const normalizedLinuxPath = linuxPath.toLowerCase();
+  for (const hint of registryHints) {
+    if (!hint.installLocation) {
+      continue;
+    }
+
+    const linuxInstallLocation = registryWindowsPathToLinux(prefixPath, hint.installLocation);
+    if (linuxInstallLocation && normalizedLinuxPath.startsWith(linuxInstallLocation.toLowerCase())) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function registryWindowsPathToLinux(prefixPath: string, windowsPath: string): string | undefined {
+  const match = /^c:[/\\](.*)$/i.exec(windowsPath.trim());
+  const rawRelativePath = match?.[1];
+  if (!rawRelativePath) {
+    return undefined;
+  }
+
+  return join(prefixPath, "drive_c", ...rawRelativePath.split(/[\\/]+/).filter((part) => part.length > 0));
 }
 
 function toWindowsPath(prefixPath: string, linuxPath: string): string {
