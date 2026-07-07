@@ -9,10 +9,10 @@ import { detectMainExecutable } from "../scanner/detector.js";
 import { createPrefix } from "../wine/prefix.js";
 import { runInstaller } from "../wine/process.js";
 import { detectSystemWine } from "../wine/runner.js";
-import { appRoot } from "./paths.js";
 import { writeApp } from "./state.js";
 import { createInstallTracker, type InstallStep } from "./install-state.js";
 import { acquireAppLock } from "./lock.js";
+import { reserveAppFolder } from "./id.js";
 import type { ManagedApp } from "./app.js";
 
 export async function installApp(installerInputPath: string): Promise<ManagedApp> {
@@ -20,15 +20,14 @@ export async function installApp(installerInputPath: string): Promise<ManagedApp
   const installerPath = resolve(installerInputPath);
   const installerKind = getInstallerKind(installerPath);
   const appName = parse(installerPath).name;
-  const appId = await allocateAppId(appName);
-  const root = appRoot(appId);
-  await mkdir(root, { recursive: true });
+  const { appId, root } = await reserveAppFolder(appName);
   const lock = await acquireAppLock(root, "install");
   const logger = new Logger(appLogPath(appId, "install.log"));
   const tracker = await createInstallTracker(root, appId, installerPath);
 
   await tracker.update(state, "running");
   await validateInstaller(installerPath);
+  await logger.info("app id allocated", { appId, root });
   await logger.info("install started", { state, installerPath, installerKind, appId });
 
   try {
@@ -130,25 +129,4 @@ async function createAppFolders(root: string): Promise<void> {
   for (const folder of folders) {
     await mkdir(join(root, folder), { recursive: true });
   }
-}
-
-async function allocateAppId(name: string): Promise<string> {
-  const base = slugify(name) || "windows-app";
-  for (let index = 0; index < 100; index += 1) {
-    const id = index === 0 ? base : `${base}-${index + 1}`;
-    try {
-      await access(appRoot(id), constants.F_OK);
-    } catch {
-      return id;
-    }
-  }
-
-  throw new WinNestError("APP_ID_EXHAUSTED", "Could not allocate a unique app id.", { name });
-}
-
-function slugify(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
 }

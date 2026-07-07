@@ -3,6 +3,7 @@ import { dirname } from "node:path";
 import { appMetadataPath, appRoot, getPaths } from "./paths.js";
 import { isManagedApp, type ManagedApp } from "./app.js";
 import { WinNestError } from "../shared/errors.js";
+import { assertValidAppId } from "./id.js";
 
 export async function writeApp(app: ManagedApp): Promise<void> {
   const path = appMetadataPath(app.id);
@@ -11,6 +12,7 @@ export async function writeApp(app: ManagedApp): Promise<void> {
 }
 
 export async function readApp(appId: string): Promise<ManagedApp> {
+  assertValidAppId(appId);
   const path = appMetadataPath(appId);
   let raw: string;
 
@@ -50,5 +52,6 @@ export async function listApps(): Promise<ManagedApp[]> {
 }
 
 export async function removeAppFolder(appId: string): Promise<void> {
+  assertValidAppId(appId);
   await rm(appRoot(appId), { recursive: true, force: true });
 }
