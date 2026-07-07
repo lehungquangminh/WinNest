@@ -54,7 +54,12 @@ export async function installApp(installerInputPath: string): Promise<ManagedApp
 
     state = "scanning";
     await tracker.update(state, "running");
-    const mainCandidate = await detectMainExecutable(prefixPath, appName, logger);
+    const mainCandidate = await detectMainExecutable(prefixPath, appName, logger, {
+      onSelectionRequired: async () => {
+        state = "selecting-launcher";
+        await tracker.update(state, "running");
+      }
+    });
     const runner = await detectSystemWine();
     const now = new Date().toISOString();
 

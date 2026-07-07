@@ -7,7 +7,8 @@ import { scanExecutables, type ExecutableCandidate } from "./executables.js";
 export async function detectMainExecutable(
   prefixPath: string,
   appHint: string,
-  logger: Logger
+  logger: Logger,
+  options: { onSelectionRequired?: () => Promise<void> } = {}
 ): Promise<ExecutableCandidate> {
   const candidates = await scanExecutables(prefixPath, appHint);
   await logger.info("scanner candidates", { count: candidates.length, candidates: candidates.slice(0, 20) });
@@ -29,6 +30,7 @@ export async function detectMainExecutable(
     );
   }
 
+  await options.onSelectionRequired?.();
   const selected = await askUserToSelect(candidates.slice(0, 10));
   await logger.info("selected main executable", selected);
   return selected;
