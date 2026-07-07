@@ -26,7 +26,8 @@ Usage:
   winnest info <app-id>
   winnest repair <app-id>
   winnest reset <app-id>
-  winnest uninstall <app-id>`);
+  winnest uninstall <app-id>
+  winnest register-mime`);
 }
 
 main().catch((error: unknown) => {

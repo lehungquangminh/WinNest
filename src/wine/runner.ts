@@ -3,9 +3,9 @@ import { runCommand } from "../shared/spawn.js";
 
 export type WineRunner = {
   id: "system-wine";
-  winePath?: string;
-  winebootPath?: string;
-  version?: string;
+  winePath: string | undefined;
+  winebootPath: string | undefined;
+  version: string | undefined;
 };
 
 export async function detectSystemWine(): Promise<WineRunner> {

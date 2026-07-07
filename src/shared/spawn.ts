@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import type { SpawnOptionsWithoutStdio } from "node:child_process";
+import type { SpawnOptions } from "node:child_process";
 import { WinNestError } from "./errors.js";
 import type { Logger } from "../logging/logger.js";
 
@@ -11,7 +11,7 @@ export type SpawnResult = {
   stderr: string;
 };
 
-export type RunCommandOptions = SpawnOptionsWithoutStdio & {
+export type RunCommandOptions = SpawnOptions & {
   logger?: Logger;
   stdin?: "inherit" | "ignore";
   timeoutMs?: number;
@@ -26,25 +26,26 @@ export async function runCommand(
     throw new WinNestError("INVALID_COMMAND", "Command must not be empty.");
   }
 
+  const { logger, stdin = "ignore", timeoutMs, ...spawnOptions } = options;
   const safeArgs = [...args];
-  await options.logger?.info("command started", {
+  await logger?.info("command started", {
     command,
     args: safeArgs,
-    cwd: options.cwd,
-    env: summarizeEnv(options.env)
+    cwd: spawnOptions.cwd,
+    env: summarizeEnv(spawnOptions.env)
   });
 
   return await new Promise<SpawnResult>((resolve, reject) => {
     let settled = false;
     const child = spawn(command, safeArgs, {
-      ...options,
+      ...spawnOptions,
       shell: false,
-      stdio: [options.stdin ?? "ignore", "pipe", "pipe"]
+      stdio: [stdin, "pipe", "pipe"]
     });
 
     const stdout: Buffer[] = [];
     const stderr: Buffer[] = [];
-    const timeout = options.timeoutMs
+    const timeout = timeoutMs
       ? setTimeout(() => {
           if (settled) {
             return;
@@ -67,7 +68,7 @@ export async function runCommand(
       if (timeout) {
         clearTimeout(timeout);
       }
-      await options.logger?.error("command failed to start", { command, args: safeArgs, error });
+      await logger?.error("command failed to start", { command, args: safeArgs, error });
       reject(new WinNestError("COMMAND_START_FAILED", `Failed to start command: ${command}`, error));
     });
 
@@ -80,12 +81,12 @@ export async function runCommand(
       const result: SpawnResult = {
         command,
         args: safeArgs,
-        exitCode: signal === "SIGTERM" && options.timeoutMs ? -2 : code ?? -1,
+        exitCode: signal === "SIGTERM" && timeoutMs ? -2 : code ?? -1,
         stdout: Buffer.concat(stdout).toString("utf8"),
         stderr: Buffer.concat(stderr).toString("utf8")
       };
 
-      await options.logger?.info("command exited", {
+      await logger?.info("command exited", {
         command,
         args: safeArgs,
         exitCode: result.exitCode,
