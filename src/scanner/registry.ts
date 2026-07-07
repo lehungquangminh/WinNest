@@ -6,6 +6,7 @@ import { detectSystemWine } from "@/wine/runner.js";
 export type RegistryUninstallHint = {
   key: string;
   displayName: string | undefined;
+  displayIcon: string | undefined;
   installLocation: string | undefined;
 };
 
@@ -67,12 +68,13 @@ function parseRegistryOutput(output: string): RegistryUninstallHint[] {
     }
 
     if (trimmed.startsWith("HKEY_") || trimmed.startsWith("HKLM\\") || trimmed.startsWith("HKCU\\")) {
-      if (current && (current.displayName || current.installLocation)) {
+      if (current && (current.displayName || current.displayIcon || current.installLocation)) {
         hints.push(current);
       }
       current = {
         key: trimmed,
         displayName: undefined,
+        displayIcon: undefined,
         installLocation: undefined
       };
       continue;
@@ -82,7 +84,7 @@ function parseRegistryOutput(output: string): RegistryUninstallHint[] {
       continue;
     }
 
-    const match = /^\s*(DisplayName|InstallLocation)\s+REG_\w+\s+(.+)$/.exec(line);
+    const match = /^\s*(DisplayName|DisplayIcon|InstallLocation)\s+REG_\w+\s+(.+)$/.exec(line);
     if (!match) {
       continue;
     }
@@ -95,12 +97,14 @@ function parseRegistryOutput(output: string): RegistryUninstallHint[] {
 
     if (name === "DisplayName") {
       current.displayName = value.trim();
+    } else if (name === "DisplayIcon") {
+      current.displayIcon = value.trim();
     } else if (name === "InstallLocation") {
       current.installLocation = value.trim();
     }
   }
 
-  if (current && (current.displayName || current.installLocation)) {
+  if (current && (current.displayName || current.displayIcon || current.installLocation)) {
     hints.push(current);
   }
 

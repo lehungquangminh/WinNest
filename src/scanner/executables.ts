@@ -21,6 +21,13 @@ export type ExecutableScanSummary = {
 
 const SKIP_DIRS = new Set(["windows", "temp", "$recycle.bin"]);
 const BAD_NAME_PARTS = ["unins", "uninstall", "update", "crash", "crashreporter", "helper", "setup", "install", "repair"];
+const BUILT_IN_APP_FOLDERS = [
+  "internetexplorer",
+  "windowsmediaplayer",
+  "windowsnt",
+  "commonfiles",
+  "windowsmail"
+];
 
 export type ExecutableScanOptions = {
   logger?: Logger;
@@ -110,11 +117,8 @@ async function scoreExecutable(
   const lowerName = name.toLowerCase();
   const normalizedName = normalizeName(name);
   const normalizedHint = normalizeName(appHint);
-  const normalizedFolders = linuxPath
-    .split(sep)
-    .slice(0, -1)
-    .map((part) => normalizeName(part))
-    .filter((part) => part.length > 0);
+  const relativeFolders = relative(join(prefixPath, "drive_c"), linuxPath).split(sep).slice(0, -1);
+  const normalizedFolders = relativeFolders.map((part) => normalizeName(part)).filter((part) => part.length > 0);
   const reasons: string[] = [];
   let score = 20;
 
@@ -126,6 +130,11 @@ async function scoreExecutable(
   if (linuxPath.includes(`${sep}Program Files (x86)${sep}`)) {
     score += 12;
     reasons.push("inside Program Files (x86)");
+  }
+
+  if (normalizedFolders.some((folder) => BUILT_IN_APP_FOLDERS.includes(folder))) {
+    score -= 60;
+    reasons.push("inside Wine built-in application folder");
   }
 
   if (normalizedHint && normalizedName.includes(normalizedHint)) {
@@ -159,7 +168,10 @@ async function scoreExecutable(
     reasons.push("recently modified");
   }
 
-  if (matchesRegistryHint(prefixPath, linuxPath, registryHints)) {
+  if (matchesRegistryDisplayIcon(prefixPath, linuxPath, registryHints)) {
+    score += 35;
+    reasons.push("matches registry display icon");
+  } else if (matchesRegistryInstallLocation(prefixPath, linuxPath, registryHints)) {
     score += 10;
     reasons.push("matches registry uninstall hint");
   }
@@ -175,7 +187,27 @@ async function scoreExecutable(
   };
 }
 
-function matchesRegistryHint(
+function matchesRegistryDisplayIcon(
+  prefixPath: string,
+  linuxPath: string,
+  registryHints: readonly RegistryUninstallHint[]
+): boolean {
+  const normalizedLinuxPath = linuxPath.toLowerCase();
+  for (const hint of registryHints) {
+    if (!hint.displayIcon) {
+      continue;
+    }
+
+    const linuxDisplayIcon = registryWindowsPathToLinux(prefixPath, stripIconIndex(hint.displayIcon));
+    if (linuxDisplayIcon && normalizedLinuxPath === linuxDisplayIcon.toLowerCase()) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function matchesRegistryInstallLocation(
   prefixPath: string,
   linuxPath: string,
   registryHints: readonly RegistryUninstallHint[]
@@ -193,6 +225,10 @@ function matchesRegistryHint(
   }
 
   return false;
+}
+
+function stripIconIndex(value: string): string {
+  return value.trim().replace(/^"(.+)"$/, "$1").replace(/,-?\d+$/, "");
 }
 
 function registryWindowsPathToLinux(prefixPath: string, windowsPath: string): string | undefined {
