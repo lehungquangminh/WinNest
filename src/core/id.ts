@@ -1,8 +1,8 @@
 import { constants } from "node:fs";
 import { access, mkdir } from "node:fs/promises";
 import { join } from "node:path";
-import { getPaths } from "./paths.js";
-import { WinNestError } from "../shared/errors.js";
+import { getPaths } from "@/core/paths.js";
+import { WinNestError } from "@/shared/errors.js";
 
 const APP_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 

@@ -1,7 +1,7 @@
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { safeSpawn } from "../shared/spawn.js";
+import { safeSpawn } from "@/shared/spawn.js";
 
 const CASES = [
   join("Bộ cài Test App", "setup file.exe"),

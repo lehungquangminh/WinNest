@@ -1,9 +1,9 @@
 import { chmod, mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import { getPaths } from "../core/paths.js";
-import { Logger } from "../logging/logger.js";
-import { runCommand } from "../shared/spawn.js";
-import { findExecutable } from "../shared/which.js";
+import { getPaths } from "@/core/paths.js";
+import { Logger } from "@/logging/logger.js";
+import { runCommand } from "@/shared/spawn.js";
+import { findExecutable } from "@/shared/which.js";
 
 const MIME_TYPES = [
   "application/x-ms-dos-executable",

@@ -1,9 +1,9 @@
 import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
-import { appMetadataPath, appRoot, getPaths } from "./paths.js";
-import { isManagedApp, type ManagedApp } from "./app.js";
-import { WinNestError } from "../shared/errors.js";
-import { assertValidAppId } from "./id.js";
+import { appMetadataPath, appRoot, getPaths } from "@/core/paths.js";
+import { isManagedApp, type ManagedApp } from "@/core/app.js";
+import { WinNestError } from "@/shared/errors.js";
+import { assertValidAppId } from "@/core/id.js";
 
 export async function writeApp(app: ManagedApp): Promise<void> {
   const path = appMetadataPath(app.id);

@@ -1,8 +1,8 @@
 import { resolve, join, relative } from "node:path";
-import type { ManagedApp } from "./app.js";
-import { appRoot, getPaths } from "./paths.js";
-import { assertValidAppId } from "./id.js";
-import { WinNestError } from "../shared/errors.js";
+import type { ManagedApp } from "@/core/app.js";
+import { appRoot, getPaths } from "@/core/paths.js";
+import { assertValidAppId } from "@/core/id.js";
+import { WinNestError } from "@/shared/errors.js";
 
 export type ManagedAppPaths = {
   appsRoot: string;

@@ -2,13 +2,13 @@ import { constants } from "node:fs";
 import { access, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { arch, release, tmpdir, type } from "node:os";
 import { join } from "node:path";
-import { getPaths } from "./paths.js";
-import { globalLogPath } from "../logging/paths.js";
-import { Logger } from "../logging/logger.js";
-import { runCommand } from "../shared/spawn.js";
-import { findExecutable } from "../shared/which.js";
-import { detectSystemWine } from "../wine/runner.js";
-import { WINNEST_VERSION } from "../shared/version.js";
+import { getPaths } from "@/core/paths.js";
+import { globalLogPath } from "@/logging/paths.js";
+import { Logger } from "@/logging/logger.js";
+import { runCommand } from "@/shared/spawn.js";
+import { findExecutable } from "@/shared/which.js";
+import { detectSystemWine } from "@/wine/runner.js";
+import { WINNEST_VERSION } from "@/shared/version.js";
 
 type Check = {
   label: string;

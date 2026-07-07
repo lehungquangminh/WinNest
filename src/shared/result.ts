@@ -1,4 +1,4 @@
-import type { WinNestError } from "./errors.js";
+import type { WinNestError } from "@/shared/errors.js";
 
 export type Result<T> =
   | { ok: true; value: T }

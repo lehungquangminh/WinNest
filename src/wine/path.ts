@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import { WinNestError } from "../shared/errors.js";
+import { WinNestError } from "@/shared/errors.js";
 
 export function windowsPathToLinux(prefixPath: string, windowsPath: string): string {
   const match = /^c:[/\\](.*)$/i.exec(windowsPath);

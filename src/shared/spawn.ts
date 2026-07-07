@@ -2,9 +2,9 @@ import { spawn } from "node:child_process";
 import type { SpawnOptions as NodeSpawnOptions } from "node:child_process";
 import { appendFile, mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
-import { WinNestError } from "./errors.js";
-import { err, ok, type Result } from "./result.js";
-import type { Logger } from "../logging/logger.js";
+import { WinNestError } from "@/shared/errors.js";
+import { err, ok, type Result } from "@/shared/result.js";
+import type { Logger } from "@/logging/logger.js";
 
 export type SpawnResult = {
   command: string;

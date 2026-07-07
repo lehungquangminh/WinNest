@@ -8,7 +8,7 @@
     "winnest-open": "./dist/cli/open.js"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && tsc-alias -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.tests.json --noEmit",
     "dev:cli": "node --enable-source-maps ./dist/cli/index.js",
     "test:path-torture": "npm run build && node --enable-source-maps ./dist/dev/path-torture.js",
@@ -20,6 +20,7 @@
   "license": "MPL-2.0",
   "devDependencies": {
     "@types/node": "^24.0.10",
+    "tsc-alias": "^1.9.0",
     "tsx": "^4.23.0",
     "typescript": "^5.8.3"
   }

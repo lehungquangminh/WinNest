@@ -1,13 +1,13 @@
 import { rm, unlink } from "node:fs/promises";
-import { appLogPath } from "../logging/paths.js";
-import { Logger } from "../logging/logger.js";
-import { findExecutable } from "../shared/which.js";
-import { runCommand } from "../shared/spawn.js";
-import { stopPrefix } from "../wine/control.js";
-import { appRoot, getPaths } from "./paths.js";
-import { acquireAppLock } from "./lock.js";
-import { isSafeDesktopEntryPath, validateManagedAppPaths } from "./safety.js";
-import { readApp } from "./state.js";
+import { appLogPath } from "@/logging/paths.js";
+import { Logger } from "@/logging/logger.js";
+import { findExecutable } from "@/shared/which.js";
+import { runCommand } from "@/shared/spawn.js";
+import { stopPrefix } from "@/wine/control.js";
+import { appRoot, getPaths } from "@/core/paths.js";
+import { acquireAppLock } from "@/core/lock.js";
+import { isSafeDesktopEntryPath, validateManagedAppPaths } from "@/core/safety.js";
+import { readApp } from "@/core/state.js";
 
 export async function uninstallApp(appId: string): Promise<void> {
   const app = await readApp(appId);

@@ -1,13 +1,13 @@
 import { constants } from "node:fs";
 import { access } from "node:fs/promises";
-import { appLogPath } from "../logging/paths.js";
-import { Logger } from "../logging/logger.js";
-import { WinNestError } from "../shared/errors.js";
-import { runWindowsExe } from "../wine/process.js";
-import { windowsPathToLinux } from "../wine/path.js";
-import { appRoot } from "./paths.js";
-import { acquireAppLock } from "./lock.js";
-import { readApp } from "./state.js";
+import { appLogPath } from "@/logging/paths.js";
+import { Logger } from "@/logging/logger.js";
+import { WinNestError } from "@/shared/errors.js";
+import { runWindowsExe } from "@/wine/process.js";
+import { windowsPathToLinux } from "@/wine/path.js";
+import { appRoot } from "@/core/paths.js";
+import { acquireAppLock } from "@/core/lock.js";
+import { readApp } from "@/core/state.js";
 
 export async function runApp(appId: string): Promise<void> {
   const app = await readApp(appId);

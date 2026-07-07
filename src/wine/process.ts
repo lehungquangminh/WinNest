@@ -1,8 +1,8 @@
-import { Logger } from "../logging/logger.js";
-import { WinNestError } from "../shared/errors.js";
-import { runCommand } from "../shared/spawn.js";
-import { buildWineEnv } from "./env.js";
-import { detectSystemWine } from "./runner.js";
+import { Logger } from "@/logging/logger.js";
+import { WinNestError } from "@/shared/errors.js";
+import { runCommand } from "@/shared/spawn.js";
+import { buildWineEnv } from "@/wine/env.js";
+import { detectSystemWine } from "@/wine/runner.js";
 
 export async function runInstaller(
   prefixPath: string,

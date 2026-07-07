@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import { WinNestError, toWinNestError } from "../shared/errors.js";
-import { main as runCli } from "./runtime.js";
+import { WinNestError, toWinNestError } from "@/shared/errors.js";
+import { main as runCli } from "@/cli/runtime.js";
 
 async function main(): Promise<void> {
   const [, , command, ...args] = process.argv;

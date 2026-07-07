@@ -1,6 +1,6 @@
 import { open, readFile, rm } from "node:fs/promises";
 import { join } from "node:path";
-import { WinNestError } from "../shared/errors.js";
+import { WinNestError } from "@/shared/errors.js";
 
 export type AppLockCommand = "install" | "run" | "repair" | "reset" | "rescan" | "uninstall";
 

@@ -1,6 +1,6 @@
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
-import type { Logger } from "../logging/logger.js";
+import type { Logger } from "@/logging/logger.js";
 
 export type ShortcutCandidate = {
   linuxPath: string;

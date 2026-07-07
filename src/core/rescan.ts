@@ -1,15 +1,15 @@
 import { createInterface } from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
-import { appLogPath } from "../logging/paths.js";
-import { Logger } from "../logging/logger.js";
-import { createDesktopEntry } from "../desktop/entry.js";
-import { scanExecutables, type ExecutableCandidate } from "../scanner/executables.js";
-import { scanRegistryUninstallEntries } from "../scanner/registry.js";
-import { scanShortcutFiles } from "../scanner/shortcuts.js";
-import { WinNestError } from "../shared/errors.js";
-import { appRoot } from "./paths.js";
-import { acquireAppLock } from "./lock.js";
-import { readApp, writeApp } from "./state.js";
+import { appLogPath } from "@/logging/paths.js";
+import { Logger } from "@/logging/logger.js";
+import { createDesktopEntry } from "@/desktop/entry.js";
+import { scanExecutables, type ExecutableCandidate } from "@/scanner/executables.js";
+import { scanRegistryUninstallEntries } from "@/scanner/registry.js";
+import { scanShortcutFiles } from "@/scanner/shortcuts.js";
+import { WinNestError } from "@/shared/errors.js";
+import { appRoot } from "@/core/paths.js";
+import { acquireAppLock } from "@/core/lock.js";
+import { readApp, writeApp } from "@/core/state.js";
 
 export async function rescanApp(appId: string): Promise<void> {
   const app = await readApp(appId);

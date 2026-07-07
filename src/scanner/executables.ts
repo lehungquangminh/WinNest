@@ -1,7 +1,7 @@
 import { readdir, stat } from "node:fs/promises";
 import { basename, join, relative, sep } from "node:path";
-import type { Logger } from "../logging/logger.js";
-import type { RegistryUninstallHint } from "./registry.js";
+import type { Logger } from "@/logging/logger.js";
+import type { RegistryUninstallHint } from "@/scanner/registry.js";
 
 export type ExecutableCandidate = {
   windowsPath: string;

@@ -1,5 +1,5 @@
-import { findExecutable } from "../shared/which.js";
-import { runCommand } from "../shared/spawn.js";
+import { findExecutable } from "@/shared/which.js";
+import { runCommand } from "@/shared/spawn.js";
 
 export type WineRunner = {
   id: "system-wine";

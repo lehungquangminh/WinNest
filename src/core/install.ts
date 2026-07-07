@@ -1,19 +1,19 @@
 import { constants } from "node:fs";
 import { access, copyFile, mkdir } from "node:fs/promises";
 import { basename, extname, join, parse, resolve } from "node:path";
-import { appLogPath } from "../logging/paths.js";
-import { Logger } from "../logging/logger.js";
-import { WinNestError, toWinNestError } from "../shared/errors.js";
-import { createDesktopEntry } from "../desktop/entry.js";
-import { detectMainExecutable } from "../scanner/detector.js";
-import { createPrefix } from "../wine/prefix.js";
-import { runInstaller } from "../wine/process.js";
-import { detectSystemWine } from "../wine/runner.js";
-import { writeApp } from "./state.js";
-import { createInstallTracker, type InstallStep } from "./install-state.js";
-import { acquireAppLock } from "./lock.js";
-import { reserveAppFolder } from "./id.js";
-import type { ManagedApp } from "./app.js";
+import { appLogPath } from "@/logging/paths.js";
+import { Logger } from "@/logging/logger.js";
+import { WinNestError, toWinNestError } from "@/shared/errors.js";
+import { createDesktopEntry } from "@/desktop/entry.js";
+import { detectMainExecutable } from "@/scanner/detector.js";
+import { createPrefix } from "@/wine/prefix.js";
+import { runInstaller } from "@/wine/process.js";
+import { detectSystemWine } from "@/wine/runner.js";
+import { writeApp } from "@/core/state.js";
+import { createInstallTracker, type InstallStep } from "@/core/install-state.js";
+import { acquireAppLock } from "@/core/lock.js";
+import { reserveAppFolder } from "@/core/id.js";
+import type { ManagedApp } from "@/core/app.js";
 
 export async function installApp(installerInputPath: string): Promise<ManagedApp> {
   let state: InstallStep = "validating";

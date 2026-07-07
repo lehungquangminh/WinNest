@@ -1,10 +1,10 @@
-import { globalLogPath } from "../logging/paths.js";
-import { Logger } from "../logging/logger.js";
-import { WinNestError } from "../shared/errors.js";
-import { err, ok, type Result } from "../shared/result.js";
-import { safeSpawn } from "../shared/spawn.js";
-import { buildWineEnv } from "./env.js";
-import { detectSystemWine } from "./runner.js";
+import { globalLogPath } from "@/logging/paths.js";
+import { Logger } from "@/logging/logger.js";
+import { WinNestError } from "@/shared/errors.js";
+import { err, ok, type Result } from "@/shared/result.js";
+import { safeSpawn } from "@/shared/spawn.js";
+import { buildWineEnv } from "@/wine/env.js";
+import { detectSystemWine } from "@/wine/runner.js";
 
 export async function stopPrefix(prefixPath: string): Promise<Result<void>> {
   return await runWineserver(prefixPath, ["-w"], "WINESERVER_STOP_FAILED");

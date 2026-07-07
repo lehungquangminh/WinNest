@@ -1,10 +1,10 @@
 import { chmod, mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import { getPaths } from "../core/paths.js";
-import type { ManagedApp } from "../core/app.js";
-import { Logger } from "../logging/logger.js";
-import { findExecutable } from "../shared/which.js";
-import { runCommand } from "../shared/spawn.js";
+import { getPaths } from "@/core/paths.js";
+import type { ManagedApp } from "@/core/app.js";
+import { Logger } from "@/logging/logger.js";
+import { findExecutable } from "@/shared/which.js";
+import { runCommand } from "@/shared/spawn.js";
 
 export async function createDesktopEntry(app: ManagedApp, logger: Logger): Promise<string> {
   const filePath = join(getPaths().applicationsDir, `winnest-${app.id}.desktop`);

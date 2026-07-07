@@ -1,10 +1,10 @@
 import { createInterface } from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
-import { Logger } from "../logging/logger.js";
-import { WinNestError } from "../shared/errors.js";
-import { scanExecutables, type ExecutableCandidate } from "./executables.js";
-import { scanShortcutFiles } from "./shortcuts.js";
-import { scanRegistryUninstallEntries } from "./registry.js";
+import { Logger } from "@/logging/logger.js";
+import { WinNestError } from "@/shared/errors.js";
+import { scanExecutables, type ExecutableCandidate } from "@/scanner/executables.js";
+import { scanShortcutFiles } from "@/scanner/shortcuts.js";
+import { scanRegistryUninstallEntries } from "@/scanner/registry.js";
 
 export async function detectMainExecutable(
   prefixPath: string,

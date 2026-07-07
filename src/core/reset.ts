@@ -1,14 +1,14 @@
 import { rm } from "node:fs/promises";
-import { appLogPath } from "../logging/paths.js";
-import { Logger } from "../logging/logger.js";
-import { WinNestError } from "../shared/errors.js";
-import { stopPrefix } from "../wine/control.js";
-import { createPrefix } from "../wine/prefix.js";
-import { detectSystemWine } from "../wine/runner.js";
-import { appRoot } from "./paths.js";
-import { acquireAppLock } from "./lock.js";
-import { validateManagedAppPaths } from "./safety.js";
-import { readApp, writeApp } from "./state.js";
+import { appLogPath } from "@/logging/paths.js";
+import { Logger } from "@/logging/logger.js";
+import { WinNestError } from "@/shared/errors.js";
+import { stopPrefix } from "@/wine/control.js";
+import { createPrefix } from "@/wine/prefix.js";
+import { detectSystemWine } from "@/wine/runner.js";
+import { appRoot } from "@/core/paths.js";
+import { acquireAppLock } from "@/core/lock.js";
+import { validateManagedAppPaths } from "@/core/safety.js";
+import { readApp, writeApp } from "@/core/state.js";
 
 export async function resetApp(appId: string): Promise<void> {
   const app = await readApp(appId);

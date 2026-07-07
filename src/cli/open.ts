@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { toWinNestError } from "../shared/errors.js";
+import { toWinNestError } from "@/shared/errors.js";
 
 async function main(): Promise<void> {
   const filePath = process.argv[2];

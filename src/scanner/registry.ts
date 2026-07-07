@@ -1,7 +1,7 @@
-import type { Logger } from "../logging/logger.js";
-import { runCommand } from "../shared/spawn.js";
-import { buildWineEnv } from "../wine/env.js";
-import { detectSystemWine } from "../wine/runner.js";
+import type { Logger } from "@/logging/logger.js";
+import { runCommand } from "@/shared/spawn.js";
+import { buildWineEnv } from "@/wine/env.js";
+import { detectSystemWine } from "@/wine/runner.js";
 
 export type RegistryUninstallHint = {
   key: string;
