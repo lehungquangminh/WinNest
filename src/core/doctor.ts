@@ -1,6 +1,6 @@
 import { constants } from "node:fs";
 import { access, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { arch, release, tmpdir, type } from "node:os";
 import { join } from "node:path";
 import { getPaths } from "./paths.js";
 import { globalLogPath } from "../logging/paths.js";
@@ -16,7 +16,20 @@ type Check = {
   value: string;
 };
 
-export async function runDoctor(): Promise<void> {
+export type DoctorOptions = {
+  verbose?: boolean;
+};
+
+type PrefixCheck = {
+  ok: boolean;
+  value: string;
+  prefixPath: string | undefined;
+  stdout: string;
+  stderr: string;
+  exitCode: number | undefined;
+};
+
+export async function runDoctor(options: DoctorOptions = {}): Promise<void> {
   const logger = new Logger(globalLogPath("doctor.log"));
   const paths = getPaths();
   const runner = await detectSystemWine();
@@ -76,6 +89,20 @@ export async function runDoctor(): Promise<void> {
   ];
 
   printDoctor(systemChecks, wineChecks, desktopChecks, winNestChecks);
+
+  if (options.verbose) {
+    printVerboseDoctor({
+      paths,
+      runner,
+      prefixCheck,
+      tools: {
+        xdgMime,
+        xdgDesktopMenu,
+        updateDesktopDatabase,
+        updateMimeDatabase
+      }
+    });
+  }
 
   const requiredOk =
     systemChecks.every((check) => check.ok) &&
@@ -144,9 +171,9 @@ async function isWritable(path: string): Promise<boolean> {
 async function checkTemporaryPrefix(
   winebootPath: string | undefined,
   logger: Logger
-): Promise<{ ok: boolean; value: string }> {
+): Promise<PrefixCheck> {
   if (!winebootPath) {
-    return { ok: false, value: "skipped" };
+    return { ok: false, value: "skipped", prefixPath: undefined, stdout: "", stderr: "", exitCode: undefined };
   }
 
   const prefixPath = await mkdtemp(join(tmpdir(), "winnest-prefix-"));
@@ -162,13 +189,27 @@ async function checkTemporaryPrefix(
     });
 
     if (result.exitCode === 0) {
-      return { ok: true, value: "ok" };
+      return {
+        ok: true,
+        value: "ok",
+        prefixPath,
+        stdout: result.stdout,
+        stderr: result.stderr,
+        exitCode: result.exitCode
+      };
     }
 
-    return { ok: false, value: `failed exit ${result.exitCode}` };
+    return {
+      ok: false,
+      value: `failed exit ${result.exitCode}`,
+      prefixPath,
+      stdout: result.stdout,
+      stderr: result.stderr,
+      exitCode: result.exitCode
+    };
   } catch (error) {
     await logger.error("temporary prefix check failed", error);
-    return { ok: false, value: "failed" };
+    return { ok: false, value: "failed", prefixPath, stdout: "", stderr: String(error), exitCode: undefined };
   } finally {
     await rm(prefixPath, { recursive: true, force: true });
   }
@@ -184,4 +225,57 @@ function formatTool(path: string | undefined, optional = false): string {
   }
 
   return optional ? "missing optional" : "missing";
+}
+
+function printVerboseDoctor(details: {
+  paths: ReturnType<typeof getPaths>;
+  runner: Awaited<ReturnType<typeof detectSystemWine>>;
+  prefixCheck: PrefixCheck;
+  tools: {
+    xdgMime: string | undefined;
+    xdgDesktopMenu: string | undefined;
+    updateDesktopDatabase: string | undefined;
+    updateMimeDatabase: string | undefined;
+  };
+}): void {
+  console.log("");
+  console.log("Verbose:");
+  console.log("  Paths:");
+  console.log(`    home: ${details.paths.home}`);
+  console.log(`    dataRoot: ${details.paths.dataRoot}`);
+  console.log(`    appsRoot: ${details.paths.appsRoot}`);
+  console.log(`    globalLogsRoot: ${details.paths.globalLogsRoot}`);
+  console.log(`    applicationsDir: ${details.paths.applicationsDir}`);
+  console.log(`    mimePackagesDir: ${details.paths.mimePackagesDir}`);
+  console.log("  Wine:");
+  console.log(`    winePath: ${details.runner.winePath ?? "missing"}`);
+  console.log(`    winebootPath: ${details.runner.winebootPath ?? "missing"}`);
+  console.log(`    wineserverPath: ${details.runner.wineserverPath ?? "missing"}`);
+  console.log(`    wineVersionOutput: ${details.runner.version ?? "unknown"}`);
+  console.log(`    tempPrefixPath: ${details.prefixCheck.prefixPath ?? "none"}`);
+  console.log(`    tempPrefixResult: ${details.prefixCheck.value}`);
+  console.log(`    tempPrefixExitCode: ${details.prefixCheck.exitCode ?? "none"}`);
+  console.log(`    tempPrefixStdout: ${trimForConsole(details.prefixCheck.stdout)}`);
+  console.log(`    tempPrefixStderr: ${trimForConsole(details.prefixCheck.stderr)}`);
+  console.log("  Desktop tools:");
+  console.log(`    xdgMime: ${details.tools.xdgMime ?? "missing"}`);
+  console.log(`    xdgDesktopMenu: ${details.tools.xdgDesktopMenu ?? "missing"}`);
+  console.log(`    updateDesktopDatabase: ${details.tools.updateDesktopDatabase ?? "missing"}`);
+  console.log(`    updateMimeDatabase: ${details.tools.updateMimeDatabase ?? "missing"}`);
+  console.log("  Runtime:");
+  console.log(`    PATH: ${process.env.PATH ?? ""}`);
+  console.log(`    node: ${process.version}`);
+  console.log(`    platform: ${process.platform}`);
+  console.log(`    osType: ${type()}`);
+  console.log(`    osRelease: ${release()}`);
+  console.log(`    arch: ${arch()}`);
+}
+
+function trimForConsole(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return "";
+  }
+
+  return trimmed.length > 600 ? `${trimmed.slice(0, 600)}...` : trimmed;
 }
