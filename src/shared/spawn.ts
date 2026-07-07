@@ -1,6 +1,9 @@
 import { spawn } from "node:child_process";
-import type { SpawnOptions } from "node:child_process";
+import type { SpawnOptions as NodeSpawnOptions } from "node:child_process";
+import { appendFile, mkdir } from "node:fs/promises";
+import { dirname } from "node:path";
 import { WinNestError } from "./errors.js";
+import { err, ok, type Result } from "./result.js";
 import type { Logger } from "../logging/logger.js";
 
 export type SpawnResult = {
@@ -9,24 +12,45 @@ export type SpawnResult = {
   exitCode: number;
   stdout: string;
   stderr: string;
+  timedOut: boolean;
+  aborted: boolean;
 };
 
-export type RunCommandOptions = SpawnOptions & {
+export type SafeSpawnOptions = {
+  cwd?: string;
+  env?: NodeJS.ProcessEnv;
+  timeoutMs?: number;
+  signal?: AbortSignal;
+  logFile?: string;
   logger?: Logger;
   stdin?: "inherit" | "ignore";
-  timeoutMs?: number;
 };
+
+export type RunCommandOptions = SafeSpawnOptions & Pick<NodeSpawnOptions, "detached" | "uid" | "gid">;
 
 export async function runCommand(
   command: string,
   args: readonly string[],
   options: RunCommandOptions = {}
 ): Promise<SpawnResult> {
-  if (command.trim().length === 0) {
-    throw new WinNestError("INVALID_COMMAND", "Command must not be empty.");
+  const result = await safeSpawn(command, [...args], options);
+  if (!result.ok) {
+    throw result.error;
   }
 
-  const { logger, stdin = "ignore", timeoutMs, ...spawnOptions } = options;
+  return result.value;
+}
+
+export async function safeSpawn(
+  command: string,
+  args: string[],
+  options: RunCommandOptions = {}
+): Promise<Result<SpawnResult>> {
+  if (command.trim().length === 0) {
+    return err(new WinNestError("INVALID_COMMAND", "Command must not be empty."));
+  }
+
+  const { logger, stdin = "ignore", timeoutMs, logFile, signal, ...spawnOptions } = options;
   const safeArgs = [...args];
   await logger?.info("command started", {
     command,
@@ -34,11 +58,15 @@ export async function runCommand(
     cwd: spawnOptions.cwd,
     env: summarizeEnv(spawnOptions.env)
   });
+  await writeProcessLog(logFile, "command started", { command, args: safeArgs });
 
-  return await new Promise<SpawnResult>((resolve, reject) => {
+  return await new Promise<Result<SpawnResult>>((resolve) => {
     let settled = false;
+    let timedOut = false;
+    let aborted = false;
     const child = spawn(command, safeArgs, {
       ...spawnOptions,
+      signal,
       shell: false,
       stdio: [stdin, "pipe", "pipe"]
     });
@@ -51,16 +79,32 @@ export async function runCommand(
             return;
           }
 
+          timedOut = true;
           child.kill("SIGTERM");
-        }, options.timeoutMs)
+        }, timeoutMs)
       : undefined;
+
+    signal?.addEventListener(
+      "abort",
+      () => {
+        if (settled) {
+          return;
+        }
+
+        aborted = true;
+        child.kill("SIGTERM");
+      },
+      { once: true }
+    );
 
     child.stdout.on("data", (chunk: Buffer) => {
       stdout.push(chunk);
+      void writeProcessLog(logFile, "stdout", { text: chunk.toString("utf8") });
     });
 
     child.stderr.on("data", (chunk: Buffer) => {
       stderr.push(chunk);
+      void writeProcessLog(logFile, "stderr", { text: chunk.toString("utf8") });
     });
 
     child.on("error", async (error) => {
@@ -69,7 +113,12 @@ export async function runCommand(
         clearTimeout(timeout);
       }
       await logger?.error("command failed to start", { command, args: safeArgs, error });
-      reject(new WinNestError("COMMAND_START_FAILED", `Failed to start command: ${command}`, error));
+      await writeProcessLog(logFile, "command failed to start", {
+        command,
+        args: safeArgs,
+        error: error.message
+      });
+      resolve(err(new WinNestError("COMMAND_START_FAILED", `Failed to start command: ${command}`, error)));
     });
 
     child.on("close", async (code, signal) => {
@@ -81,22 +130,53 @@ export async function runCommand(
       const result: SpawnResult = {
         command,
         args: safeArgs,
-        exitCode: signal === "SIGTERM" && timeoutMs ? -2 : code ?? -1,
+        exitCode: timedOut ? -2 : aborted ? -3 : code ?? -1,
         stdout: Buffer.concat(stdout).toString("utf8"),
-        stderr: Buffer.concat(stderr).toString("utf8")
+        stderr: Buffer.concat(stderr).toString("utf8"),
+        timedOut,
+        aborted
       };
 
       await logger?.info("command exited", {
         command,
         args: safeArgs,
         exitCode: result.exitCode,
+        signal,
+        timedOut,
+        aborted,
         stdout: result.stdout.slice(-4000),
         stderr: result.stderr.slice(-4000)
       });
 
-      resolve(result);
+      await writeProcessLog(logFile, "command exited", {
+        command,
+        args: safeArgs,
+        exitCode: result.exitCode,
+        signal,
+        timedOut,
+        aborted
+      });
+
+      resolve(ok(result));
     });
   });
+}
+
+async function writeProcessLog(logFile: string | undefined, event: string, details: unknown): Promise<void> {
+  if (!logFile) {
+    return;
+  }
+
+  await mkdir(dirname(logFile), { recursive: true });
+  await appendFile(
+    logFile,
+    `${JSON.stringify({
+      time: new Date().toISOString(),
+      event,
+      details
+    })}\n`,
+    "utf8"
+  );
 }
 
 function summarizeEnv(env: NodeJS.ProcessEnv | undefined): Record<string, string> | undefined {
