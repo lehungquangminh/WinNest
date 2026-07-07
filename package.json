@@ -11,7 +11,8 @@
     "build": "tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",
     "dev:cli": "node --enable-source-maps ./dist/cli/index.js",
-    "test:path-torture": "npm run build && node --enable-source-maps ./dist/dev/path-torture.js"
+    "test:path-torture": "npm run build && node --enable-source-maps ./dist/dev/path-torture.js",
+    "test:real-install": "tsx src/dev/real-install.ts"
   },
   "engines": {
     "node": ">=20"
@@ -19,6 +20,7 @@
   "license": "MPL-2.0",
   "devDependencies": {
     "@types/node": "^24.0.10",
+    "tsx": "^4.23.0",
     "typescript": "^5.8.3"
   }
 }
