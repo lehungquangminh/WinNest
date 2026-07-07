@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tài liệu WinNest — Cơ chế Sandbox & Bảo mật</title>
+    <meta name="description" content="Tài liệu phân tích mô hình bảo mật, nguyên lý spawn tiến trình an toàn và giới hạn vùng chạy ứng dụng Windows của WinNest.">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@1,400;1,500;1,600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+    <div class="grain-overlay"></div>
+
+    <div class="dossier-layout">
+        
+        <!-- SIDEBAR: Documentation Navigation -->
+        <aside class="dossier-sidebar">
+            <div class="profile-sticky-card">
+                
+                <!-- WinNest Logo -->
+                <div class="logo-block">
+                    <div class="logo-frame">
+                        <i class="ph-fill ph-wine logo-icon"></i>
+                    </div>
+                </div>
+
+                <!-- Brand Title -->
+                <div class="identity-block">
+                    <h1 class="profile-name" id="typing-name">WinNest</h1>
+                    <p class="profile-pseudonym">Documentation Portal</p>
+                    <p class="profile-title">Quản lý và vận hành phần mềm Windows cô lập trên Linux.</p>
+                </div>
+
+                <!-- Documentation Nav Groups -->
+                <div class="docs-nav-group">
+                    <div class="docs-nav-title">Bắt đầu</div>
+                    <ul class="docs-nav-list">
+                        <li>
+                            <a href="index.html" class="docs-nav-link">
+                                <span>Giới thiệu & Cài đặt</span>
+                                <i class="ph ph-caret-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="docs-nav-group">
+                    <div class="docs-nav-title">Hướng dẫn CLI</div>
+                    <ul class="docs-nav-list">
+                        <li>
+                            <a href="cli.html" class="docs-nav-link">
+                                <span>Tham chiếu dòng lệnh</span>
+                                <i class="ph ph-caret-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="docs-nav-group">
+                    <div class="docs-nav-title">Kiến trúc hệ thống</div>
+                    <ul class="docs-nav-list">
+                        <li>
+                            <a href="architecture.html" class="docs-nav-link">
+                                <span>Thiết kế & Layout</span>
+                                <i class="ph ph-caret-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="docs-nav-group">
+                    <div class="docs-nav-title">An toàn bảo mật</div>
+                    <ul class="docs-nav-list">
+                        <li>
+                            <a href="security.html" class="docs-nav-link active">
+                                <span>Cơ chế Sandbox</span>
+                                <i class="ph ph-caret-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Back to Main Site -->
+                <nav class="nav-links" style="margin-top: 16px;">
+                    <a href="../index.html" class="nav-item">
+                        <span>← Quay lại trang chủ</span>
+                    </a>
+                </nav>
+
+                <!-- External Links -->
+                <div class="external-links">
+                    <a href="https://github.com/lehungquangminh/WinNest" target="_blank" rel="noopener noreferrer" class="link-item">
+                        <span>GitHub Repository</span>
+                        <i class="ph ph-arrow-up-right"></i>
+                    </a>
+                </div>
+
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT: Document Sheet -->
+        <main class="dossier-main">
+            
+            <section class="dossier-section scroll-reveal">
+                <blockquote class="manifesto-quote">
+                    “Mã nguồn không tin cậy luôn tìm cách khai thác kẽ hở giao tiếp giữa các thành phần của hệ điều hành. Rào cản tốt nhất là từ chối cung cấp môi trường biên dịch lệnh động.”
+                </blockquote>
+                <cite class="manifesto-author">— Secure Systems Design Group</cite>
+            </section>
+
+            <!-- Threat Model -->
+            <section class="dossier-section scroll-reveal" id="threat-model">
+                <span class="section-meta">SECURITY POLICY</span>
+                <h2 class="section-title">Mô hình đe dọa (Threat Model)</h2>
+                
+                <p class="text-block">
+                    Các tệp cài đặt Windows (`.exe` hoặc `.msi`) tải xuống từ Internet được WinNest coi là <span class="highlight-text">"mã nguồn không tin cậy"</span>. Mặc dù Wine cung cấp môi trường ảo hóa API Windows để chạy ứng dụng trực tiếp, các tiến trình Windows này về bản chất vẫn chạy dưới quyền của người dùng Linux hiện hành và có quyền đọc/ghi các thư mục hệ thống nếu không được cấu hình chặn.
+                </p>
+                <p class="text-block">
+                    Mục tiêu bảo mật của WinNest là ngăn chặn tối đa việc các ứng dụng Windows hoặc các tham số độc hại can thiệp trái phép, phá hoại hệ thống Linux máy chủ.
+                </p>
+            </section>
+
+            <!-- Safe Spawning -->
+            <section class="dossier-section scroll-reveal" id="safe-spawning">
+                <span class="section-meta">PROCESS SPAWNING</span>
+                <h2 class="section-title">Nguyên lý Safe Spawning</h2>
+                
+                <p class="text-block">
+                    Lỗ hổng bảo mật phổ biến nhất khi viết công cụ dòng lệnh gọi chương trình bên ngoài là sử dụng cơ chế thực thi chuỗi lệnh shell thô (ví dụ: `child_process.exec("wine " + installerPath)`). Nếu `installerPath` chứa các ký tự đặc biệt như dấu chấm phẩy `;`, dấu và `&`, hoặc khoảng trắng kết hợp lệnh hệ thống, kẻ tấn công có thể chèn các mã độc hại để thực thi trực tiếp trên terminal Linux.
+                </p>
+                <p class="text-block">
+                    WinNest loại trừ hoàn toàn rủi ro này bằng cách thực thi chính sách **Safe Spawning**:
+                </p>
+
+                <div class="terminal-block">
+                    <div class="terminal-header">
+                        <span class="terminal-title">Ví dụ code Safe Spawn (TypeScript)</span>
+                    </div>
+                    <div class="terminal-body" style="color: #60A5FA;">
+<pre>// ❌ KHÔNG AN TOÀN: Dễ bị Shell Injection
+exec(`wine ${installerPath} /S`);
+
+//  AN TOÀN: WinNest sử dụng mảng đối số tách biệt
+const proc = spawn("wine", [installerPath, "/S"], {
+  shell: false, // Vô hiệu hóa trình biên dịch lệnh của Shell Linux
+  cwd: appDir
+});</pre>
+                    </div>
+                </div>
+
+                <p class="text-block">
+                    Bằng cách đặt thuộc tính <code class="code-badge">shell: false</code> và truyền tham số dạng một mảng các chuỗi ký tự tách biệt, hệ điều hành Linux sẽ chuyển các tham số này trực tiếp vào mảng đối số tiến trình (`argv`) mà không thông qua bất kỳ trình biên dịch Shell nào (như bash hay sh). Điều này giúp triệt tiêu hoàn toàn khả năng chèn lệnh độc hại.
+                </p>
+            </section>
+
+            <!-- Sandbox Boundaries -->
+            <section class="dossier-section scroll-reveal" id="boundaries">
+                <span class="section-meta">SANDBOX BOUNDARIES</span>
+                <h2 class="section-title">Giới hạn phân vùng (Sandbox Limits)</h2>
+                
+                <p class="text-block">
+                    Để cô lập hành vi đọc ghi của phần mềm Windows ảo, WinNest thực hiện các giới hạn sau trên cấu hình Wine Prefix:
+                </p>
+
+                <ul class="bullet-list">
+                    <li><strong>Registry Isolation</strong>: Mỗi ứng dụng có hệ thống Registry ảo riêng biệt. Việc đăng ký phần mềm độc hại vào registry của app này không ảnh hưởng đến app khác.</li>
+                    <li><strong>Drive Mapping Control</strong>: Vô hiệu hóa hoặc hạn chế việc tự động ánh xạ (auto-mapping) các ổ đĩa Linux của máy chủ (như `/` hoặc thư mục Home) vào Wine prefix dưới dạng các ổ đĩa ảo `D:`, `E:` ngoại trừ trường hợp người dùng cho phép cụ thể.</li>
+                    <li><strong>DLL Override Mitigation</strong>: Chặn các thư viện DLL hệ thống Windows bị can thiệp chéo bằng cách ưu tiên tải các thư viện nguyên bản (builtin) của Wine thay vì các DLL giả mạo do phần mềm Windows mang lại.</li>
+                </ul>
+            </section>
+
+            <!-- Navigation Footer -->
+            <div class="docs-footer-nav">
+                <a href="architecture.html" class="docs-nav-card prev">
+                    <span class="docs-card-lbl">Trang trước</span>
+                    <span class="docs-card-title">
+                        <i class="ph ph-caret-left"></i>
+                        <span>Kiến trúc thiết kế & Layout</span>
+                    </span>
+                </a>
+                <a href="../index.html" class="docs-nav-card next" style="border-color: rgba(52, 211, 153, 0.2);">
+                    <span class="docs-card-lbl" style="color: var(--accent-green);">Hoàn thành</span>
+                    <span class="docs-card-title" style="color: var(--accent-green);">
+                        <span>Quay lại trang chủ</span>
+                        <i class="ph ph-caret-right"></i>
+                    </span>
+                </a>
+            </div>
+
+            <!-- Footer -->
+            <footer class="dossier-footer">
+                <p>&copy; 2026 WinNest Project. Bản quyền thuộc về Lê Hùng Quang Minh.</p>
+                <p class="mono">VER 0.1.0 · MPL-2.0</p>
+            </footer>
+
+        </main>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="../script.js"></script>
+</body>
+</html>

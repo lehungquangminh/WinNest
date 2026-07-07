@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tài liệu WinNest — Kiến trúc & Thiết kế thư mục</title>
+    <meta name="description" content="Tài liệu chi tiết về mô hình kiến trúc, cơ chế lock tệp tin tiến trình và cấu trúc thư mục lưu trữ ứng dụng của WinNest.">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@1,400;1,500;1,600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+    <div class="grain-overlay"></div>
+
+    <div class="dossier-layout">
+        
+        <!-- SIDEBAR: Documentation Navigation -->
+        <aside class="dossier-sidebar">
+            <div class="profile-sticky-card">
+                
+                <!-- WinNest Logo -->
+                <div class="logo-block">
+                    <div class="logo-frame">
+                        <i class="ph-fill ph-wine logo-icon"></i>
+                    </div>
+                </div>
+
+                <!-- Brand Title -->
+                <div class="identity-block">
+                    <h1 class="profile-name" id="typing-name">WinNest</h1>
+                    <p class="profile-pseudonym">Documentation Portal</p>
+                    <p class="profile-title">Quản lý và vận hành phần mềm Windows cô lập trên Linux.</p>
+                </div>
+
+                <!-- Documentation Nav Groups -->
+                <div class="docs-nav-group">
+                    <div class="docs-nav-title">Bắt đầu</div>
+                    <ul class="docs-nav-list">
+                        <li>
+                            <a href="index.html" class="docs-nav-link">
+                                <span>Giới thiệu & Cài đặt</span>
+                                <i class="ph ph-caret-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="docs-nav-group">
+                    <div class="docs-nav-title">Hướng dẫn CLI</div>
+                    <ul class="docs-nav-list">
+                        <li>
+                            <a href="cli.html" class="docs-nav-link">
+                                <span>Tham chiếu dòng lệnh</span>
+                                <i class="ph ph-caret-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="docs-nav-group">
+                    <div class="docs-nav-title">Kiến trúc hệ thống</div>
+                    <ul class="docs-nav-list">
+                        <li>
+                            <a href="architecture.html" class="docs-nav-link active">
+                                <span>Thiết kế & Layout</span>
+                                <i class="ph ph-caret-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="docs-nav-group">
+                    <div class="docs-nav-title">An toàn bảo mật</div>
+                    <ul class="docs-nav-list">
+                        <li>
+                            <a href="security.html" class="docs-nav-link">
+                                <span>Cơ chế Sandbox</span>
+                                <i class="ph ph-caret-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Back to Main Site -->
+                <nav class="nav-links" style="margin-top: 16px;">
+                    <a href="../index.html" class="nav-item">
+                        <span>← Quay lại trang chủ</span>
+                    </a>
+                </nav>
+
+                <!-- External Links -->
+                <div class="external-links">
+                    <a href="https://github.com/lehungquangminh/WinNest" target="_blank" rel="noopener noreferrer" class="link-item">
+                        <span>GitHub Repository</span>
+                        <i class="ph ph-arrow-up-right"></i>
+                    </a>
+                </div>
+
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT: Document Sheet -->
+        <main class="dossier-main">
+            
+            <section class="dossier-section scroll-reveal">
+                <blockquote class="manifesto-quote">
+                    “Một hệ thống bền bỉ được xây dựng trên một cấu trúc dữ liệu minh bạch, nơi trạng thái của tiến trình có thể kiểm chứng tại bất kỳ thời điểm nào.”
+                </blockquote>
+                <cite class="manifesto-author">— Software Architecture Review</cite>
+            </section>
+
+            <!-- Execution Model -->
+            <section class="dossier-section scroll-reveal" id="model">
+                <span class="section-meta">EXECUTION MODEL</span>
+                <h2 class="section-title">Mô hình vận hành & IPC</h2>
+                
+                <p class="text-block">
+                    Kiến trúc của WinNest tuân thủ nghiêm ngặt nguyên lý <span class="highlight-text">phân tách mối quan tâm (separation of concerns)</span>. Nhân điều hành cốt lõi (Core Engine) được viết hoàn toàn bằng TypeScript và giao tiếp trực tiếp với hệ điều hành Linux và Wine.
+                </p>
+                <p class="text-block">
+                    Khi tích hợp giao diện người dùng để xuất bản ứng dụng Desktop (Electron GUI), phần hiển thị (Renderer Process) không được phép gọi trực tiếp các câu lệnh Wine hoặc thay đổi prefix. Mọi thao tác phải được định tuyến qua cơ chế IPC của main-process Electron để gọi các API dùng chung của WinNest Core. Điều này đảm bảo tính nhất quán của trạng thái ứng dụng và tránh xung đột dữ liệu.
+                </p>
+            </section>
+
+            <!-- Directory Layout -->
+            <section class="dossier-section scroll-reveal" id="layout">
+                <span class="section-meta">DIRECTORY STRUCTURE</span>
+                <h2 class="section-title">Cấu trúc thư mục chi tiết</h2>
+                
+                <p class="text-block">
+                    Mỗi phần mềm Windows được quản lý độc lập tại đường dẫn hệ thống:
+                </p>
+                <div class="arch-blueprint">
+                    <div style="font-family: var(--font-mono); font-size: 13px; color: var(--text-primary); line-height: 1.8;">
+                        <strong>~/.local/share/winnest/apps/&lt;app-id&gt;/</strong><br>
+                        ├── <strong>app.json</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Lưu metadata cài đặt (ID, Executables, Args)<br>
+                        ├── <strong>prefix/</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Thư mục Wine Prefix ảo<br>
+                        │ &nbsp;&nbsp;├── system.reg &nbsp;&nbsp;&nbsp;&nbsp;# Registry ảo hệ thống của Windows ảo<br>
+                        │ &nbsp;&nbsp;├── user.reg &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Registry ảo người dùng<br>
+                        │ &nbsp;&nbsp;└── drive_c/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Thư mục đĩa C:\ chứa mã thực thi ảo<br>
+                        ├── <strong>installer/</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Cache bản cài gốc của phần mềm<br>
+                        └── <strong>logs/</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Logs runtime lưu dạng JSON-lines (.jsonl)
+                    </div>
+                </div>
+
+                <p class="text-block">
+                    Tệp cấu hình <code class="code-badge">app.json</code> là trung tâm thông tin của WinNest để theo dõi đường dẫn chạy file `.exe` thực tế bên trong đĩa ảo C: mà không cần quét lại ổ đĩa ở mỗi lần khởi chạy.
+                </p>
+            </section>
+
+            <!-- Process Locking -->
+            <section class="dossier-section scroll-reveal" id="locking">
+                <span class="section-meta">PROCESS SYNCHRONIZATION</span>
+                <h2 class="section-title">Khóa tiến trình cô lập (Locks)</h2>
+                
+                <p class="text-block">
+                    Để tránh việc ghi đè Registry ảo hoặc thay đổi tệp tin hệ thống đồng thời (Race Conditions), WinNest trang bị cơ chế **Khóa tiến trình (Process Locking)**.
+                </p>
+                <p class="text-block">
+                    Khi một ứng dụng bắt đầu quá trình cài đặt (`install`), sửa chữa (`repair`), hoặc khởi chạy (`run`), WinNest sẽ tạo một tệp tin khóa tạm thời:
+                    <br>
+                    <code class="code-badge">~/.local/share/winnest/apps/&lt;app-id&gt;/.winnest.lock</code>
+                </p>
+                <p class="text-block">
+                    Tệp tin khóa chứa mã tiến trình (PID) của tác vụ WinNest hiện tại. Trước khi thực thi bất kỳ thao tác thay đổi nào trên prefix, hệ thống Core sẽ kiểm tra sự hiện diện của tệp lock. Nếu lock tồn tại và PID ghi trong lock vẫn đang hoạt động (alive) trên Linux, WinNest sẽ từ chối thao tác mới và trả về lỗi xung đột <code class="code-badge">WinNestError</code> để bảo vệ an toàn cho dữ liệu prefix.
+                </p>
+            </section>
+
+            <!-- Navigation Footer -->
+            <div class="docs-footer-nav">
+                <a href="cli.html" class="docs-nav-card prev">
+                    <span class="docs-card-lbl">Trang trước</span>
+                    <span class="docs-card-title">
+                        <i class="ph ph-caret-left"></i>
+                        <span>Tham chiếu dòng lệnh CLI</span>
+                    </span>
+                </a>
+                <a href="security.html" class="docs-nav-card next">
+                    <span class="docs-card-lbl">Trang tiếp theo</span>
+                    <span class="docs-card-title">
+                        <span>Cơ chế Sandbox & Bảo mật</span>
+                        <i class="ph ph-caret-right"></i>
+                    </span>
+                </a>
+            </div>
+
+            <!-- Footer -->
+            <footer class="dossier-footer">
+                <p>&copy; 2026 WinNest Project. Bản quyền thuộc về Lê Hùng Quang Minh.</p>
+                <p class="mono">VER 0.1.0 · MPL-2.0</p>
+            </footer>
+
+        </main>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="../script.js"></script>
+</body>
+</html>
