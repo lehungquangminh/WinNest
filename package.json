@@ -1,0 +1,23 @@
+{
+  "name": "winnest",
+  "version": "0.1.0",
+  "description": "A TypeScript-only Linux desktop and CLI app manager for Windows software through Wine.",
+  "type": "module",
+  "bin": {
+    "winnest": "./dist/cli/index.js",
+    "winnest-open": "./dist/cli/open.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "dev:cli": "node --enable-source-maps ./dist/cli/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^24.0.10",
+    "typescript": "^5.8.3"
+  }
+}
