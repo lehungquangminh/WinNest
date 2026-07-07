@@ -28,7 +28,8 @@ Usage:
   winnest reset <app-id>
   winnest rescan <app-id>
   winnest uninstall <app-id>
-  winnest register-mime`);
+  winnest register-mime
+  winnest setup-wine`);
 }
 
 main().catch((error: unknown) => {

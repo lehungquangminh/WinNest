@@ -24,6 +24,7 @@ export type SafeSpawnOptions = {
   logFile?: string;
   logger?: Logger;
   stdin?: "inherit" | "ignore";
+  stdio?: "pipe" | "inherit";
 };
 
 export type RunCommandOptions = SafeSpawnOptions & Pick<NodeSpawnOptions, "detached" | "uid" | "gid">;
@@ -50,7 +51,7 @@ export async function safeSpawn(
     return err(new WinNestError("INVALID_COMMAND", "Command must not be empty."));
   }
 
-  const { logger, stdin = "ignore", timeoutMs, logFile, signal, ...spawnOptions } = options;
+  const { logger, stdin = "ignore", stdio = "pipe", timeoutMs, logFile, signal, ...spawnOptions } = options;
   const safeArgs = [...args];
   await logger?.info("command started", {
     command,
@@ -68,7 +69,7 @@ export async function safeSpawn(
       ...spawnOptions,
       signal,
       shell: false,
-      stdio: [stdin, "pipe", "pipe"]
+      stdio: stdio === "inherit" ? "inherit" : [stdin, "pipe", "pipe"]
     });
 
     const stdout: Buffer[] = [];
@@ -97,12 +98,12 @@ export async function safeSpawn(
       { once: true }
     );
 
-    child.stdout.on("data", (chunk: Buffer) => {
+    child.stdout?.on("data", (chunk: Buffer) => {
       stdout.push(chunk);
       void writeProcessLog(logFile, "stdout", { text: chunk.toString("utf8") });
     });
 
-    child.stderr.on("data", (chunk: Buffer) => {
+    child.stderr?.on("data", (chunk: Buffer) => {
       stderr.push(chunk);
       void writeProcessLog(logFile, "stderr", { text: chunk.toString("utf8") });
     });

@@ -51,9 +51,13 @@ WinNest exposes a clean CLI to manage your Windows software catalog.
 | `winnest reset <app-id>` | Reset the application prefix configuration and database entries to defaults. |
 | `winnest uninstall <app-id>` | Completely remove the application, its Wine prefix, logs, and shortcuts. |
 | `winnest register-mime` | Register file manager MIME-type associations for the desktop. |
+| `winnest setup-wine` | Install Wine, 32-bit Wine support, and desktop integration packages on apt-based Linux systems. |
 
 > [!NOTE]
 > `winnest-open <file-path>` is a dedicated fast-path helper program designed specifically for system file managers to open files using WinNest MIME types without loading the full CLI overhead.
+
+> [!IMPORTANT]
+> `winnest setup-wine` performs a real package installation. On non-root shells it runs `sudo` so the user can type their password directly in the terminal. WinNest never reads or stores sudo passwords.
 
 ---
 

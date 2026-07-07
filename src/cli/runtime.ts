@@ -6,6 +6,7 @@ import { runApp } from "@/core/run.js";
 import { repairApp } from "@/core/repair.js";
 import { resetApp } from "@/core/reset.js";
 import { rescanApp } from "@/core/rescan.js";
+import { setupWine } from "@/core/setup-wine.js";
 import { listApps } from "@/core/state.js";
 import { uninstallApp } from "@/core/uninstall.js";
 import { createMimeHandler } from "@/desktop/mime.js";
@@ -51,6 +52,9 @@ export async function main(args: readonly string[]): Promise<void> {
       return;
     case "register-mime":
       await registerMimeCommand();
+      return;
+    case "setup-wine":
+      await setupWine();
       return;
     default:
       throw new WinNestError("COMMAND_NOT_IMPLEMENTED", `Command is not implemented yet: ${command ?? "help"}`);
