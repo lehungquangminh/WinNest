@@ -2,7 +2,7 @@ import { open, readFile, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { WinNestError } from "../shared/errors.js";
 
-export type AppLockCommand = "install" | "run" | "repair" | "reset" | "uninstall";
+export type AppLockCommand = "install" | "run" | "repair" | "reset" | "rescan" | "uninstall";
 
 export type AppLockFile = {
   pid: number;
@@ -111,7 +111,14 @@ function isPidAlive(pid: number): boolean {
 }
 
 function isKnownCommand(value: unknown): value is AppLockCommand {
-  return value === "install" || value === "run" || value === "repair" || value === "reset" || value === "uninstall";
+  return (
+    value === "install" ||
+    value === "run" ||
+    value === "repair" ||
+    value === "reset" ||
+    value === "rescan" ||
+    value === "uninstall"
+  );
 }
 
 function isFileExistsError(error: unknown): boolean {

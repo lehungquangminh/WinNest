@@ -4,6 +4,7 @@ import { installApp } from "../core/install.js";
 import { runApp } from "../core/run.js";
 import { repairApp } from "../core/repair.js";
 import { resetApp } from "../core/reset.js";
+import { rescanApp } from "../core/rescan.js";
 import { listApps, readApp } from "../core/state.js";
 import { uninstallApp } from "../core/uninstall.js";
 import { createMimeHandler } from "../desktop/mime.js";
@@ -39,6 +40,9 @@ export async function main(args: readonly string[]): Promise<void> {
     case "reset":
       await resetApp(requiredArg(command, firstArg, "app-id"));
       console.log(`Reset ${firstArg}. Reinstall is required before running it again.`);
+      return;
+    case "rescan":
+      await rescanApp(requiredArg(command, firstArg, "app-id"));
       return;
     case "uninstall":
       await uninstallApp(requiredArg(command, firstArg, "app-id"));

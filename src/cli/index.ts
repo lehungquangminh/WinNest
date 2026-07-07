@@ -26,6 +26,7 @@ Usage:
   winnest info <app-id>
   winnest repair <app-id>
   winnest reset <app-id>
+  winnest rescan <app-id>
   winnest uninstall <app-id>
   winnest register-mime`);
 }
