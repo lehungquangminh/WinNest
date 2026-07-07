@@ -1,16 +1,17 @@
 #!/usr/bin/env node
 
 import { WinNestError, toWinNestError } from "../shared/errors.js";
+import { main as runCli } from "./runtime.js";
 
 async function main(): Promise<void> {
-  const [, , command] = process.argv;
+  const [, , command, ...args] = process.argv;
 
   if (!command || command === "help" || command === "--help" || command === "-h") {
     printHelp();
     return;
   }
 
-  throw new WinNestError("COMMAND_NOT_IMPLEMENTED", `Command is not implemented yet: ${command}`);
+  await runCli([command, ...args]);
 }
 
 function printHelp(): void {

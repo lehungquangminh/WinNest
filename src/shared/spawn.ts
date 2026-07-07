@@ -14,6 +14,7 @@ export type SpawnResult = {
 export type RunCommandOptions = SpawnOptionsWithoutStdio & {
   logger?: Logger;
   stdin?: "inherit" | "ignore";
+  timeoutMs?: number;
 };
 
 export async function runCommand(
@@ -34,6 +35,7 @@ export async function runCommand(
   });
 
   return await new Promise<SpawnResult>((resolve, reject) => {
+    let settled = false;
     const child = spawn(command, safeArgs, {
       ...options,
       shell: false,
@@ -42,6 +44,15 @@ export async function runCommand(
 
     const stdout: Buffer[] = [];
     const stderr: Buffer[] = [];
+    const timeout = options.timeoutMs
+      ? setTimeout(() => {
+          if (settled) {
+            return;
+          }
+
+          child.kill("SIGTERM");
+        }, options.timeoutMs)
+      : undefined;
 
     child.stdout.on("data", (chunk: Buffer) => {
       stdout.push(chunk);
@@ -52,15 +63,24 @@ export async function runCommand(
     });
 
     child.on("error", async (error) => {
+      settled = true;
+      if (timeout) {
+        clearTimeout(timeout);
+      }
       await options.logger?.error("command failed to start", { command, args: safeArgs, error });
       reject(new WinNestError("COMMAND_START_FAILED", `Failed to start command: ${command}`, error));
     });
 
-    child.on("close", async (code) => {
+    child.on("close", async (code, signal) => {
+      settled = true;
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+
       const result: SpawnResult = {
         command,
         args: safeArgs,
-        exitCode: code ?? -1,
+        exitCode: signal === "SIGTERM" && options.timeoutMs ? -2 : code ?? -1,
         stdout: Buffer.concat(stdout).toString("utf8"),
         stderr: Buffer.concat(stderr).toString("utf8")
       };
