@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WinNest — Trình quản lý ứng dụng Windows cô lập trên Linux</title>
+    <meta name="description" content="WinNest là công cụ dòng lệnh và giao diện TypeScript giúp cài đặt, vận hành ứng dụng Windows qua Wine một cách cô lập và an toàn trên Linux.">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@1,400;1,500;1,600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- CSS paper-like grain noise texture overlay -->
+    <div class="grain-overlay"></div>
+
+    <div class="dossier-layout">
+        
+        <!-- SIDEBAR: Product Dossier (Left Panel) -->
+        <aside class="dossier-sidebar">
+            <div class="profile-sticky-card">
+                
+                <!-- WinNest Brand Logo -->
+                <div class="logo-block">
+                    <div class="logo-frame">
+                        <i class="ph-fill ph-wine logo-icon"></i>
+                    </div>
+                </div>
+
+                <!-- Identity Block -->
+                <div class="identity-block">
+                    <h1 class="profile-name" id="typing-name">WinNest</h1>
+                    <p class="profile-pseudonym">Containerized Wine Runner</p>
+                    <p class="profile-title">Quản lý và vận hành phần mềm Windows cô lập trên hệ thống Linux.</p>
+                </div>
+
+                <!-- Technical Specification Details -->
+                <div class="dossier-details">
+                    <div class="dossier-item">
+                        <span class="lbl">Môi trường</span>
+                        <span class="val mono">TypeScript / Node</span>
+                    </div>
+                    <div class="dossier-item">
+                        <span class="lbl">Hỗ trợ</span>
+                        <span class="val mono">Wine 8.0+ / Linux</span>
+                    </div>
+                    <div class="dossier-item">
+                        <span class="lbl">Giấy phép</span>
+                        <span class="val mono">MPL-2.0</span>
+                    </div>
+                    <div class="dossier-item">
+                        <span class="lbl">Trạng thái</span>
+                        <span class="val status-active">
+                            <span class="pulse-dot"></span>
+                            Sẵn sàng
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Document Navigation -->
+                <nav class="nav-links">
+                    <a href="index.html" class="nav-item active">
+                        <span>Giới thiệu</span>
+                        <i class="ph ph-caret-right"></i>
+                    </a>
+                    <a href="docs.html" class="nav-item">
+                        <span>Tài liệu hướng dẫn</span>
+                        <i class="ph ph-caret-right"></i>
+                    </a>
+                </nav>
+
+                <!-- External Blueprint Links -->
+                <div class="external-links">
+                    <a href="https://github.com/lehungquangminh/WinNest" target="_blank" rel="noopener noreferrer" class="link-item">
+                        <span>GitHub Repository</span>
+                        <i class="ph ph-arrow-up-right"></i>
+                    </a>
+                    <a href="https://github.com/lehungquangminh/WinNest/issues" target="_blank" rel="noopener noreferrer" class="link-item">
+                        <span>Bug Tracker</span>
+                        <i class="ph ph-arrow-up-right"></i>
+                    </a>
+                </div>
+
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT: Right Panel Sheets -->
+        <main class="dossier-main">
+            
+            <!-- Quote Section -->
+            <section class="dossier-section scroll-reveal" id="manifesto">
+                <blockquote class="manifesto-quote">
+                    “Giá trị cốt lõi của WinNest là đóng gói và cô lập sự phức tạp của Wine, mang lại trải nghiệm phần mềm Windows nguyên bản mà không làm xáo trộn hệ thống Linux của bạn.”
+                </blockquote>
+                <cite class="manifesto-author">— Lê Hùng Quang Minh (Dismon James)</cite>
+            </section>
+
+            <!-- Technical Overview -->
+            <section class="dossier-section scroll-reveal" id="overview">
+                <span class="section-meta">TECHNICAL DOSSIER</span>
+                <h2 class="section-title">Tổng quan dự án</h2>
+                
+                <p class="text-block">
+                    Hầu hết các công cụ chạy ứng dụng Windows trên Linux hiện nay đều tạo ra sự xáo trộn hoặc yêu cầu cấu hình thủ công phức tạp. <strong>WinNest</strong> giải quyết vấn đề này bằng cách tiếp cận hướng đối tượng và tự động hóa toàn bộ vòng đời ứng dụng.
+                </p>
+                <p class="text-block">
+                    Mỗi ứng dụng được cài đặt qua WinNest sẽ được cấp một <strong>vùng chứa prefix Wine cô lập</strong> duy nhất. WinNest tự động quản lý tệp cấu hình ứng dụng (`app.json`), ghi nhận log hoạt động, sao lưu trình cài đặt gốc và tích hợp phím tắt khởi chạy trực tiếp lên thanh menu của Linux Desktop.
+                </p>
+
+                <!-- Terminal Simulation Screen -->
+                <div class="terminal-block">
+                    <div class="terminal-header">
+                        <div class="terminal-buttons">
+                            <span class="terminal-dot red"></span>
+                            <span class="terminal-dot yellow"></span>
+                            <span class="terminal-dot green"></span>
+                        </div>
+                        <span class="terminal-title">winnest-shell --demo</span>
+                        <div style="width: 36px;"></div>
+                    </div>
+                    <div class="terminal-body">
+                        <div>
+                            <span class="terminal-prompt">$</span>
+                            <span class="terminal-cmd" id="terminal-cmd">winnest doctor</span>
+                            <span class="terminal-cursor">▋</span>
+                        </div>
+                        <div class="terminal-output" id="terminal-output">
+Checking Node.js environment... (v22.1.0 >= v20) -> OK
+Checking Wine runners... (found /usr/bin/wine) -> OK
+Checking wineserver... (found /usr/bin/wineserver) -> OK
+Checking system shortcuts path... -> OK
+
+WinNest Status: Doctor checks passed. Ready to install apps.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Feature Checklist Sheet -->
+            <section class="dossier-section scroll-reveal" id="features">
+                <span class="section-meta">SPECIFICATION</span>
+                <h2 class="section-title">Các đặc tính kỹ thuật</h2>
+                
+                <div class="features-grid">
+                    
+                    <div class="feature-card">
+                        <i class="ph ph-cube feature-icon"></i>
+                        <h4 class="feature-title">Cô lập Wine Prefix tối đa</h4>
+                        <p class="feature-desc">Mỗi ứng dụng có registry và cấu hình thư viện DLL riêng biệt, triệt tiêu hoàn toàn khả năng xung đột thư viện giữa các phần mềm khác nhau.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <i class="ph ph-shield-check feature-icon"></i>
+                        <h4 class="feature-title">Spawning an toàn cấp thấp</h4>
+                        <p class="feature-desc">Loại bỏ hoàn toàn việc thực thi chuỗi lệnh shell thô (shell execution string). Thay thế bằng việc khởi tạo tiến trình dạng mảng đối số độc lập để chống khai thác injection.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <i class="ph ph-desktop feature-icon"></i>
+                        <h4 class="feature-title">MIME & Desktop Integration</h4>
+                        <p class="feature-desc">Đăng ký định dạng MIME tích hợp chặt chẽ với các chương trình quản lý tệp tin Linux (Nautilus, Dolphin). Hỗ trợ nhấp đúp tệp tin để mở bằng phần mềm Windows tương ứng.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <i class="ph ph-terminal feature-icon"></i>
+                        <h4 class="feature-title">Lọc log & Cấu hình tập trung</h4>
+                        <p class="feature-desc">Tự động bắt luồng xuất (stdout/stderr) của ứng dụng Windows, ghi ra tệp nhật ký JSON có cấu trúc rõ ràng tại thư mục gốc của app.</p>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Architecture Blueprint -->
+            <section class="dossier-section scroll-reveal" id="architecture">
+                <span class="section-meta">ARCHITECTURE BLUEPRINT</span>
+                <h2 class="section-title">Sơ đồ thiết kế hệ thống</h2>
+                
+                <p class="text-block">
+                    Kiến trúc WinNest được xây dựng hướng tới sự tách biệt hoàn toàn giữa nhân Core CLI điều hành trực tiếp Wine và giao diện người dùng Desktop (Electron GUI).
+                </p>
+
+                <div class="arch-blueprint">
+                    
+                    <div class="arch-node">
+                        <div class="arch-node-header">
+                            <span class="arch-node-title">Electron GUI (Frontend)</span>
+                            <span class="arch-node-tag">Desktop Window</span>
+                        </div>
+                        <p class="arch-node-desc">Giao diện quản lý thân thiện, gọi các tiến trình thông qua cơ chế IPC an toàn. Không bao giờ trực tiếp gọi Wine runner.</p>
+                    </div>
+
+                    <div class="arch-flow-arrow">▼ IPC (Inter-Process Communication)</div>
+
+                    <div class="arch-node">
+                        <div class="arch-node-header">
+                            <span class="arch-node-title">WinNest CLI / Core Engine</span>
+                            <span class="arch-node-tag">TypeScript Core</span>
+                        </div>
+                        <p class="arch-node-desc">Tập hợp các bộ điều phối: Quản lý prefix, Parser metadata (`app.json`), Đăng ký MIME desktop launchers và lock tiến trình.</p>
+                    </div>
+
+                    <div class="arch-flow-arrow">▼ Safe Spawn (Argument Arrays)</div>
+
+                    <div class="arch-node" style="border-color: rgba(248, 113, 113, 0.2);">
+                        <div class="arch-node-header" style="color: var(--accent-red);">
+                            <span class="arch-node-title">Wine Runner Environment</span>
+                            <span class="arch-node-tag" style="background: rgba(248, 113, 113, 0.05);">Wine Host</span>
+                        </div>
+                        <p class="arch-node-desc">Tiến trình Wine và Wineserver cô lập, thực thi mã ứng dụng Windows trực tiếp trên kernel Linux với cấu hình sandbox.</p>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Footer Sheet -->
+            <footer class="dossier-footer">
+                <p>&copy; 2026 WinNest Project. Bản quyền thuộc về Lê Hùng Quang Minh.</p>
+                <p class="mono">VER 0.1.0 · MPL-2.0</p>
+            </footer>
+
+        </main>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+</body>
+</html>
