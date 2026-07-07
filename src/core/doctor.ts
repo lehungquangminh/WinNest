@@ -8,6 +8,7 @@ import { Logger } from "../logging/logger.js";
 import { runCommand } from "../shared/spawn.js";
 import { findExecutable } from "../shared/which.js";
 import { detectSystemWine } from "../wine/runner.js";
+import { WINNEST_VERSION } from "../shared/version.js";
 
 type Check = {
   label: string;
@@ -30,6 +31,7 @@ export async function runDoctor(): Promise<void> {
   const homeWritable = await isWritable(paths.home);
   const dataWritable = await isWritable(paths.dataRoot);
   const applicationsWritable = await isWritable(paths.applicationsDir);
+  const mimePackagesWritable = await isWritable(paths.mimePackagesDir);
   const xdgMime = await findExecutable("xdg-mime");
   const xdgDesktopMenu = await findExecutable("xdg-desktop-menu");
   const updateDesktopDatabase = await findExecutable("update-desktop-database");
@@ -40,38 +42,46 @@ export async function runDoctor(): Promise<void> {
     { label: "Linux", ok: process.platform === "linux", value: yesNo(process.platform === "linux") },
     { label: "Node runtime", ok: true, value: process.version },
     { label: "Home writable", ok: homeWritable, value: yesNo(homeWritable) },
+    { label: "App data writable", ok: dataWritable, value: yesNo(dataWritable) },
     { label: "App data path", ok: dataWritable, value: paths.dataRoot }
   ];
 
   const wineChecks: Check[] = [
-    { label: "wine", ok: Boolean(runner.winePath), value: runner.winePath ?? "missing" },
-    { label: "wineboot", ok: Boolean(runner.winebootPath), value: runner.winebootPath ?? "missing" },
+    { label: "wine", ok: Boolean(runner.winePath), value: formatTool(runner.winePath) },
+    { label: "wineboot", ok: Boolean(runner.winebootPath), value: formatTool(runner.winebootPath) },
+    { label: "wineserver", ok: Boolean(runner.wineserverPath), value: formatTool(runner.wineserverPath) },
     { label: "version", ok: Boolean(runner.version), value: runner.version ?? "unknown" },
     { label: "temporary prefix", ok: prefixCheck.ok, value: prefixCheck.value }
   ];
 
   const desktopChecks: Check[] = [
-    { label: "xdg-mime", ok: Boolean(xdgMime), value: xdgMime ?? "missing" },
-    { label: "xdg-desktop-menu", ok: Boolean(xdgDesktopMenu), value: xdgDesktopMenu ?? "missing optional" },
+    { label: "xdg-mime", ok: Boolean(xdgMime), value: formatTool(xdgMime) },
+    { label: "xdg-desktop-menu", ok: Boolean(xdgDesktopMenu), value: formatTool(xdgDesktopMenu, true) },
     {
       label: "update-desktop-database",
       ok: Boolean(updateDesktopDatabase),
-      value: updateDesktopDatabase ?? "missing optional"
+      value: formatTool(updateDesktopDatabase, true)
     },
     {
       label: "update-mime-database",
       ok: Boolean(updateMimeDatabase),
-      value: updateMimeDatabase ?? "missing optional"
+      value: formatTool(updateMimeDatabase, true)
     },
-    { label: "applications dir", ok: applicationsWritable, value: applicationsWritable ? "writable" : "not writable" }
+    { label: "applications dir", ok: applicationsWritable, value: applicationsWritable ? "writable" : "not writable" },
+    { label: "MIME packages dir", ok: mimePackagesWritable, value: mimePackagesWritable ? "writable" : "not writable" }
   ];
 
-  printDoctor(systemChecks, wineChecks, desktopChecks);
+  const winNestChecks: Check[] = [
+    { label: "version", ok: true, value: WINNEST_VERSION }
+  ];
+
+  printDoctor(systemChecks, wineChecks, desktopChecks, winNestChecks);
 
   const requiredOk =
     systemChecks.every((check) => check.ok) &&
     wineChecks.every((check) => check.ok) &&
     applicationsWritable &&
+    mimePackagesWritable &&
     Boolean(xdgMime);
 
   console.log("");
@@ -89,7 +99,12 @@ export async function runDoctor(): Promise<void> {
   }
 }
 
-function printDoctor(system: readonly Check[], wine: readonly Check[], desktop: readonly Check[]): void {
+function printDoctor(
+  system: readonly Check[],
+  wine: readonly Check[],
+  desktop: readonly Check[],
+  winNest: readonly Check[]
+): void {
   console.log("WinNest Doctor");
   console.log("");
   console.log("System:");
@@ -104,6 +119,11 @@ function printDoctor(system: readonly Check[], wine: readonly Check[], desktop: 
   console.log("");
   console.log("Desktop integration:");
   for (const check of desktop) {
+    console.log(`  ${check.label}: ${check.value}`);
+  }
+  console.log("");
+  console.log("WinNest:");
+  for (const check of winNest) {
     console.log(`  ${check.label}: ${check.value}`);
   }
 }
@@ -156,4 +176,12 @@ async function checkTemporaryPrefix(
 
 function yesNo(value: boolean): string {
   return value ? "yes" : "no";
+}
+
+function formatTool(path: string | undefined, optional = false): string {
+  if (path) {
+    return `found ${path}`;
+  }
+
+  return optional ? "missing optional" : "missing";
 }
