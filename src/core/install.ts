@@ -12,6 +12,7 @@ import { detectSystemWine } from "../wine/runner.js";
 import { appRoot } from "./paths.js";
 import { writeApp } from "./state.js";
 import { createInstallTracker, type InstallStep } from "./install-state.js";
+import { acquireAppLock } from "./lock.js";
 import type { ManagedApp } from "./app.js";
 
 export async function installApp(installerInputPath: string): Promise<ManagedApp> {
@@ -22,6 +23,7 @@ export async function installApp(installerInputPath: string): Promise<ManagedApp
   const appId = await allocateAppId(appName);
   const root = appRoot(appId);
   await mkdir(root, { recursive: true });
+  const lock = await acquireAppLock(root, "install");
   const logger = new Logger(appLogPath(appId, "install.log"));
   const tracker = await createInstallTracker(root, appId, installerPath);
 
@@ -95,6 +97,8 @@ export async function installApp(installerInputPath: string): Promise<ManagedApp
     });
     await logger.error("install failed", { state, error });
     throw error;
+  } finally {
+    await lock.release();
   }
 }
 
