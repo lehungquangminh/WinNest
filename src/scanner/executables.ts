@@ -1,5 +1,6 @@
 import { readdir, stat } from "node:fs/promises";
 import { basename, join, relative, sep } from "node:path";
+import type { Logger } from "../logging/logger.js";
 
 export type ExecutableCandidate = {
   windowsPath: string;
@@ -9,33 +10,64 @@ export type ExecutableCandidate = {
   reasons: string[];
 };
 
+export type ExecutableScanSummary = {
+  directoriesScanned: string[];
+  exeFilesFound: number;
+  candidates: ExecutableCandidate[];
+};
+
 const SKIP_DIRS = new Set(["windows", "temp", "$recycle.bin"]);
 const BAD_NAME_PARTS = ["unins", "uninstall", "update", "crash", "helper", "setup", "install", "repair"];
 
-export async function scanExecutables(prefixPath: string, appHint: string): Promise<ExecutableCandidate[]> {
+export async function scanExecutables(
+  prefixPath: string,
+  appHint: string,
+  logger?: Logger
+): Promise<ExecutableCandidate[]> {
   const roots = [
     join(prefixPath, "drive_c", "Program Files"),
     join(prefixPath, "drive_c", "Program Files (x86)")
   ];
   const candidates: ExecutableCandidate[] = [];
+  const directoriesScanned: string[] = [];
+  let exeFilesFound = 0;
 
   for (const root of roots) {
-    await walk(root, async (path) => {
+    await walk(root, directoriesScanned, async (path) => {
       if (!path.toLowerCase().endsWith(".exe")) {
         return;
       }
 
+      exeFilesFound += 1;
       candidates.push(scoreExecutable(prefixPath, path, appHint));
     });
   }
 
-  return candidates.sort((left, right) => right.score - left.score || left.name.localeCompare(right.name));
+  const sorted = candidates.sort((left, right) => right.score - left.score || left.name.localeCompare(right.name));
+  await logger?.info("executable scan finished", {
+    directoriesScanned,
+    exeFilesFound,
+    candidateCount: sorted.length,
+    candidates: sorted.map((candidate) => ({
+      path: candidate.windowsPath,
+      linuxPath: candidate.linuxPath,
+      score: candidate.score,
+      reasons: candidate.reasons
+    }))
+  });
+
+  return sorted;
 }
 
-async function walk(root: string, onFile: (path: string) => Promise<void>): Promise<void> {
+async function walk(
+  root: string,
+  directoriesScanned: string[],
+  onFile: (path: string) => Promise<void>
+): Promise<void> {
   let entries;
   try {
     entries = await readdir(root, { withFileTypes: true });
+    directoriesScanned.push(root);
   } catch {
     return;
   }
@@ -44,7 +76,7 @@ async function walk(root: string, onFile: (path: string) => Promise<void>): Prom
     const path = join(root, entry.name);
     if (entry.isDirectory()) {
       if (!SKIP_DIRS.has(entry.name.toLowerCase())) {
-        await walk(path, onFile);
+        await walk(path, directoriesScanned, onFile);
       }
       continue;
     }

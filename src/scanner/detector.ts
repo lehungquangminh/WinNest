@@ -10,8 +10,15 @@ export async function detectMainExecutable(
   logger: Logger,
   options: { onSelectionRequired?: () => Promise<void> } = {}
 ): Promise<ExecutableCandidate> {
-  const candidates = await scanExecutables(prefixPath, appHint);
-  await logger.info("scanner candidates", { count: candidates.length, candidates: candidates.slice(0, 20) });
+  const candidates = await scanExecutables(prefixPath, appHint, logger);
+  await logger.info("scanner candidates", {
+    count: candidates.length,
+    candidates: candidates.slice(0, 20).map((candidate) => ({
+      path: candidate.windowsPath,
+      score: candidate.score,
+      reasons: candidate.reasons
+    }))
+  });
 
   if (candidates.length === 0) {
     throw new WinNestError("NO_LAUNCH_CANDIDATE", "No installed Windows executable was detected.");
@@ -19,7 +26,7 @@ export async function detectMainExecutable(
 
   const [best, second] = candidates;
   if (best && (!second || best.score - second.score >= 20)) {
-    await logger.info("selected main executable", best);
+    await logger.info("selected main executable", { mode: "automatic", candidate: best });
     return best;
   }
 
@@ -32,7 +39,7 @@ export async function detectMainExecutable(
 
   await options.onSelectionRequired?.();
   const selected = await askUserToSelect(candidates.slice(0, 10));
-  await logger.info("selected main executable", selected);
+  await logger.info("selected main executable", { mode: "manual", candidate: selected });
   return selected;
 }
 
