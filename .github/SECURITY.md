@@ -13,7 +13,7 @@ We support security updates for the following versions of WinNest:
 
 We take the security of WinNest seriously. If you find a security vulnerability, please do not open a public issue. Instead, report it directly to the maintainer:
 
-*   **Email**: [lhqminh.dev@gmail.com](mailto:lhqminh.dev@gmail.com)
+*   **Email**: [lehungquangminh2011@gmail.com](mailto:lehungquangminh2011@gmail.com)
 
 Please include:
 *   A description of the vulnerability.
