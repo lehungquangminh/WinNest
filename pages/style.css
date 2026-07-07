@@ -693,6 +693,22 @@ body {
     opacity: 1;
 }
 
+/* Table Wrapper for mobile overflow safety */
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 24px 0;
+    border: 1px solid var(--border-muffled);
+    border-radius: 8px;
+    background: var(--bg-surface);
+}
+
+.table-wrapper .dossier-table {
+    margin: 0;
+    border-bottom: none;
+}
+
 /* 7. Responsive Adaptations */
 @media (max-width: 960px) {
     .dossier-layout {
@@ -762,6 +778,20 @@ body {
     .link-item {
         padding: 4px 0;
     }
+    
+    .docs-container {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        padding: 24px 20px;
+    }
+    
+    .docs-sidebar {
+        position: static;
+        height: auto;
+        border-bottom: 1px solid var(--border-muffled);
+        padding-bottom: 24px;
+        margin-bottom: 24px;
+    }
 }
 
 @media (max-width: 768px) {
@@ -774,6 +804,108 @@ body {
         gap: 8px;
     }
 }
+
+@media (max-width: 600px) {
+    .profile-sticky-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+    
+    .logo-block {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+    
+    .identity-block {
+        width: 100%;
+    }
+    
+    .nav-links {
+        flex-direction: column;
+        width: 100%;
+        gap: 6px;
+    }
+    
+    .nav-item {
+        width: 100%;
+        justify-content: space-between;
+        padding: 10px 14px;
+    }
+    
+    .external-links {
+        flex-direction: column;
+        width: 100%;
+        gap: 6px;
+    }
+    
+    .link-item {
+        width: 100%;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--border-muffled);
+        padding: 8px 0;
+    }
+    
+    .section-title {
+        font-size: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .manifesto-quote {
+        font-size: 16px;
+        line-height: 1.45;
+    }
+    
+    .terminal-body {
+        padding: 14px;
+        font-size: 11.5px;
+    }
+    
+    .terminal-header {
+        padding: 8px 12px;
+    }
+    
+    .arch-blueprint {
+        padding: 16px;
+    }
+    
+    .arch-node {
+        padding: 12px;
+    }
+    
+    .arch-node-desc {
+        font-size: 12px;
+    }
+    
+    .dossier-table th, .dossier-table td {
+        padding: 10px 12px;
+        font-size: 12.5px;
+    }
+    
+    .docs-footer-nav {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-top: 40px;
+    }
+    
+    .docs-container {
+        padding: 24px 16px;
+    }
+    
+    .bullet-list {
+        margin-left: 16px;
+    }
+    
+    .bullet-list li {
+        font-size: 13.5px;
+    }
+    
+    .text-block {
+        font-size: 14px;
+        line-height: 1.55;
+    }
+}
+
 
 @media (prefers-reduced-motion: reduce) {
     .scroll-reveal {
