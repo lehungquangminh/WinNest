@@ -23,12 +23,28 @@ export async function runInstaller(
   });
 
   if (result.exitCode !== 0) {
+    if (isWine32Missing(result.stderr)) {
+      throw new WinNestError(
+        "WINE32_MISSING",
+        "Wine 32-bit support is missing. Install wine32:i386 and retry this installer.",
+        {
+          installerPath,
+          exitCode: result.exitCode,
+          stderr: result.stderr
+        }
+      );
+    }
+
     throw new WinNestError("INSTALLER_FAILED", "Windows installer exited with an error.", {
       installerPath,
       exitCode: result.exitCode,
       stderr: result.stderr
     });
   }
+}
+
+function isWine32Missing(stderr: string): boolean {
+  return stderr.includes("wine32 is missing") || stderr.includes("syswow64\\\\ntdll.dll");
 }
 
 export async function runWindowsExe(prefixPath: string, windowsExe: string, logger: Logger): Promise<void> {

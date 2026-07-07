@@ -50,6 +50,7 @@ export async function runDoctor(options: DoctorOptions = {}): Promise<void> {
   const updateDesktopDatabase = await findExecutable("update-desktop-database");
   const updateMimeDatabase = await findExecutable("update-mime-database");
   const prefixCheck = await checkTemporaryPrefix(runner.winebootPath, logger);
+  const wine32Available = !isWine32Missing(prefixCheck.stderr);
 
   const systemChecks: Check[] = [
     { label: "Linux", ok: process.platform === "linux", value: yesNo(process.platform === "linux") },
@@ -64,7 +65,8 @@ export async function runDoctor(options: DoctorOptions = {}): Promise<void> {
     { label: "wineboot", ok: Boolean(runner.winebootPath), value: formatTool(runner.winebootPath) },
     { label: "wineserver", ok: Boolean(runner.wineserverPath), value: formatTool(runner.wineserverPath) },
     { label: "version", ok: Boolean(runner.version), value: runner.version ?? "unknown" },
-    { label: "temporary prefix", ok: prefixCheck.ok, value: prefixCheck.value }
+    { label: "temporary prefix", ok: prefixCheck.ok, value: prefixCheck.value },
+    { label: "wine32 support", ok: wine32Available, value: wine32Available ? "available" : "missing wine32:i386" }
   ];
 
   const desktopChecks: Check[] = [
@@ -278,4 +280,8 @@ function trimForConsole(value: string): string {
   }
 
   return trimmed.length > 600 ? `${trimmed.slice(0, 600)}...` : trimmed;
+}
+
+function isWine32Missing(stderr: string): boolean {
+  return stderr.includes("wine32 is missing") || stderr.includes("syswow64\\\\ntdll.dll");
 }
