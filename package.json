@@ -10,7 +10,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",
-    "dev:cli": "node --enable-source-maps ./dist/cli/index.js"
+    "dev:cli": "node --enable-source-maps ./dist/cli/index.js",
+    "test:path-torture": "npm run build && node --enable-source-maps ./dist/dev/path-torture.js"
   },
   "engines": {
     "node": ">=20"
