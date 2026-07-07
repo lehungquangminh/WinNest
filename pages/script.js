@@ -36,10 +36,10 @@ function initTypewriter(elementId, textToType, speed = 80) {
             setTimeout(type, randomizedDelay);
         } else {
             setTimeout(() => {
-                cursorSpan.style.transition = "opacity 0.5s ease";
+                cursorSpan.style.transition = "opacity 0.3s ease";
                 cursorSpan.style.opacity = "0";
-                setTimeout(() => cursorSpan.remove(), 500);
-            }, 3000);
+                setTimeout(() => cursorSpan.remove(), 300);
+            }, 800);
         }
     }
 
