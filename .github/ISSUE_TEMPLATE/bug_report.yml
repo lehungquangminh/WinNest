@@ -1,0 +1,57 @@
+name: Bug Report
+description: File a bug report to help us improve WinNest
+title: "[BUG]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report! Please provide as much details as possible.
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+      placeholder: Describe what happened...
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: How did you encounter the bug?
+      placeholder: |
+        1. Run 'winnest install <installer>'
+        2. Execute 'winnest run <app-id>'
+        3. See error: ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: A clear and concise description of what you expected to happen.
+    validations:
+      required: false
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Logs or Terminal Output
+      description: Please copy/paste any relevant logs, terminal output, or debug trace.
+      render: shell
+  - type: input
+    id: version
+    attributes:
+      label: WinNest Version
+      description: What version of WinNest are you using? (Check with `winnest --version` or package.json)
+      placeholder: e.g. v0.1.0
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment Info
+      description: Linux OS/distro, Node.js version, Wine version.
+      placeholder: e.g. Arch Linux, Node v22.1.0, Wine 9.8-staging
+    validations:
+      required: true
