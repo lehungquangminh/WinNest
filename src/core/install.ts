@@ -1,9 +1,9 @@
 import { constants } from "node:fs";
 import { access, copyFile, mkdir } from "node:fs/promises";
-import { basename, extname, join, parse } from "node:path";
+import { basename, extname, join, parse, resolve } from "node:path";
 import { appLogPath } from "../logging/paths.js";
 import { Logger } from "../logging/logger.js";
-import { WinNestError } from "../shared/errors.js";
+import { WinNestError, toWinNestError } from "../shared/errors.js";
 import { createDesktopEntry } from "../desktop/entry.js";
 import { detectMainExecutable } from "../scanner/detector.js";
 import { createPrefix } from "../wine/prefix.js";
@@ -11,57 +11,54 @@ import { runInstaller } from "../wine/process.js";
 import { detectSystemWine } from "../wine/runner.js";
 import { appRoot } from "./paths.js";
 import { writeApp } from "./state.js";
+import { createInstallTracker, type InstallStep } from "./install-state.js";
 import type { ManagedApp } from "./app.js";
 
-export type InstallState =
-  | "idle"
-  | "validating"
-  | "creating-app-folder"
-  | "copying-installer"
-  | "creating-prefix"
-  | "booting-prefix"
-  | "running-installer"
-  | "scanning"
-  | "selecting-launcher"
-  | "writing-metadata"
-  | "creating-desktop-entry"
-  | "done"
-  | "failed";
-
 export async function installApp(installerInputPath: string): Promise<ManagedApp> {
-  let state: InstallState = "idle";
-
-  state = "validating";
-  const installerPath = await validateInstaller(installerInputPath);
+  let state: InstallStep = "validating";
+  const installerPath = resolve(installerInputPath);
   const installerKind = getInstallerKind(installerPath);
   const appName = parse(installerPath).name;
   const appId = await allocateAppId(appName);
   const root = appRoot(appId);
+  await mkdir(root, { recursive: true });
   const logger = new Logger(appLogPath(appId, "install.log"));
+  const tracker = await createInstallTracker(root, appId, installerPath);
+
+  await tracker.update(state, "running");
+  await validateInstaller(installerPath);
   await logger.info("install started", { state, installerPath, installerKind, appId });
 
   try {
     state = "creating-app-folder";
+    await tracker.update(state, "running");
     await createAppFolders(root);
 
     state = "copying-installer";
+    await tracker.update(state, "running");
     const storedInstallerPath = join(root, "installers", basename(installerPath));
     await copyFile(installerPath, storedInstallerPath);
     await logger.info("installer copied", { from: installerPath, to: storedInstallerPath });
 
     state = "creating-prefix";
+    await tracker.update(state, "running");
     const prefixPath = join(root, "prefix");
+    state = "booting-prefix";
+    await tracker.update(state, "running");
     await createPrefix(prefixPath, logger);
 
     state = "running-installer";
+    await tracker.update(state, "running");
     await runInstaller(prefixPath, storedInstallerPath, installerKind, logger);
 
     state = "scanning";
+    await tracker.update(state, "running");
     const mainCandidate = await detectMainExecutable(prefixPath, appName, logger);
     const runner = await detectSystemWine();
     const now = new Date().toISOString();
 
     state = "writing-metadata";
+    await tracker.update(state, "running");
     let app: ManagedApp = {
       schemaVersion: 1,
       id: appId,
@@ -81,24 +78,28 @@ export async function installApp(installerInputPath: string): Promise<ManagedApp
     await writeApp(app);
 
     state = "creating-desktop-entry";
+    await tracker.update(state, "running");
     const desktopEntryPath = await createDesktopEntry(app, logger);
     app = { ...app, desktopEntryPath, updatedAt: new Date().toISOString() };
     await writeApp(app);
 
     state = "done";
+    await tracker.update(state, "done");
     await logger.info("install finished", { state, app });
     return app;
   } catch (error) {
+    const winNestError = toWinNestError(error);
+    await tracker.update("failed", "failed", {
+      code: winNestError.code,
+      message: winNestError.message
+    });
     await logger.error("install failed", { state, error });
     throw error;
   }
 }
 
 async function validateInstaller(path: string): Promise<string> {
-  const kind = getInstallerKind(path);
-  if (!kind) {
-    throw new WinNestError("UNSUPPORTED_INSTALLER", "Installer must be a .exe or .msi file.", { path });
-  }
+  getInstallerKind(path);
 
   try {
     await access(path, constants.R_OK);
