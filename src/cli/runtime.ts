@@ -1,11 +1,12 @@
 import { WinNestError } from "../shared/errors.js";
 import { runDoctor } from "../core/doctor.js";
 import { installApp } from "../core/install.js";
+import { printAppInfo } from "../core/info.js";
 import { runApp } from "../core/run.js";
 import { repairApp } from "../core/repair.js";
 import { resetApp } from "../core/reset.js";
 import { rescanApp } from "../core/rescan.js";
-import { listApps, readApp } from "../core/state.js";
+import { listApps } from "../core/state.js";
 import { uninstallApp } from "../core/uninstall.js";
 import { createMimeHandler } from "../desktop/mime.js";
 import { Logger } from "../logging/logger.js";
@@ -79,8 +80,7 @@ async function listCommand(): Promise<void> {
 }
 
 async function infoCommand(appId: string | undefined): Promise<void> {
-  const app = await readApp(requiredArg("info", appId, "app-id"));
-  console.log(JSON.stringify(app, null, 2));
+  await printAppInfo(requiredArg("info", appId, "app-id"));
 }
 
 function requiredArg(command: string, value: string | undefined, name: string): string {
