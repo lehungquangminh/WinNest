@@ -9,10 +9,10 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "check": "tsc -p tsconfig.json --noEmit",
+    "check": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.tests.json --noEmit",
     "dev:cli": "node --enable-source-maps ./dist/cli/index.js",
     "test:path-torture": "npm run build && node --enable-source-maps ./dist/dev/path-torture.js",
-    "test:real-install": "tsx src/dev/real-install.ts"
+    "test:real-install": "tsx tests/real-install.ts"
   },
   "engines": {
     "node": ">=20"

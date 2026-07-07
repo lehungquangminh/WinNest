@@ -1,10 +1,10 @@
 import { readdir, stat } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
-import { runDoctor } from "../core/doctor.js";
-import { installApp } from "../core/install.js";
-import { appRoot } from "../core/paths.js";
-import { readApp } from "../core/state.js";
-import { toWinNestError } from "../shared/errors.js";
+import { runDoctor } from "@/core/doctor.js";
+import { installApp } from "@/core/install.js";
+import { appRoot } from "@/core/paths.js";
+import { readApp } from "@/core/state.js";
+import { toWinNestError } from "@/shared/errors.js";
 
 async function main(): Promise<void> {
   const installerPath = process.argv[2];
