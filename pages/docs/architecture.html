@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tài liệu WinNest — Kiến trúc & Thiết kế thư mục</title>
+    <title>WinNest Docs — Kiến trúc & Thiết kế thư mục</title>
     <meta name="description" content="Tài liệu chi tiết về mô hình kiến trúc, cơ chế lock tệp tin tiến trình và cấu trúc thư mục lưu trữ ứng dụng của WinNest.">
     
     <!-- Fonts -->
@@ -21,97 +21,80 @@
 
     <div class="grain-overlay"></div>
 
-    <div class="dossier-layout">
+    <!-- 1. Top Navigation Bar -->
+    <header class="docs-header">
+        <div class="docs-header-container">
+            <a href="../index.html" class="docs-logo">
+                <i class="ph-fill ph-wine"></i>
+                <span>WinNest</span>
+            </a>
+            <nav class="docs-nav-items-top">
+                <a href="../index.html" class="docs-nav-link-top">Trang chủ</a>
+                <a href="index.html" class="docs-nav-link-top" style="color: var(--text-highlight);">Tài liệu</a>
+                <a href="https://github.com/lehungquangminh/WinNest" target="_blank" rel="noopener noreferrer" class="docs-nav-link-top">
+                    GitHub <i class="ph ph-arrow-up-right" style="font-size: 10px;"></i>
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 2. Two-Column Documentation Layout -->
+    <div class="docs-container">
         
-        <!-- SIDEBAR: Documentation Navigation -->
-        <aside class="dossier-sidebar">
-            <div class="profile-sticky-card">
-                
-                <!-- WinNest Logo -->
-                <div class="logo-block">
-                    <div class="logo-frame">
-                        <i class="ph-fill ph-wine logo-icon"></i>
-                    </div>
-                </div>
+        <!-- Left Sidebar: Navigation tree only -->
+        <aside class="docs-sidebar">
+            <div class="docs-nav-group">
+                <div class="docs-nav-title">Bắt đầu</div>
+                <ul class="docs-nav-list">
+                    <li>
+                        <a href="index.html" class="docs-nav-link">
+                            <span>Giới thiệu & Cài đặt</span>
+                            <i class="ph ph-caret-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
 
-                <!-- Brand Title -->
-                <div class="identity-block">
-                    <h1 class="profile-name" id="typing-name">WinNest</h1>
-                    <p class="profile-pseudonym">Documentation Portal</p>
-                    <p class="profile-title">Quản lý và vận hành phần mềm Windows cô lập trên Linux.</p>
-                </div>
+            <div class="docs-nav-group">
+                <div class="docs-nav-title">Hướng dẫn CLI</div>
+                <ul class="docs-nav-list">
+                    <li>
+                        <a href="cli.html" class="docs-nav-link">
+                            <span>Tham chiếu dòng lệnh</span>
+                            <i class="ph ph-caret-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
 
-                <!-- Documentation Nav Groups -->
-                <div class="docs-nav-group">
-                    <div class="docs-nav-title">Bắt đầu</div>
-                    <ul class="docs-nav-list">
-                        <li>
-                            <a href="index.html" class="docs-nav-link">
-                                <span>Giới thiệu & Cài đặt</span>
-                                <i class="ph ph-caret-right"></i>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+            <div class="docs-nav-group">
+                <div class="docs-nav-title">Kiến trúc hệ thống</div>
+                <ul class="docs-nav-list">
+                    <li>
+                        <a href="architecture.html" class="docs-nav-link active">
+                            <span>Thiết kế & Layout</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
 
-                <div class="docs-nav-group">
-                    <div class="docs-nav-title">Hướng dẫn CLI</div>
-                    <ul class="docs-nav-list">
-                        <li>
-                            <a href="cli.html" class="docs-nav-link">
-                                <span>Tham chiếu dòng lệnh</span>
-                                <i class="ph ph-caret-right"></i>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="docs-nav-group">
-                    <div class="docs-nav-title">Kiến trúc hệ thống</div>
-                    <ul class="docs-nav-list">
-                        <li>
-                            <a href="architecture.html" class="docs-nav-link active">
-                                <span>Thiết kế & Layout</span>
-                                <i class="ph ph-caret-right"></i>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="docs-nav-group">
-                    <div class="docs-nav-title">An toàn bảo mật</div>
-                    <ul class="docs-nav-list">
-                        <li>
-                            <a href="security.html" class="docs-nav-link">
-                                <span>Cơ chế Sandbox</span>
-                                <i class="ph ph-caret-right"></i>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-
-                <!-- Back to Main Site -->
-                <nav class="nav-links" style="margin-top: 16px;">
-                    <a href="../index.html" class="nav-item">
-                        <span>← Quay lại trang chủ</span>
-                    </a>
-                </nav>
-
-                <!-- External Links -->
-                <div class="external-links">
-                    <a href="https://github.com/lehungquangminh/WinNest" target="_blank" rel="noopener noreferrer" class="link-item">
-                        <span>GitHub Repository</span>
-                        <i class="ph ph-arrow-up-right"></i>
-                    </a>
-                </div>
-
+            <div class="docs-nav-group">
+                <div class="docs-nav-title">An toàn bảo mật</div>
+                <ul class="docs-nav-list">
+                    <li>
+                        <a href="security.html" class="docs-nav-link">
+                            <span>Cơ chế Sandbox</span>
+                            <i class="ph ph-caret-right"></i>
+                        </a>
+                    </li>
+                </ul>
             </div>
         </aside>
 
-        <!-- MAIN CONTENT: Document Sheet -->
-        <main class="dossier-main">
+        <!-- Right Content: The Article -->
+        <main class="docs-content">
             
-            <section class="dossier-section scroll-reveal">
+            <section class="dossier-section scroll-reveal" style="border-bottom: none; margin-bottom: 24px; padding-bottom: 0;">
                 <blockquote class="manifesto-quote">
                     “Một hệ thống bền bỉ được xây dựng trên một cấu trúc dữ liệu minh bạch, nơi trạng thái của tiến trình có thể kiểm chứng tại bất kỳ thời điểm nào.”
                 </blockquote>

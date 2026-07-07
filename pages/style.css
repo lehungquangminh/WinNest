@@ -686,20 +686,9 @@ body {
     color: var(--text-muted);
 }
 
-/* 6. Scroll Entry Transitions */
+/* 6. Scroll Entry Transitions (Simplified for Butter-Smooth Performance) */
 .scroll-reveal {
-    opacity: 0;
-    transform: translateY(12px) translateZ(0);
-    backface-visibility: hidden;
-    perspective: 1000px;
-    transition: opacity 0.6s var(--transition-curve), 
-                transform 0.6s var(--transition-curve);
-    will-change: transform, opacity;
-}
-
-.scroll-reveal.reveal-active {
     opacity: 1;
-    transform: translateY(0) translateZ(0);
 }
 
 /* 7. Responsive Adaptations */
@@ -949,4 +938,96 @@ body {
 .bullet-list li strong {
     color: var(--text-primary);
 }
+
+/* Documentation Navbar and Two-Column Layout */
+.docs-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    height: 60px;
+    background: rgba(10, 10, 12, 0.8);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-muffled);
+}
+
+.docs-header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    padding: 0 24px;
+}
+
+.docs-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--text-highlight);
+    font-size: 16px;
+}
+
+.docs-logo i {
+    color: var(--accent-red);
+    font-size: 20px;
+}
+
+.docs-nav-items-top {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.docs-nav-link-top {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 500;
+    transition: color 0.2s var(--transition-curve);
+}
+
+.docs-nav-link-top:hover {
+    color: var(--text-highlight);
+}
+
+.docs-container {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 64px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 48px 24px;
+}
+
+.docs-sidebar {
+    position: sticky;
+    top: 84px;
+    height: calc(100vh - 120px);
+    overflow-y: auto;
+    padding-right: 12px;
+}
+
+.docs-content {
+    max-width: 800px;
+    width: 100%;
+}
+
+@media (max-width: 960px) {
+    .docs-container {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        padding: 24px 20px;
+    }
+    .docs-sidebar {
+        position: static;
+        height: auto;
+        border-bottom: 1px solid var(--border-muffled);
+        padding-bottom: 24px;
+        margin-bottom: 24px;
+    }
+}
+
 
