@@ -124,13 +124,6 @@ body {
 .logo-icon {
     font-size: 42px;
     color: var(--accent-red);
-    filter: drop-shadow(0 4px 10px rgba(248, 113, 113, 0.3));
-    animation: logo-float 4s ease-in-out infinite;
-}
-
-@keyframes logo-float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-4px); }
 }
 
 /* Identity */
@@ -213,6 +206,7 @@ body {
     background-color: var(--accent-green);
     border-radius: 50%;
     animation: status-pulse 1.8s infinite;
+    will-change: transform, opacity;
 }
 
 @keyframes status-pulse {
@@ -438,6 +432,12 @@ body {
     animation: cursor-blink 0.8s infinite;
     display: inline-block;
     color: var(--text-highlight);
+    will-change: opacity;
+}
+
+@keyframes cursor-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
 }
 
 /* Feature Grid Layout */
@@ -689,14 +689,17 @@ body {
 /* 6. Scroll Entry Transitions */
 .scroll-reveal {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(12px) translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
     transition: opacity 0.6s var(--transition-curve), 
                 transform 0.6s var(--transition-curve);
+    will-change: transform, opacity;
 }
 
 .scroll-reveal.reveal-active {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) translateZ(0);
 }
 
 /* 7. Responsive Adaptations */
