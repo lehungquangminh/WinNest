@@ -66,6 +66,8 @@ body {
     opacity: 0.015;
     pointer-events: none;
     z-index: 999;
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
 
 /* 3. Layout Grid

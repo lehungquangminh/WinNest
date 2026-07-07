@@ -1,84 +1,11 @@
 /**
  * WINNEST OFFICIAL WEB PORTAL — SCRIPT SYSTEM
- * Implements typewriter animations, scroll reveal, and interactive terminal simulation.
+ * Implements interactive terminal simulation for the landing page.
  */
 
 document.addEventListener("DOMContentLoaded", () => {
-    initTypewriter("typing-name", "WinNest", 120);
-    initScrollReveal();
     initTerminalSimulation();
 });
-
-/**
- * Creates a natural, custom typewriter effect with a blinking cursor.
- */
-function initTypewriter(elementId, textToType, speed = 80) {
-    const container = document.getElementById(elementId);
-    if (!container) return;
-
-    container.textContent = "";
-
-    const textSpan = document.createElement("span");
-    container.appendChild(textSpan);
-
-    const cursorSpan = document.createElement("span");
-    cursorSpan.className = "terminal-cursor";
-    cursorSpan.textContent = "▋";
-    container.appendChild(cursorSpan);
-
-    let charIndex = 0;
-
-    function type() {
-        if (charIndex < textToType.length) {
-            textSpan.textContent += textToType.charAt(charIndex);
-            charIndex++;
-            const randomizedDelay = speed + (Math.random() * 40 - 20);
-            setTimeout(type, randomizedDelay);
-        } else {
-            setTimeout(() => {
-                cursorSpan.style.transition = "opacity 0.3s ease";
-                cursorSpan.style.opacity = "0";
-                setTimeout(() => cursorSpan.remove(), 300);
-            }, 800);
-        }
-    }
-
-    setTimeout(type, 300);
-}
-
-/**
- * Initializes the IntersectionObserver for entry animations.
- */
-function initScrollReveal() {
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const revealElements = document.querySelectorAll(".scroll-reveal");
-    
-    if (prefersReducedMotion) {
-        revealElements.forEach(el => {
-            el.classList.add("reveal-active");
-        });
-        return;
-    }
-    
-    const observerOptions = {
-        root: null,
-        rootMargin: "0px 0px -6% 0px",
-        threshold: 0.05
-    };
-    
-    const revealObserver = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add("reveal-active");
-                observer.unobserve(entry.target);
-            }
-        });
-    }, observerOptions);
-    
-    revealElements.forEach(el => {
-        revealObserver.observe(el);
-    });
-}
 
 /**
  * Simulates terminal prompt and command executions sequentially.
