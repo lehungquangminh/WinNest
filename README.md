@@ -92,3 +92,15 @@ WinNest exposes a clean CLI to manage your Windows software catalog.
 
 *   **Untrusted Code**: Windows apps run in user space. While WinNest secures host commands against shell injection, Windows apps still run under Wine and can access your host filesystem if Wine configurations expose home directories. Use caution with untrusted binaries.
 *   **No Emulation/VM**: WinNest is not a virtual machine. It relies entirely on your system's Wine installation. Software compatibility is subject to Wine's current implementation and available DLL overrides.
+
+## Known MVP limitations
+
+*   Not every Windows app works under Wine.
+*   Wine must be installed separately for now.
+*   Some installers may hang or require manual clicks inside Wine dialogs.
+*   Some apps need extra dependencies, fonts, runtimes, or DLL overrides that WinNest does not install yet.
+*   The executable scanner can still choose the wrong `.exe`; use `winnest rescan <app-id>` to correct it.
+*   Start Menu `.lnk` discovery is logged, but target parsing is still limited/TODO.
+*   Registry uninstall detection is best-effort and only used as a scanner hint.
+*   WinNest does not strongly sandbox Windows apps yet.
+*   Windows apps may access files exposed through the Wine prefix.
