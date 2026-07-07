@@ -8,6 +8,8 @@ export type ExecutableCandidate = {
   name: string;
   score: number;
   reasons: string[];
+  sizeBytes: number;
+  modifiedAt: string;
 };
 
 export type ExecutableScanSummary = {
@@ -17,12 +19,17 @@ export type ExecutableScanSummary = {
 };
 
 const SKIP_DIRS = new Set(["windows", "temp", "$recycle.bin"]);
-const BAD_NAME_PARTS = ["unins", "uninstall", "update", "crash", "helper", "setup", "install", "repair"];
+const BAD_NAME_PARTS = ["unins", "uninstall", "update", "crash", "crashreporter", "helper", "setup", "install", "repair"];
+
+export type ExecutableScanOptions = {
+  logger?: Logger;
+  referenceTimeMs?: number;
+};
 
 export async function scanExecutables(
   prefixPath: string,
   appHint: string,
-  logger?: Logger
+  options: ExecutableScanOptions = {}
 ): Promise<ExecutableCandidate[]> {
   const roots = [
     join(prefixPath, "drive_c", "Program Files"),
@@ -39,12 +46,12 @@ export async function scanExecutables(
       }
 
       exeFilesFound += 1;
-      candidates.push(scoreExecutable(prefixPath, path, appHint));
+      candidates.push(await scoreExecutable(prefixPath, path, appHint, options.referenceTimeMs));
     });
   }
 
   const sorted = candidates.sort((left, right) => right.score - left.score || left.name.localeCompare(right.name));
-  await logger?.info("executable scan finished", {
+  await options.logger?.info("executable scan finished", {
     directoriesScanned,
     exeFilesFound,
     candidateCount: sorted.length,
@@ -52,7 +59,9 @@ export async function scanExecutables(
       path: candidate.windowsPath,
       linuxPath: candidate.linuxPath,
       score: candidate.score,
-      reasons: candidate.reasons
+      reasons: candidate.reasons,
+      sizeBytes: candidate.sizeBytes,
+      modifiedAt: candidate.modifiedAt
     }))
   });
 
@@ -87,11 +96,22 @@ async function walk(
   }
 }
 
-function scoreExecutable(prefixPath: string, linuxPath: string, appHint: string): ExecutableCandidate {
+async function scoreExecutable(
+  prefixPath: string,
+  linuxPath: string,
+  appHint: string,
+  referenceTimeMs: number | undefined
+): Promise<ExecutableCandidate> {
+  const info = await stat(linuxPath);
   const name = basename(linuxPath);
   const lowerName = name.toLowerCase();
   const normalizedName = normalizeName(name);
   const normalizedHint = normalizeName(appHint);
+  const normalizedFolders = linuxPath
+    .split(sep)
+    .slice(0, -1)
+    .map((part) => normalizeName(part))
+    .filter((part) => part.length > 0);
   const reasons: string[] = [];
   let score = 20;
 
@@ -100,14 +120,40 @@ function scoreExecutable(prefixPath: string, linuxPath: string, appHint: string)
     reasons.push("inside Program Files");
   }
 
+  if (linuxPath.includes(`${sep}Program Files (x86)${sep}`)) {
+    score += 12;
+    reasons.push("inside Program Files (x86)");
+  }
+
   if (normalizedHint && normalizedName.includes(normalizedHint)) {
-    score += 30;
-    reasons.push("name matches installer");
+    score += 35;
+    reasons.push("filename similar to app name");
+  }
+
+  if (normalizedHint && normalizedFolders.some((folder) => folder.includes(normalizedHint) || normalizedHint.includes(folder))) {
+    score += 25;
+    reasons.push("folder name resembles app name");
   }
 
   if (BAD_NAME_PARTS.some((part) => lowerName.includes(part))) {
     score -= 45;
     reasons.push("looks like maintenance executable");
+  } else {
+    score += 10;
+    reasons.push("not an uninstaller");
+  }
+
+  if (info.size >= 1024 * 1024) {
+    score += 15;
+    reasons.push("larger than tiny helper binaries");
+  } else if (info.size < 128 * 1024) {
+    score -= 10;
+    reasons.push("very small executable");
+  }
+
+  if (referenceTimeMs && info.mtimeMs >= referenceTimeMs - 5 * 60 * 1000) {
+    score += 15;
+    reasons.push("recently modified");
   }
 
   return {
@@ -115,7 +161,9 @@ function scoreExecutable(prefixPath: string, linuxPath: string, appHint: string)
     linuxPath,
     name,
     score,
-    reasons
+    reasons,
+    sizeBytes: info.size,
+    modifiedAt: info.mtime.toISOString()
   };
 }
 

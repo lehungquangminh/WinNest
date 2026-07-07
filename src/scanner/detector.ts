@@ -8,9 +8,10 @@ export async function detectMainExecutable(
   prefixPath: string,
   appHint: string,
   logger: Logger,
-  options: { onSelectionRequired?: () => Promise<void> } = {}
+  options: { onSelectionRequired?: () => Promise<void>; referenceTimeMs?: number } = {}
 ): Promise<ExecutableCandidate> {
-  const candidates = await scanExecutables(prefixPath, appHint, logger);
+  const scanOptions = options.referenceTimeMs === undefined ? { logger } : { logger, referenceTimeMs: options.referenceTimeMs };
+  const candidates = await scanExecutables(prefixPath, appHint, scanOptions);
   await logger.info("scanner candidates", {
     count: candidates.length,
     candidates: candidates.slice(0, 20).map((candidate) => ({
@@ -25,7 +26,7 @@ export async function detectMainExecutable(
   }
 
   const [best, second] = candidates;
-  if (best && (!second || best.score - second.score >= 20)) {
+  if (best && best.score >= 70 && (!second || best.score - second.score >= 15)) {
     await logger.info("selected main executable", { mode: "automatic", candidate: best });
     return best;
   }

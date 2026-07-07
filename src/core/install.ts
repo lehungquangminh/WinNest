@@ -17,6 +17,7 @@ import type { ManagedApp } from "./app.js";
 
 export async function installApp(installerInputPath: string): Promise<ManagedApp> {
   let state: InstallStep = "validating";
+  const startedAtMs = Date.now();
   const installerPath = resolve(installerInputPath);
   const installerKind = getInstallerKind(installerPath);
   const appName = parse(installerPath).name;
@@ -55,6 +56,7 @@ export async function installApp(installerInputPath: string): Promise<ManagedApp
     state = "scanning";
     await tracker.update(state, "running");
     const mainCandidate = await detectMainExecutable(prefixPath, appName, logger, {
+      referenceTimeMs: startedAtMs,
       onSelectionRequired: async () => {
         state = "selecting-launcher";
         await tracker.update(state, "running");
