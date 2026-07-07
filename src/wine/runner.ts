@@ -5,18 +5,21 @@ export type WineRunner = {
   id: "system-wine";
   winePath: string | undefined;
   winebootPath: string | undefined;
+  wineserverPath: string | undefined;
   version: string | undefined;
 };
 
 export async function detectSystemWine(): Promise<WineRunner> {
   const winePath = await findExecutable("wine");
   const winebootPath = await findExecutable("wineboot");
+  const wineserverPath = await findExecutable("wineserver");
   const version = winePath ? await getWineVersion(winePath) : undefined;
 
   return {
     id: "system-wine",
     winePath,
     winebootPath,
+    wineserverPath,
     version
   };
 }
