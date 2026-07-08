@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WinNest Docs — Kiến trúc & Thiết kế thư mục</title>
-    <meta name="description" content="Tài liệu chi tiết về mô hình kiến trúc, cơ chế lock tệp tin tiến trình và cấu trúc thư mục lưu trữ ứng dụng của WinNest.">
+    <title>WinNest Docs — Architecture & Directory Layout</title>
+    <meta name="description" content="Detailed documentation on the execution model, IPC mechanisms, process locks, and directory storage layout of WinNest.">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,13 +29,13 @@
                 <span>WinNest</span>
             </a>
             <nav class="docs-nav-items-top">
-                <a href="../index.html" class="docs-nav-link-top">Trang chủ</a>
-                <a href="index.html" class="docs-nav-link-top" style="color: var(--text-highlight);">Tài liệu</a>
+                <a href="../index.html" class="docs-nav-link-top">Home</a>
+                <a href="index.html" class="docs-nav-link-top" style="color: var(--text-highlight);">Docs</a>
                 <a href="https://github.com/lehungquangminh/WinNest" target="_blank" rel="noopener noreferrer" class="docs-nav-link-top">
                     GitHub <i class="ph ph-arrow-up-right" style="font-size: 10px;"></i>
                 </a>
                 <span style="color: var(--text-muted); font-size: 11px; margin: 0 4px;">|</span>
-                <a href="../en/docs/architecture.html" class="docs-nav-link-top" style="font-size: 12px;">English</a>
+                <a href="../../docs/architecture.html" class="docs-nav-link-top" style="font-size: 12px;">Tiếng Việt</a>
             </nav>
         </div>
     </header>
@@ -46,11 +46,11 @@
         <!-- Left Sidebar: Navigation tree only -->
         <aside class="docs-sidebar">
             <div class="docs-nav-group">
-                <div class="docs-nav-title">Bắt đầu</div>
+                <div class="docs-nav-title">Getting Started</div>
                 <ul class="docs-nav-list">
                     <li>
                         <a href="index.html" class="docs-nav-link">
-                            <span>Giới thiệu & Cài đặt</span>
+                            <span>Introduction & Setup</span>
                             <i class="ph ph-caret-right"></i>
                         </a>
                     </li>
@@ -58,11 +58,11 @@
             </div>
 
             <div class="docs-nav-group">
-                <div class="docs-nav-title">Hướng dẫn CLI</div>
+                <div class="docs-nav-title">CLI Guides</div>
                 <ul class="docs-nav-list">
                     <li>
                         <a href="cli.html" class="docs-nav-link">
-                            <span>Tham chiếu dòng lệnh</span>
+                            <span>Command Reference</span>
                             <i class="ph ph-caret-right"></i>
                         </a>
                     </li>
@@ -70,22 +70,22 @@
             </div>
 
             <div class="docs-nav-group">
-                <div class="docs-nav-title">Kiến trúc hệ thống</div>
+                <div class="docs-nav-title">System Architecture</div>
                 <ul class="docs-nav-list">
                     <li>
                         <a href="architecture.html" class="docs-nav-link active">
-                            <span>Thiết kế & Layout</span>
+                            <span>Design & Layout</span>
                         </a>
                     </li>
                 </ul>
             </div>
 
             <div class="docs-nav-group">
-                <div class="docs-nav-title">An toàn bảo mật</div>
+                <div class="docs-nav-title">Security & Sandboxing</div>
                 <ul class="docs-nav-list">
                     <li>
                         <a href="security.html" class="docs-nav-link">
-                            <span>Cơ chế Sandbox</span>
+                            <span>Sandbox Mechanisms</span>
                             <i class="ph ph-caret-right"></i>
                         </a>
                     </li>
@@ -98,7 +98,7 @@
             
             <section class="dossier-section scroll-reveal" style="border-bottom: none; margin-bottom: 24px; padding-bottom: 0;">
                 <blockquote class="manifesto-quote">
-                    “Một hệ thống bền bỉ được xây dựng trên một cấu trúc dữ liệu minh bạch, nơi trạng thái của tiến trình có thể kiểm chứng tại bất kỳ thời điểm nào.”
+                    “A robust system is built on transparent data structures, where process states can be verified at any given moment.”
                 </blockquote>
                 <cite class="manifesto-author">— Software Architecture Review</cite>
             </section>
@@ -106,73 +106,73 @@
             <!-- Execution Model -->
             <section class="dossier-section scroll-reveal" id="model">
                 <span class="section-meta">EXECUTION MODEL</span>
-                <h2 class="section-title">Mô hình vận hành & IPC</h2>
+                <h2 class="section-title">Operation Model & IPC</h2>
                 
                 <p class="text-block">
-                    Kiến trúc của WinNest tuân thủ nghiêm ngặt nguyên lý <span class="highlight-text">phân tách mối quan tâm (separation of concerns)</span>. Nhân điều hành cốt lõi (Core Engine) được viết hoàn toàn bằng TypeScript và giao tiếp trực tiếp với hệ điều hành Linux và Wine.
+                    The WinNest architecture strictly follows the <span class="highlight-text">separation of concerns</span> principle. The Core Engine is written entirely in TypeScript and communicates directly with the host Linux OS and Wine.
                 </p>
                 <p class="text-block">
-                    Khi tích hợp giao diện người dùng để xuất bản ứng dụng Desktop (Electron GUI), phần hiển thị (Renderer Process) không được phép gọi trực tiếp các câu lệnh Wine hoặc thay đổi prefix. Mọi thao tác phải được định tuyến qua cơ chế IPC của main-process Electron để gọi các API dùng chung của WinNest Core. Điều này đảm bảo tính nhất quán của trạng thái ứng dụng và tránh xung đột dữ liệu.
+                    When integrating the user interface as a desktop application (Electron GUI), the frontend Renderer Process is prohibited from directly executing Wine commands or mutating prefixes. Instead, all operations are routed through Electron's main-process IPC mechanism to call WinNest Core's shared APIs. This maintains application state integrity and prevents data corruption.
                 </p>
             </section>
 
             <!-- Directory Layout -->
             <section class="dossier-section scroll-reveal" id="layout">
                 <span class="section-meta">DIRECTORY STRUCTURE</span>
-                <h2 class="section-title">Cấu trúc thư mục chi tiết</h2>
+                <h2 class="section-title">Detailed Directory Structure</h2>
                 
                 <p class="text-block">
-                    Mỗi phần mềm Windows được quản lý độc lập tại đường dẫn hệ thống:
+                    Each Windows application is managed independently under the following system path:
                 </p>
                 <div class="arch-blueprint">
                     <div style="font-family: var(--font-mono); font-size: 13px; color: var(--text-primary); line-height: 1.8;">
                         <strong>~/.local/share/winnest/apps/&lt;app-id&gt;/</strong><br>
-                        ├── <strong>app.json</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Lưu metadata cài đặt (ID, Executables, Args)<br>
-                        ├── <strong>prefix/</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Thư mục Wine Prefix ảo<br>
-                        │ &nbsp;&nbsp;├── system.reg &nbsp;&nbsp;&nbsp;&nbsp;# Registry ảo hệ thống của Windows ảo<br>
-                        │ &nbsp;&nbsp;├── user.reg &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Registry ảo người dùng<br>
-                        │ &nbsp;&nbsp;└── drive_c/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Thư mục đĩa C:\ chứa mã thực thi ảo<br>
-                        ├── <strong>installer/</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Cache bản cài gốc của phần mềm<br>
-                        └── <strong>logs/</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Logs runtime lưu dạng JSON-lines (.jsonl)
+                        ├── <strong>app.json</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Stores installation metadata (ID, Executables, Args)<br>
+                        ├── <strong>prefix/</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Virtual Wine Prefix directory<br>
+                        │ &nbsp;&nbsp;├── system.reg &nbsp;&nbsp;&nbsp;&nbsp;# Virtual Windows system Registry<br>
+                        │ &nbsp;&nbsp;├── user.reg &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Virtual Windows user Registry<br>
+                        │ &nbsp;&nbsp;└── drive_c/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Virtual C:\ drive folder hosting executables<br>
+                        ├── <strong>installer/</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Cache containing the original software installer<br>
+                        └── <strong>logs/</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Structured JSON-line runtime logs (.jsonl)
                     </div>
                 </div>
 
                 <p class="text-block">
-                    Tệp cấu hình <code class="code-badge">app.json</code> là trung tâm thông tin của WinNest để theo dõi đường dẫn chạy file `.exe` thực tế bên trong đĩa ảo C: mà không cần quét lại ổ đĩa ở mỗi lần khởi chạy.
+                    The configuration file <code class="code-badge">app.json</code> acts as WinNest's central source of truth, tracking target `.exe` execution paths inside the virtual C: drive without rescanning the disk on every startup.
                 </p>
             </section>
 
             <!-- Process Locking -->
             <section class="dossier-section scroll-reveal" id="locking">
                 <span class="section-meta">PROCESS SYNCHRONIZATION</span>
-                <h2 class="section-title">Khóa tiến trình cô lập (Locks)</h2>
+                <h2 class="section-title">Process Locking (Locks)</h2>
                 
                 <p class="text-block">
-                    Để tránh việc ghi đè Registry ảo hoặc thay đổi tệp tin hệ thống đồng thời (Race Conditions), WinNest trang bị cơ chế **Khóa tiến trình (Process Locking)**.
+                    To prevent concurrent virtual Registry overrides or file system mutations (Race Conditions), WinNest implements a **Process Locking** mechanism.
                 </p>
                 <p class="text-block">
-                    Khi một ứng dụng bắt đầu quá trình cài đặt (`install`), sửa chữa (`repair`), hoặc khởi chạy (`run`), WinNest sẽ tạo một tệp tin khóa tạm thời:
+                    When an application begins installation (`install`), repair (`repair`), or startup (`run`), WinNest creates a temporary lock file:
                     <br>
                     <code class="code-badge">~/.local/share/winnest/apps/&lt;app-id&gt;/.winnest.lock</code>
                 </p>
                 <p class="text-block">
-                    Tệp tin khóa chứa mã tiến trình (PID) của tác vụ WinNest hiện tại. Trước khi thực thi bất kỳ thao tác thay đổi nào trên prefix, hệ thống Core sẽ kiểm tra sự hiện diện của tệp lock. Nếu lock tồn tại và PID ghi trong lock vẫn đang hoạt động (alive) trên Linux, WinNest sẽ từ chối thao tác mới và trả về lỗi xung đột <code class="code-badge">WinNestError</code> để bảo vệ an toàn cho dữ liệu prefix.
+                    The lock file stores the Process ID (PID) of the active WinNest process. Before performing any prefix mutations, the Core checks if a lock file exists. If it exists and the written PID remains active on the host Linux kernel, the system rejects the new action and throws a `WinNestError` to safeguard prefix data.
                 </p>
             </section>
 
             <!-- Navigation Footer -->
             <div class="docs-footer-nav">
                 <a href="cli.html" class="docs-nav-card prev">
-                    <span class="docs-card-lbl">Trang trước</span>
+                    <span class="docs-card-lbl">Previous Page</span>
                     <span class="docs-card-title">
                         <i class="ph ph-caret-left"></i>
-                        <span>Tham chiếu dòng lệnh CLI</span>
+                        <span>Command Line Reference</span>
                     </span>
                 </a>
                 <a href="security.html" class="docs-nav-card next">
-                    <span class="docs-card-lbl">Trang tiếp theo</span>
+                    <span class="docs-card-lbl">Next Page</span>
                     <span class="docs-card-title">
-                        <span>Cơ chế Sandbox & Bảo mật</span>
+                        <span>Sandbox & Security</span>
                         <i class="ph ph-caret-right"></i>
                     </span>
                 </a>
@@ -180,7 +180,7 @@
 
             <!-- Footer -->
             <footer class="dossier-footer">
-                <p>&copy; 2026 WinNest Project. Bản quyền thuộc về Lê Hùng Quang Minh.</p>
+                <p>&copy; 2026 WinNest Project. Copyright belongs to Lê Hùng Quang Minh.</p>
                 <p class="mono">VER 0.1.0 · MPL-2.0</p>
             </footer>
 

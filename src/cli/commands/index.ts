@@ -1,6 +1,7 @@
 import type { CliCommand } from "@/cli/command.js";
 import { createDesktopIconCommand, removeDesktopIconCommand } from "@/cli/commands/desktop-icon.js";
 import { doctorCommand } from "@/cli/commands/doctor.js";
+import { guiCommand } from "@/cli/commands/gui.js";
 import { infoCommand } from "@/cli/commands/info.js";
 import { installCommand } from "@/cli/commands/install.js";
 import { listCommand } from "@/cli/commands/list.js";
@@ -20,6 +21,12 @@ export const COMMANDS: readonly CliCommand[] = [
     usage: "doctor [--verbose] [--fix-hints] [--json]",
     description: "Diagnose Wine, desktop integration, and WinNest paths.",
     run: async ({ args }) => doctorCommand(args)
+  },
+  {
+    name: "gui",
+    usage: "gui [--install <installer-path>]",
+    description: "Open the Electron shell, optionally with an installer preselected.",
+    run: async ({ args }) => guiCommand(args)
   },
   {
     name: "install",

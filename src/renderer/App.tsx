@@ -12,6 +12,7 @@ export type Page = "home" | "install" | "detail" | "settings";
 export default function App(): React.JSX.Element {
   const [page, setPage] = useState<Page>("home");
   const [selectedAppId, setSelectedAppId] = useState<string | undefined>();
+  const [handoffInstallerPath, setHandoffInstallerPath] = useState<string | undefined>();
   
   const [apps, setApps] = useState<ManagedApp[]>([]);
   const [doctor, setDoctor] = useState<DoctorReport | undefined>();
@@ -46,6 +47,17 @@ export default function App(): React.JSX.Element {
       void refresh();
     }
   }, [refresh]);
+
+  useEffect(() => {
+    if (!window.winnest?.onInstallPath) {
+      return undefined;
+    }
+
+    return window.winnest.onInstallPath((installerPath) => {
+      setHandoffInstallerPath(installerPath);
+      setPage("install");
+    });
+  }, []);
 
   if (typeof window === "undefined" || !window.winnest) {
     return (
@@ -114,6 +126,7 @@ export default function App(): React.JSX.Element {
         )}
         {page === "install" && (
           <Install 
+            initialInstallerPath={handoffInstallerPath}
             onInstalled={async (appId) => {
               await refresh();
               setSelectedAppId(appId);
@@ -140,4 +153,3 @@ export default function App(): React.JSX.Element {
     </div>
   );
 }
-

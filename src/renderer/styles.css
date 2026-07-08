@@ -899,6 +899,15 @@ body {
   flex-shrink: 0;
 }
 
+.install-warning-box {
+  border-color: var(--danger-border);
+  background: var(--danger-bg);
+}
+
+.install-warning-box svg {
+  color: var(--danger);
+}
+
 .info-text {
   display: flex;
   flex-direction: column;
@@ -915,6 +924,47 @@ body {
   font-size: 11px;
   color: var(--text-secondary);
   line-height: 1.45;
+}
+
+.candidate-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.candidate-button {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-muted);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.candidate-button:hover {
+  border-color: var(--border-strong);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.candidate-path,
+.candidate-meta {
+  overflow-wrap: anywhere;
+}
+
+.candidate-path {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.candidate-meta {
+  font-size: 10px;
+  color: var(--text-secondary);
 }
 
 /* Console Panel styling */

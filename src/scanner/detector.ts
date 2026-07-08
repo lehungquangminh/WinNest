@@ -40,6 +40,8 @@ export async function detectMainExecutable(
     return best;
   }
 
+  await options.onSelectionRequired?.();
+
   if (!process.stdin.isTTY || !process.stdout.isTTY) {
     throw new WinNestError(
       "LAUNCHER_SELECTION_REQUIRED",
@@ -47,7 +49,6 @@ export async function detectMainExecutable(
     );
   }
 
-  await options.onSelectionRequired?.();
   const selected = await askUserToSelect(candidates.slice(0, 10));
   await logger.info("selected main executable", { mode: "manual", candidate: selected });
   return selected;

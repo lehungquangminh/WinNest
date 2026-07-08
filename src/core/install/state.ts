@@ -69,6 +69,11 @@ export function installStatePath(appFolder: string): string {
   return join(appFolder, "install-state.json");
 }
 
+export async function readInstallState(appFolder: string): Promise<InstallStateFile> {
+  const raw = await readFile(installStatePath(appFolder), "utf8");
+  return JSON.parse(raw) as InstallStateFile;
+}
+
 async function readStartedAt(filePath: string): Promise<string> {
   try {
     const raw = await readFile(filePath, "utf8");

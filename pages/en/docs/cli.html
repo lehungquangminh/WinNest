@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WinNest Docs — Tham chiếu dòng lệnh CLI</title>
-    <meta name="description" content="Hướng dẫn chi tiết về các câu lệnh dòng lệnh CLI của WinNest giúp cài đặt, khởi chạy và quản trị ứng dụng Windows.">
+    <title>WinNest Docs — CLI Command Reference</title>
+    <meta name="description" content="Detailed guide to WinNest CLI commands for installing, launching, and managing Windows applications.">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,13 +29,13 @@
                 <span>WinNest</span>
             </a>
             <nav class="docs-nav-items-top">
-                <a href="../index.html" class="docs-nav-link-top">Trang chủ</a>
-                <a href="index.html" class="docs-nav-link-top" style="color: var(--text-highlight);">Tài liệu</a>
+                <a href="../index.html" class="docs-nav-link-top">Home</a>
+                <a href="index.html" class="docs-nav-link-top" style="color: var(--text-highlight);">Docs</a>
                 <a href="https://github.com/lehungquangminh/WinNest" target="_blank" rel="noopener noreferrer" class="docs-nav-link-top">
                     GitHub <i class="ph ph-arrow-up-right" style="font-size: 10px;"></i>
                 </a>
                 <span style="color: var(--text-muted); font-size: 11px; margin: 0 4px;">|</span>
-                <a href="../en/docs/cli.html" class="docs-nav-link-top" style="font-size: 12px;">English</a>
+                <a href="../../docs/cli.html" class="docs-nav-link-top" style="font-size: 12px;">Tiếng Việt</a>
             </nav>
         </div>
     </header>
@@ -46,11 +46,11 @@
         <!-- Left Sidebar: Navigation tree only -->
         <aside class="docs-sidebar">
             <div class="docs-nav-group">
-                <div class="docs-nav-title">Bắt đầu</div>
+                <div class="docs-nav-title">Getting Started</div>
                 <ul class="docs-nav-list">
                     <li>
                         <a href="index.html" class="docs-nav-link">
-                            <span>Giới thiệu & Cài đặt</span>
+                            <span>Introduction & Setup</span>
                             <i class="ph ph-caret-right"></i>
                         </a>
                     </li>
@@ -58,22 +58,22 @@
             </div>
 
             <div class="docs-nav-group">
-                <div class="docs-nav-title">Hướng dẫn CLI</div>
+                <div class="docs-nav-title">CLI Guides</div>
                 <ul class="docs-nav-list">
                     <li>
                         <a href="cli.html" class="docs-nav-link active">
-                            <span>Tham chiếu dòng lệnh</span>
+                            <span>Command Reference</span>
                         </a>
                     </li>
                 </ul>
             </div>
 
             <div class="docs-nav-group">
-                <div class="docs-nav-title">Kiến trúc hệ thống</div>
+                <div class="docs-nav-title">System Architecture</div>
                 <ul class="docs-nav-list">
                     <li>
                         <a href="architecture.html" class="docs-nav-link">
-                            <span>Thiết kế & Layout</span>
+                            <span>Design & Layout</span>
                             <i class="ph ph-caret-right"></i>
                         </a>
                     </li>
@@ -81,11 +81,11 @@
             </div>
 
             <div class="docs-nav-group">
-                <div class="docs-nav-title">An toàn bảo mật</div>
+                <div class="docs-nav-title">Security & Sandboxing</div>
                 <ul class="docs-nav-list">
                     <li>
                         <a href="security.html" class="docs-nav-link">
-                            <span>Cơ chế Sandbox</span>
+                            <span>Sandbox Mechanisms</span>
                             <i class="ph ph-caret-right"></i>
                         </a>
                     </li>
@@ -98,7 +98,7 @@
             
             <section class="dossier-section scroll-reveal" style="border-bottom: none; margin-bottom: 24px; padding-bottom: 0;">
                 <blockquote class="manifesto-quote">
-                    “Một CLI được thiết kế khoa học sẽ biến các tác vụ hệ thống phức tạp thành các câu lệnh tự giải thích rõ ràng.”
+                    “A scientifically designed CLI transforms complex system operations into self-explanatory command flows.”
                 </blockquote>
                 <cite class="manifesto-author">— UNIX Philosophy Guidelines</cite>
             </section>
@@ -106,10 +106,10 @@
             <!-- CLI Introduction -->
             <section class="dossier-section scroll-reveal" id="cli-intro">
                 <span class="section-meta">REFERENCE</span>
-                <h2 class="section-title">Danh sách lệnh CLI</h2>
+                <h2 class="section-title">CLI Command Reference</h2>
                 
                 <p class="text-block">
-                    Công cụ dòng lệnh `winnest` là giao diện cốt lõi để điều phối toàn bộ các hoạt động của WinNest. Dưới đây là mô tả chi tiết của từng câu lệnh, các tham số và kết quả đầu ra thực tế.
+                    The `winnest` command-line tool is the core interface to orchestrate all WinNest operations. Below is a detailed description of each command, parameters, and output results.
                 </p>
 
                 <!-- Doctor Command -->
@@ -118,7 +118,7 @@
                         <span class="mono-tag">winnest doctor</span>
                     </div>
                     <p class="doc-command-desc">
-                        Chẩn đoán toàn diện môi trường hoạt động của máy chủ Linux. Lệnh này kiểm tra xem Wine có được cài đặt hay không, kiểm tra sự hiện diện của `wineserver` (dùng để quản lý các prefix và đồng bộ), xác minh phiên bản Node.js hiện hành và kiểm tra quyền ghi của người dùng trên đường dẫn desktop shortcut.
+                        Diagnoses the Linux host environment. It verifies that Wine and wineserver are installed, checks Node.js runtime version, and checks folder write permissions for creating desktop shortcuts.
                     </p>
                 </div>
 
@@ -128,7 +128,7 @@
                         <span class="mono-tag">winnest install &lt;installer-path&gt;</span>
                     </div>
                     <p class="doc-command-desc">
-                        Thực hiện cài đặt phần mềm mới. WinNest sẽ tự tạo một ID ứng dụng duy nhất, khởi tạo thư mục prefix, copy installer gốc vào thư mục cache, sau đó an toàn chạy trình cài đặt thông qua Wine. Khi trình cài đặt thoát, WinNest sẽ thực hiện quét Registry ảo của prefix để tự động ánh xạ các shortcut ứng dụng và tạo file `.desktop` tương ứng trên Linux Desktop.
+                        Installs a new application. WinNest generates a unique application ID, creates a new Wine prefix, caches the installer path, and safely launches the installer. Once done, it scans the virtual Registry to auto-generate desktop launchers and `.desktop` shortcuts.
                     </p>
                 </div>
 
@@ -138,7 +138,7 @@
                         <span class="mono-tag">winnest run &lt;app-id&gt;</span>
                     </div>
                     <p class="doc-command-desc">
-                        Khởi chạy ứng dụng Windows đã cài đặt dựa trên <code class="code-badge">app-id</code>. Lệnh này thiết lập biến môi trường `WINEPREFIX` trỏ chính xác về thư mục cô lập của ứng dụng, gọi wineserver nếu cần, chạy file thực thi đích và điều hướng toàn bộ stdout/stderr của chương trình Windows về tệp tin nhật ký JSON-lines nằm dưới thư mục logs của app.
+                        Launches an installed Windows application. It configures the `WINEPREFIX` environment variable, triggers wineserver, executes the binary, and redirects stdout/stderr to structured JSON-line logs under the app logs directory.
                     </p>
                 </div>
 
@@ -148,7 +148,7 @@
                         <span class="mono-tag">winnest open &lt;file-path&gt;</span>
                     </div>
                     <p class="doc-command-desc">
-                        Mở một tệp tin dữ liệu thông qua ứng dụng Windows phù hợp trong WinNest. Đây là điểm tích hợp chính cho file manager của Linux (nhấp đúp tệp `.docx` để mở bằng MS Word ảo hoặc `.psd` bằng Photoshop ảo). Lệnh gọi này cũng có chương trình phụ trợ siêu nhẹ mang tên <span class="highlight-text">`winnest-open`</span> nhằm tối thiểu hóa độ trễ khi mở tệp.
+                        Opens a document/file using the registered Windows application inside WinNest (e.g. double-click `.docx` to open in MS Word, `.psd` in Photoshop). This command uses the lightweight <span class="highlight-text">`winnest-open`</span> binary helper to minimize opening delays.
                     </p>
                 </div>
 
@@ -158,7 +158,7 @@
                         <span class="mono-tag">winnest list</span>
                     </div>
                     <p class="doc-command-desc">
-                        Liệt kê danh sách tất cả các ứng dụng hiện tại đang được quản lý bởi WinNest dưới dạng bảng kỹ thuật gọn gàng, bao gồm ID, tên đầy đủ, phiên bản Wine đang chạy app và trạng thái hiện hành.
+                        Lists all managed applications in a clean summary table showing application ID, name, active Wine version, and run status.
                     </p>
                 </div>
 
@@ -168,7 +168,7 @@
                         <span class="mono-tag">winnest info &lt;app-id&gt;</span>
                     </div>
                     <p class="doc-command-desc">
-                        In ra toàn bộ thông tin chi tiết của một ứng dụng dưới định dạng văn bản technical: Ngày cài đặt, đường dẫn vật lý của prefix, danh sách các file thực thi phát hiện được, đường dẫn file log và cấu hình thông số chạy.
+                        Prints detailed metadata of the application, including installation date, prefix directory path, list of executable targets, log files, and configuration arguments.
                     </p>
                 </div>
 
@@ -178,7 +178,7 @@
                         <span class="mono-tag">winnest repair &lt;app-id&gt;</span>
                     </div>
                     <p class="doc-command-desc">
-                        Sửa chữa cấu hình ứng dụng bị hỏng. Lệnh này tự động khôi phục lại các liên kết symlinks của prefix bị đứt gãy, dựng lại các file launcher `.desktop` bị mất và sửa các trường metadata trong file `app.json` bị sai lệch.
+                        Repairs a broken application configuration. It restores corrupted symlinks inside the prefix, recreates missing desktop entry shortcuts, and fixes malformed metadata in `app.json`.
                     </p>
                 </div>
 
@@ -188,7 +188,7 @@
                         <span class="mono-tag">winnest reset &lt;app-id&gt;</span>
                     </div>
                     <p class="doc-command-desc">
-                        Đưa ứng dụng Windows về trạng thái cài đặt ban đầu. Nó dọn sạch Registry ảo của ứng dụng, xóa các tệp tin lưu tạm ở ổ C ảo và giữ nguyên bản copy của installer gốc để bạn có thể tiến hành cài đặt lại sạch sẽ.
+                        Resets the Windows application prefix sandbox back to its clean initial state, clearing the virtual Registry and user app data (C:\Drive files) while keeping the installer cache for easy reinstall.
                     </p>
                 </div>
 
@@ -198,7 +198,7 @@
                         <span class="mono-tag">winnest uninstall &lt;app-id&gt;</span>
                     </div>
                     <p class="doc-command-desc">
-                        Xóa bỏ hoàn toàn ứng dụng khỏi hệ thống Linux. Lệnh này xóa sạch thư mục prefix, file `app.json`, cache installer, logs hoạt động và gỡ bỏ phím tắt `.desktop` khỏi hệ thống Desktop Launcher của Linux.
+                        Completely purges the application from the Linux host. Deletes the prefix directory, `app.json` settings, installer cache, logs, and unregisters its desktop shortcut entry.
                     </p>
                 </div>
 
@@ -208,7 +208,7 @@
                         <span class="mono-tag">winnest register-mime</span>
                     </div>
                     <p class="doc-command-desc">
-                        Đăng ký định dạng MIME và liên kết mở rộng tệp tin với hệ điều hành Linux Desktop để đảm bảo các tệp tin đặc thù của Windows có thể nhận diện WinNest làm trình khởi chạy mặc định một cách tự động.
+                        Registers MIME type configurations and file association links with the Linux Desktop environment, ensuring file managers automatically associate specific Windows extensions with WinNest.
                     </p>
                 </div>
             </section>
@@ -216,16 +216,16 @@
             <!-- Navigation Footer -->
             <div class="docs-footer-nav">
                 <a href="index.html" class="docs-nav-card prev">
-                    <span class="docs-card-lbl">Trang trước</span>
+                    <span class="docs-card-lbl">Previous Page</span>
                     <span class="docs-card-title">
                         <i class="ph ph-caret-left"></i>
-                        <span>Giới thiệu & Cài đặt</span>
+                        <span>Introduction & Setup</span>
                     </span>
                 </a>
                 <a href="architecture.html" class="docs-nav-card next">
-                    <span class="docs-card-lbl">Trang tiếp theo</span>
+                    <span class="docs-card-lbl">Next Page</span>
                     <span class="docs-card-title">
-                        <span>Kiến trúc thiết kế & Layout</span>
+                        <span>Design & Directory Layout</span>
                         <i class="ph ph-caret-right"></i>
                     </span>
                 </a>
@@ -233,7 +233,7 @@
 
             <!-- Footer -->
             <footer class="dossier-footer">
-                <p>&copy; 2026 WinNest Project. Bản quyền thuộc về Lê Hùng Quang Minh.</p>
+                <p>&copy; 2026 WinNest Project. Copyright belongs to Lê Hùng Quang Minh.</p>
                 <p class="mono">VER 0.1.0 · MPL-2.0</p>
             </footer>
 

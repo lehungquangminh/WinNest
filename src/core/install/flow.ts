@@ -23,6 +23,7 @@ import type { ManagedApp } from "@/core/app.js";
 
 export type InstallOptions = {
   desktopIcon?: boolean;
+  onAppIdAllocated?: (appId: string) => void;
 };
 
 export async function installApp(installerInputPath: string, options: InstallOptions = {}): Promise<ManagedApp> {
@@ -36,6 +37,7 @@ export async function installApp(installerInputPath: string, options: InstallOpt
   const logger = new Logger(appLogPath(appId, "install.log"));
   const tracker = await createInstallTracker(root, appId, installerPath);
 
+  options.onAppIdAllocated?.(appId);
   await tracker.update(state, "running");
   await validateInstaller(installerPath);
   await logger.info("app id allocated", { appId, root });
@@ -132,11 +134,21 @@ export async function installApp(installerInputPath: string, options: InstallOpt
     const winNestError = toWinNestError(error);
     const report = await createDoctorReport(logger);
     const diagnosis = diagnoseWineFailure(collectErrorText(winNestError), report.hints);
+    const stateError =
+      winNestError.code === "LAUNCHER_SELECTION_REQUIRED"
+        ? {
+            code: winNestError.code,
+            message: winNestError.message,
+            hints: ["Select a launch executable in the WinNest install window or run winnest rescan later."]
+          }
+        : {
+            code: diagnosis.code,
+            message: diagnosis.message,
+            hints: diagnosis.hints,
+            diagnosis: diagnosis.code
+          };
     await tracker.update("failed", "failed", {
-      code: diagnosis.code,
-      message: diagnosis.message,
-      hints: diagnosis.hints,
-      diagnosis: diagnosis.code
+      ...stateError
     });
     await logger.error("install failed", {
       state,

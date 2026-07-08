@@ -16,6 +16,12 @@ export type SpawnResult = {
   aborted: boolean;
 };
 
+export type DetachedSpawnResult = {
+  command: string;
+  args: string[];
+  pid: number | undefined;
+};
+
 export type SafeSpawnOptions = {
   cwd?: string;
   env?: NodeJS.ProcessEnv;
@@ -161,6 +167,49 @@ export async function safeSpawn(
       resolve(ok(result));
     });
   });
+}
+
+export async function safeSpawnDetached(
+  command: string,
+  args: string[],
+  options: Pick<RunCommandOptions, "cwd" | "env" | "logger" | "logFile"> = {}
+): Promise<Result<DetachedSpawnResult>> {
+  if (command.trim().length === 0) {
+    return err(new WinNestError("INVALID_COMMAND", "Command must not be empty."));
+  }
+
+  const safeArgs = [...args];
+  await options.logger?.info("detached command started", {
+    command,
+    args: safeArgs,
+    cwd: options.cwd,
+    env: summarizeEnv(options.env)
+  });
+  await writeProcessLog(options.logFile, "detached command started", { command, args: safeArgs });
+
+  try {
+    const child = spawn(command, safeArgs, {
+      cwd: options.cwd,
+      env: options.env,
+      detached: true,
+      shell: false,
+      stdio: "ignore"
+    });
+    child.unref();
+
+    const result = { command, args: safeArgs, pid: child.pid };
+    await options.logger?.info("detached command spawned", result);
+    await writeProcessLog(options.logFile, "detached command spawned", result);
+    return ok(result);
+  } catch (error) {
+    await options.logger?.error("detached command failed to start", { command, args: safeArgs, error });
+    await writeProcessLog(options.logFile, "detached command failed to start", {
+      command,
+      args: safeArgs,
+      error: error instanceof Error ? error.message : String(error)
+    });
+    return err(new WinNestError("COMMAND_START_FAILED", `Failed to start command: ${command}`, error));
+  }
 }
 
 async function writeProcessLog(logFile: string | undefined, event: string, details: unknown): Promise<void> {

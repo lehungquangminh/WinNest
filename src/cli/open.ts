@@ -3,18 +3,26 @@
 import { constants } from "node:fs";
 import { access } from "node:fs/promises";
 import { basename, extname } from "node:path";
+import { launchGui } from "@/core/gui/launch.js";
 import { Logger } from "@/logging/logger.js";
 import { globalLogPath } from "@/logging/paths.js";
 import { WinNestError, toWinNestError } from "@/shared/errors.js";
 
 async function main(): Promise<void> {
   const logger = new Logger(globalLogPath("open.log"));
-  const filePath = process.argv[2];
+  const args = process.argv.slice(2);
+  const filePath = args.find((arg) => !arg.startsWith("--"));
   if (!filePath) {
-    throw new Error("Usage: winnest-open <file-path>");
+    throw new Error("Usage: winnest-open <file-path> [--gui|--cli]");
+  }
+  const forceGui = args.includes("--gui");
+  const forceCli = args.includes("--cli");
+  if (forceGui && forceCli) {
+    throw new WinNestError("CONFLICTING_OPEN_MODE", "Use either --gui or --cli, not both.");
   }
 
-  await logger.info("winnest-open started", { filePath, hasTty: process.stdin.isTTY && process.stdout.isTTY });
+  const hasTty = Boolean(process.stdin.isTTY && process.stdout.isTTY);
+  await logger.info("winnest-open started", { filePath, hasTty, forceGui, forceCli });
   await validateOpenPath(filePath);
 
   if (!isInstallerLike(filePath)) {
@@ -23,6 +31,24 @@ async function main(): Promise<void> {
       "Portable Windows executables are not supported yet. Run an installer-like .exe or .msi, or use `winnest install <path>` manually.",
       { filePath }
     );
+  }
+
+  if (forceGui || (!forceCli && !hasTty)) {
+    try {
+      await launchGui({ installerPath: filePath });
+      await logger.info("winnest-open handed installer to GUI", { filePath });
+      return;
+    } catch (error) {
+      await logger.error("winnest-open GUI handoff failed", { filePath, error });
+      if (!hasTty) {
+        throw new WinNestError(
+          "GUI_HANDOFF_FAILED",
+          "WinNest could not open the Electron install window. Run `winnest install <path>` from a terminal.",
+          { filePath, error }
+        );
+      }
+      console.error("GUI handoff failed; falling back to CLI install.");
+    }
   }
 
   const { main: cliMain } = await import("./runtime.js");

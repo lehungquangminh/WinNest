@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WinNest Docs — Giới thiệu & Cài đặt</title>
-    <meta name="description" content="Tài liệu giới thiệu tổng quan và hướng dẫn cài đặt WinNest.">
+    <title>WinNest Docs — Introduction & Setup</title>
+    <meta name="description" content="Introduction and installation guide for WinNest.">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,13 +29,13 @@
                 <span>WinNest</span>
             </a>
             <nav class="docs-nav-items-top">
-                <a href="../index.html" class="docs-nav-link-top">Trang chủ</a>
-                <a href="index.html" class="docs-nav-link-top" style="color: var(--text-highlight);">Tài liệu</a>
+                <a href="../index.html" class="docs-nav-link-top">Home</a>
+                <a href="index.html" class="docs-nav-link-top" style="color: var(--text-highlight);">Docs</a>
                 <a href="https://github.com/lehungquangminh/WinNest" target="_blank" rel="noopener noreferrer" class="docs-nav-link-top">
                     GitHub <i class="ph ph-arrow-up-right" style="font-size: 10px;"></i>
                 </a>
                 <span style="color: var(--text-muted); font-size: 11px; margin: 0 4px;">|</span>
-                <a href="../en/docs/index.html" class="docs-nav-link-top" style="font-size: 12px;">English</a>
+                <a href="../../docs/index.html" class="docs-nav-link-top" style="font-size: 12px;">Tiếng Việt</a>
             </nav>
         </div>
     </header>
@@ -46,22 +46,22 @@
         <!-- Left Sidebar: Navigation tree only -->
         <aside class="docs-sidebar">
             <div class="docs-nav-group">
-                <div class="docs-nav-title">Bắt đầu</div>
+                <div class="docs-nav-title">Getting Started</div>
                 <ul class="docs-nav-list">
                     <li>
                         <a href="index.html" class="docs-nav-link active">
-                            <span>Giới thiệu & Cài đặt</span>
+                            <span>Introduction & Setup</span>
                         </a>
                     </li>
                 </ul>
             </div>
 
             <div class="docs-nav-group">
-                <div class="docs-nav-title">Hướng dẫn CLI</div>
+                <div class="docs-nav-title">CLI Guides</div>
                 <ul class="docs-nav-list">
                     <li>
                         <a href="cli.html" class="docs-nav-link">
-                            <span>Tham chiếu dòng lệnh</span>
+                            <span>Command Reference</span>
                             <i class="ph ph-caret-right"></i>
                         </a>
                     </li>
@@ -69,11 +69,11 @@
             </div>
 
             <div class="docs-nav-group">
-                <div class="docs-nav-title">Kiến trúc hệ thống</div>
+                <div class="docs-nav-title">System Architecture</div>
                 <ul class="docs-nav-list">
                     <li>
                         <a href="architecture.html" class="docs-nav-link">
-                            <span>Thiết kế & Layout</span>
+                            <span>Design & Layout</span>
                             <i class="ph ph-caret-right"></i>
                         </a>
                     </li>
@@ -81,11 +81,11 @@
             </div>
 
             <div class="docs-nav-group">
-                <div class="docs-nav-title">An toàn bảo mật</div>
+                <div class="docs-nav-title">Security & Sandboxing</div>
                 <ul class="docs-nav-list">
                     <li>
                         <a href="security.html" class="docs-nav-link">
-                            <span>Cơ chế Sandbox</span>
+                            <span>Sandbox Mechanisms</span>
                             <i class="ph ph-caret-right"></i>
                         </a>
                     </li>
@@ -98,7 +98,7 @@
             
             <section class="dossier-section scroll-reveal" style="border-bottom: none; margin-bottom: 24px; padding-bottom: 0;">
                 <blockquote class="manifesto-quote">
-                    “Tài liệu tốt không chỉ giải thích cách hoạt động của mã nguồn, mà còn trình bày rõ ràng lý do tại sao nó được thiết kế như vậy.”
+                    “Good documentation not only explains how code works, but also clearly details why it was designed that way.”
                 </blockquote>
                 <cite class="manifesto-author">— Technical Writing Standards</cite>
             </section>
@@ -106,65 +106,65 @@
             <!-- Section 1: Intro -->
             <section class="dossier-section scroll-reveal" id="intro">
                 <span class="section-meta">INTRODUCTION</span>
-                <h2 class="section-title">Giới thiệu về WinNest</h2>
+                <h2 class="section-title">Introduction to WinNest</h2>
                 
                 <p class="text-block">
-                    Khi cài đặt phần mềm Windows trên Linux thông qua Wine, người dùng thường gặp phải hiện tượng <span class="highlight-text">"xáo trộn Registry"</span> hoặc các thư viện DLL bị đè lên nhau trong một prefix mặc định duy nhất (`~/.wine`). Điều này trực tiếp gây ra lỗi không tương thích giữa các ứng dụng khác nhau.
+                    When installing Windows software on Linux using Wine, users commonly experience <span class="highlight-text">"Registry cluttering"</span> or overlapping DLL overrides within a single default prefix (`~/.wine`). This directly leads to compatibility failures between different applications.
                 </p>
                 <p class="text-block">
-                    <strong>WinNest</strong> ra đời nhằm đóng gói mỗi phần mềm Windows vào một thư mục dữ liệu độc lập hoàn toàn, tự động hóa cấu hình và cung cấp khả năng tích hợp nguyên bản vào môi trường Desktop của Linux.
+                    <strong>WinNest</strong> was created to package each Windows program inside a fully independent data directory, automate configuration, and provide native desktop integration into Linux systems.
                 </p>
 
-                <h3 style="font-size: 16px; font-weight: 600; color: var(--text-highlight); margin-bottom: 12px;">Đặc trưng thiết kế:</h3>
+                <h3 style="font-size: 16px; font-weight: 600; color: var(--text-highlight); margin-bottom: 12px;">Core Design Features:</h3>
                 <ul class="bullet-list">
-                    <li><strong>Cô lập tuyệt đối</strong>: Mỗi phần mềm là một sandbox prefix tách biệt, có cấu hình Registry ảo độc lập.</li>
-                    <li><strong>An toàn tiến trình</strong>: Nói không với việc ghép chuỗi câu lệnh Shell thô, loại trừ nguy cơ tấn công Injection.</li>
-                    <li><strong>Tích hợp Desktop tự động</strong>: Tự sinh file phím tắt khởi chạy `.desktop` và đăng ký MIME types để nhấp đúp chạy ứng dụng.</li>
+                    <li><strong>Absolute Isolation</strong>: Each software runs in a separate prefix sandbox with its own virtual Registry database.</li>
+                    <li><strong>Safe Spawning</strong>: Avoids raw shell command concatenation, removing command injection attack vectors.</li>
+                    <li><strong>Automated Desktop Integration</strong>: Generates launch shortcut (`.desktop`) files and registers MIME types for double-click operation.</li>
                 </ul>
             </section>
 
             <!-- Section 2: Installation -->
             <section class="dossier-section scroll-reveal" id="setup">
                 <span class="section-meta">INSTALLATION GUIDE</span>
-                <h2 class="section-title">Thiết lập & Cài đặt hệ thống</h2>
+                <h2 class="section-title">Setup & System Installation</h2>
                 
                 <p class="text-block">
-                    WinNest được phát triển bằng ngôn ngữ <span class="highlight-text">TypeScript</span> chạy trên nền tảng Node.js. Để cài đặt và chạy thử nghiệm cục bộ, vui lòng đảm bảo hệ thống của bạn đã cài đặt các điều kiện tiên quyết sau:
+                    WinNest is developed using <span class="highlight-text">TypeScript</span> running on the Node.js platform. To install and run the project locally, please ensure that your system meets the following prerequisites:
                 </p>
 
                 <ul class="bullet-list">
-                    <li><strong>Node.js</strong>: Phiên bản LTS 20 hoặc cao hơn.</li>
-                    <li><strong>Wine & Wineserver</strong>: Cài đặt hệ thống sẵn có (Wine 8.0+).</li>
-                    <li><strong>Hệ điều hành</strong>: Các bản phân phối Linux phổ biến (Ubuntu, Arch Linux, Fedora...).</li>
+                    <li><strong>Node.js</strong>: LTS version 20 or higher.</li>
+                    <li><strong>Wine & Wineserver</strong>: Installed on the host system (Wine 8.0+).</li>
+                    <li><strong>Operating System</strong>: Common Linux distributions (Ubuntu, Arch Linux, Fedora, etc.).</li>
                 </ul>
 
-                <h3 style="font-size: 16px; font-weight: 600; color: var(--text-highlight); margin: 24px 0 12px 0;">Quy trình build cục bộ:</h3>
-                <p class="text-block">Nhập các lệnh sau trong thư mục gốc của WinNest:</p>
+                <h3 style="font-size: 16px; font-weight: 600; color: var(--text-highlight); margin: 24px 0 12px 0;">Local Build Process:</h3>
+                <p class="text-block">Enter the following commands inside the WinNest project root folder:</p>
 
                 <div class="terminal-block">
                     <div class="terminal-header">
                         <span class="terminal-title">bash --setup</span>
                     </div>
                     <div class="terminal-body" style="color: var(--text-primary);">
-<span class="terminal-prompt"># 1. Cài đặt các thư viện phụ thuộc</span>
+<span class="terminal-prompt"># 1. Install dependencies</span>
 <span class="terminal-cmd">npm install</span>
 
-<span class="terminal-prompt"># 2. Kiểm tra kiểu tĩnh TypeScript (Không build ra file)</span>
+<span class="terminal-prompt"># 2. Run TypeScript static typechecking (no emit)</span>
 <span class="terminal-cmd">npm run check</span>
 
-<span class="terminal-prompt"># 3. Biên dịch TypeScript sang JavaScript (Thư mục dist/)</span>
+<span class="terminal-prompt"># 3. Compile TypeScript to JavaScript (outputs under dist/)</span>
 <span class="terminal-cmd">npm run build</span>
 
-<span class="terminal-prompt"># 4. Kiểm tra lỗi Spawning và log với đường dẫn đặc biệt</span>
+<span class="terminal-prompt"># 4. Test safe spawning and logs against unicode/space paths</span>
 <span class="terminal-cmd">npm run test:path-torture</span>
 </div>
                 </div>
 
                 <div class="callout-box info">
-                    <h5 class="callout-title">Lưu ý về Lệnh chạy thử nghiệm</h5>
+                    <h5 class="callout-title">Note on Development Execution</h5>
                     <p class="callout-desc">
-                        Sau khi chạy biên dịch, bạn có thể gọi trực tiếp file CLI trong quá trình phát triển bằng lệnh:<br>
-                        <code class="code-badge">npm run dev:cli -- doctor</code> (Thay thế `doctor` bằng lệnh bạn muốn test).
+                        After building, you can invoke the CLI wrapper directly during development using:<br>
+                        <code class="code-badge">npm run dev:cli -- doctor</code> (Replace `doctor` with the CLI command you wish to test).
                     </p>
                 </div>
             </section>
@@ -173,9 +173,9 @@
             <div class="docs-footer-nav">
                 <div style="visibility: hidden;"></div>
                 <a href="cli.html" class="docs-nav-card next">
-                    <span class="docs-card-lbl">Trang tiếp theo</span>
+                    <span class="docs-card-lbl">Next Page</span>
                     <span class="docs-card-title">
-                        <span>Tham chiếu dòng lệnh CLI</span>
+                        <span>Command Line Reference</span>
                         <i class="ph ph-caret-right"></i>
                     </span>
                 </a>
@@ -183,7 +183,7 @@
 
             <!-- Footer -->
             <footer class="dossier-footer">
-                <p>&copy; 2026 WinNest Project. Bản quyền thuộc về Lê Hùng Quang Minh.</p>
+                <p>&copy; 2026 WinNest Project. Copyright belongs to Lê Hùng Quang Minh.</p>
                 <p class="mono">VER 0.1.0 · MPL-2.0</p>
             </footer>
 
