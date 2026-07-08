@@ -35,7 +35,16 @@ export async function detectMainExecutable(
   }
 
   const [best, second] = candidates;
-  if (best && best.score >= 70 && (!second || best.score - second.score >= 15)) {
+  // PRIMARY: recipe's first expectedExecutable (score >= 130) auto-selects unconditionally.
+  // This handles ties where multiple recipe executables have high scores.
+  const PRIMARY_RECIPE_SCORE = 130;
+  if (best && best.score >= PRIMARY_RECIPE_SCORE && best.reasons.includes("matches recipe primary expected executable")) {
+    await logger.info("selected main executable", { mode: "automatic-primary-recipe", candidate: best });
+    return best;
+  }
+  // SECONDARY: any very high-confidence single winner with a clear lead.
+  const HIGH_CONFIDENCE_SCORE = 90;
+  if (best && best.score >= HIGH_CONFIDENCE_SCORE && (!second || best.score - second.score >= 15)) {
     await logger.info("selected main executable", { mode: "automatic", candidate: best });
     return best;
   }

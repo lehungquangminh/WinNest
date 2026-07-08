@@ -134,9 +134,16 @@ async function scoreExecutable(
   const reasons: string[] = [];
   let score = 20;
 
-  if (matchesExpectedExecutable(name, expectedExecutableNames)) {
-    score += 90;
-    reasons.push("matches recipe expected executable");
+  const expectedIndex = indexOfExpectedExecutable(name, expectedExecutableNames);
+  if (expectedIndex >= 0) {
+    // First entry in recipe expectedExecutables gets a +20 priority bonus over lower entries.
+    // This ensures the canonical GUI launcher auto-selects without needing user input.
+    score += expectedIndex === 0 ? 110 : 90;
+    reasons.push(
+      expectedIndex === 0
+        ? "matches recipe primary expected executable"
+        : "matches recipe expected executable"
+    );
   }
 
   if (linuxPath.includes(`${sep}Program Files${sep}`)) {
@@ -204,14 +211,18 @@ async function scoreExecutable(
   };
 }
 
-function matchesExpectedExecutable(name: string, expectedExecutableNames: readonly string[]): boolean {
+function indexOfExpectedExecutable(name: string, expectedExecutableNames: readonly string[]): number {
   const lowerName = name.toLowerCase();
   const normalizedName = normalizeName(name);
 
-  return expectedExecutableNames.some((expected) => {
+  return expectedExecutableNames.findIndex((expected) => {
     const lowerExpected = expected.toLowerCase();
     return lowerName === lowerExpected || normalizedName === normalizeName(expected);
   });
+}
+
+function matchesExpectedExecutable(name: string, expectedExecutableNames: readonly string[]): boolean {
+  return indexOfExpectedExecutable(name, expectedExecutableNames) >= 0;
 }
 
 function matchesRegistryDisplayIcon(
