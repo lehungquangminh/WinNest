@@ -101,5 +101,10 @@ function flushPendingInstallPath(): void {
 function readInstallPath(args: readonly string[]): string | undefined {
   const index = args.indexOf("--install");
   const value = index >= 0 ? args[index + 1] : undefined;
-  return value && value.length > 0 ? value : undefined;
+  if (value && value.length > 0) {
+    return value;
+  }
+
+  const envValue = process.env["WINNEST_INSTALL_PATH"];
+  return envValue && envValue.length > 0 ? envValue : undefined;
 }

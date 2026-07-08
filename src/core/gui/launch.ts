@@ -25,7 +25,10 @@ export async function launchGui(options: GuiLaunchOptions = {}): Promise<void> {
   const result = await safeSpawnDetached(electronPath, args, {
     logger,
     cwd: projectRoot,
-    env: process.env,
+    env: {
+      ...process.env,
+      ...(options.installerPath ? { WINNEST_INSTALL_PATH: options.installerPath } : {})
+    },
     logFile: globalLogPath("gui-spawn.log")
   });
 
