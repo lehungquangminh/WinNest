@@ -74,6 +74,7 @@ mkdir -p \
 # ── Copy application files ────────────────────────────────────────────────────
 info "Copying dist/ …"
 cp -r dist/ "${STAGE}${INSTALL_ROOT}/dist"
+rm -rf "${STAGE}${INSTALL_ROOT}/dist/dev"
 
 info "Copying dist-renderer/ …"
 cp -r dist-renderer/ "${STAGE}${INSTALL_ROOT}/dist-renderer"

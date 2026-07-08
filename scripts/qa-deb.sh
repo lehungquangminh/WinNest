@@ -54,6 +54,7 @@ done
 forbidden_patterns=(
   '(^|/)node_modules(/|$)'
   '(^|/)\.git(/|$)'
+  '^./opt/winnest/dist/dev(/|$)'
   '^./src(/|$)'
   '^./tests(/|$)'
   'winnest-test-installers'
