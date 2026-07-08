@@ -84,13 +84,14 @@ export async function installApp(installerInputPath: string): Promise<ManagedApp
     });
     const runner = await detectSystemWine();
     const now = new Date().toISOString();
+    const displayName = recipe?.name ?? appName;
 
     state = "writing-metadata";
     await tracker.update(state, "running");
     let app: ManagedApp = {
       schemaVersion: 1,
       id: appId,
-      name: appName,
+      name: displayName,
       status: "installed",
       runner: "system-wine",
       runnerVersion: runner.version ?? "unknown",
@@ -107,7 +108,7 @@ export async function installApp(installerInputPath: string): Promise<ManagedApp
 
     state = "creating-desktop-entry";
     await tracker.update(state, "running");
-    const desktopEntryPath = await createDesktopEntry(app, logger);
+    const desktopEntryPath = await createDesktopEntry(app, logger, recipe ? { categories: recipe.categories } : {});
     app = { ...app, desktopEntryPath, updatedAt: new Date().toISOString() };
     await writeApp(app);
 

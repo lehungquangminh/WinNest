@@ -12,5 +12,6 @@
     "downloads": true
   },
   "notes": [],
-  "expectedExecutables": ["i_view64.exe", "i_view32.exe"]
+  "expectedExecutables": ["i_view64.exe", "i_view32.exe"],
+  "categories": ["Graphics", "Viewer"]
 }

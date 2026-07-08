@@ -38,7 +38,7 @@ export async function rescanApp(appId: string): Promise<void> {
       mainExe: selected.windowsPath,
       updatedAt: new Date().toISOString()
     };
-    const desktopEntryPath = await createDesktopEntry(updated, logger);
+    const desktopEntryPath = await createDesktopEntry(updated, logger, recipe ? { categories: recipe.categories } : {});
     await writeApp({ ...updated, desktopEntryPath });
     await logger.info("rescan finished", { appId: app.id, selected, desktopEntryPath });
 

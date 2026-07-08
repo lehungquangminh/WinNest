@@ -12,5 +12,6 @@
     "downloads": true
   },
   "notes": [],
-  "expectedExecutables": ["notepad++.exe"]
+  "expectedExecutables": ["notepad++.exe"],
+  "categories": ["Utility", "TextEditor", "Development"]
 }

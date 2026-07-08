@@ -12,5 +12,6 @@
     "downloads": true
   },
   "notes": [],
-  "expectedExecutables": ["7zFM.exe", "7zG.exe"]
+  "expectedExecutables": ["7zFM.exe", "7zG.exe"],
+  "categories": ["Utility", "Archiving"]
 }

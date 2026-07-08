@@ -14,5 +14,6 @@
   "notes": [
     "Network drive and shell integration behavior may differ from native Windows."
   ],
-  "expectedExecutables": ["WinSCP.exe"]
+  "expectedExecutables": ["WinSCP.exe"],
+  "categories": ["Network", "FileTransfer"]
 }

@@ -17,5 +17,6 @@
     "Voice and video calling may require microphone/camera integration.",
     "System tray behavior may depend on desktop environment."
   ],
-  "expectedExecutables": ["Zalo.exe"]
+  "expectedExecutables": ["Zalo.exe"],
+  "categories": ["Network", "Chat"]
 }
