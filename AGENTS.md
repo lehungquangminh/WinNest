@@ -11,7 +11,6 @@ WinNest is a TypeScript-only Linux CLI and future Electron desktop app for manag
 - `src/scanner/`: installed executable and shortcut detection.
 - `src/shared/`: typed errors, result objects, safe spawning, and shared utilities.
 - `src/logging/`: log path helpers and JSON-line logger.
-- `src/dev/`: development-only helpers such as path torture tests.
 - `tests/`: all automated tests should live here once added.
 
 Build output goes to `dist/`. Do not edit generated files.
@@ -29,6 +28,14 @@ Build output goes to `dist/`. Do not edit generated files.
 Use TypeScript only. Do not add Rust, Python, Go, C++, Tauri, or another backend language. Keep code explicit and boring. Use strict types, typed errors, and `Result<T>` where recovery is useful. Never build shell command strings; always call external tools with `spawn(command, args)`.
 
 Folder names provide context, so filenames should be short: `src/wine/runner.ts`, not `wine-runner.ts`.
+
+Keep folders domain-oriented and avoid flat piles of loosely related files. If a flow has multiple support files, group them under a domain folder with short names:
+
+- Good: `src/core/install/flow.ts`, `src/core/install/state.ts`, `src/core/install/diagnosis.ts`.
+- Good: `src/core/system/deps.ts`, `src/core/system/repair.ts`, `src/core/system/setup.ts`.
+- Bad: `src/core/install.ts`, `src/core/install-state.ts`, `src/core/install-diagnosis.ts` scattered together.
+
+CLI source follows the same rule: `src/cli/` contains entry/runtime/help primitives, while command handlers live in `src/cli/commands/` and are registered through a command registry. Do not grow a giant switch statement for every new command.
 
 ## Testing Guidelines
 
