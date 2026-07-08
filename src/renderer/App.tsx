@@ -13,6 +13,7 @@ export default function App(): React.JSX.Element {
   const [page, setPage] = useState<Page>("home");
   const [selectedAppId, setSelectedAppId] = useState<string | undefined>();
   const [handoffInstallerPath, setHandoffInstallerPath] = useState<string | undefined>();
+  const [handoffAppId, setHandoffAppId] = useState<string | undefined>();
   
   const [apps, setApps] = useState<ManagedApp[]>([]);
   const [doctor, setDoctor] = useState<DoctorReport | undefined>();
@@ -49,13 +50,22 @@ export default function App(): React.JSX.Element {
   }, [refresh]);
 
   useEffect(() => {
-    if (!window.winnest?.onInstallPath) {
+    if (!window.winnest?.onHandoffState) {
       return undefined;
     }
 
-    return window.winnest.onInstallPath((installerPath) => {
-      setHandoffInstallerPath(installerPath);
-      setPage("install");
+    return window.winnest.onHandoffState((state) => {
+      if (state.installerPath) {
+        setHandoffInstallerPath(state.installerPath);
+      }
+      if (state.appId) {
+        setHandoffAppId(state.appId);
+      }
+      if (state.page) {
+        setPage(state.page as Page);
+      } else {
+        setPage("install");
+      }
     });
   }, []);
 
@@ -127,7 +137,11 @@ export default function App(): React.JSX.Element {
         {page === "install" && (
           <Install 
             initialInstallerPath={handoffInstallerPath}
-            onClearInitialPath={() => setHandoffInstallerPath(undefined)}
+            initialAppId={handoffAppId}
+            onClearInitialPath={() => {
+              setHandoffInstallerPath(undefined);
+              setHandoffAppId(undefined);
+            }}
             onInstalled={async (appId) => {
               await refresh();
               setSelectedAppId(appId);

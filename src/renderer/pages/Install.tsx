@@ -8,6 +8,7 @@ import { InstallIcon, InfoIcon, TerminalIcon, CheckIcon, LoaderIcon, XIcon } fro
 
 type InstallProps = {
   initialInstallerPath: string | undefined;
+  initialAppId?: string | undefined;
   onClearInitialPath?: () => void;
   onInstalled: (appId: string) => void;
 };
@@ -25,11 +26,15 @@ export default function Install(props: InstallProps): React.JSX.Element {
   const pollTimer = useRef<number | undefined>(undefined);
 
   useEffect(() => {
-    if (props.initialInstallerPath) {
+    if (props.initialAppId) {
+      setActiveAppId(props.initialAppId);
+      startPolling(props.initialAppId);
+      props.onClearInitialPath?.();
+    } else if (props.initialInstallerPath) {
       setInstallerPath(props.initialInstallerPath);
       props.onClearInitialPath?.();
     }
-  }, [props.initialInstallerPath]);
+  }, [props.initialInstallerPath, props.initialAppId]);
 
   useEffect(() => {
     void refreshContext(installerPath);
