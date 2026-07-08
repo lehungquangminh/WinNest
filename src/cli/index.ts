@@ -25,6 +25,7 @@ Usage:
   winnest list
   winnest info <app-id>
   winnest repair <app-id>
+  winnest repair-system [--json]
   winnest reset <app-id>
   winnest rescan <app-id>
   winnest uninstall <app-id>
