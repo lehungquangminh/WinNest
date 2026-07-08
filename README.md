@@ -8,13 +8,33 @@
 
 By isolation and structured metadata management, WinNest bridges the gap between running Windows applications and keeping a clean, predictable Linux environment.
 
+> [!WARNING]
+> WinNest `v0.1.0-alpha` is early alpha software. It is usable for testing common installers, but it is not a compatibility guarantee for every Windows app.
+
+---
+
+## Quickstart
+
+Install the local alpha `.deb` package:
+
+```bash
+sudo apt install ./winnest_0.1.0_amd64.deb
+winnest doctor --verbose
+```
+
+Then right-click a Windows installer and choose **Open With → WinNest**.
+
+The original Windows installer opens through Wine. After the installer exits, WinNest scans the isolated prefix, writes app metadata, creates logs, and adds a Linux application-menu launcher.
+
+On KDE or other desktops that block direct executable double-clicks, use **Right-click → Open With → WinNest**. This is a desktop security policy, not a WinNest package failure.
+
 ---
 
 ## 🚀 Key Features
 
 *   **Isolated Prefixes**: Every application is installed in its own dedicated, isolated Wine prefix (located under `~/.local/share/winnest/apps/<app-id>`). This prevents registry conflicts, dependency clashes, and DLL interference between different Windows apps.
 *   **Shell-Safe Execution**: Security is paramount. WinNest completely avoids shell-string concatenation when invoking external tools (like Wine or system commands). It always executes commands with argument arrays to prevent shell injection vulnerabilities.
-*   **TypeScript-First Architecture**: Built entirely in TypeScript for strong type safety and maintainable codebase. The CLI/core logic acts as the single source of truth, designed to seamlessly interface with a future Electron-based desktop GUI via main-process IPC.
+*   **TypeScript-First Architecture**: Built entirely in TypeScript for strong type safety and maintainable codebase. The CLI/core logic acts as the single source of truth, and the Electron shell talks to it through main-process IPC.
 *   **Desktop & MIME Integration**: WinNest supports standard desktop registration, allowing you to double-click and open Windows files using your native file manager (e.g., Nautilus, Dolphin) via the lightweight `winnest-open` entry point.
 *   **Self-Contained Logs & Metadata**: View and manage application logs, installer backups, and configurations (`app.json`) directly within the app's isolated directory.
 
@@ -397,7 +417,7 @@ npm run build:deb -- --build
 ## Known MVP limitations
 
 *   Not every Windows app works under Wine.
-*   Wine must be installed separately for now.
+*   System Wine packages are required. The `.deb` and APT package metadata declare them; source-development installs may still need manual setup.
 *   Automatic system dependency installation currently supports Debian/Ubuntu/nonlaOS-like systems only.
 *   Some installers may hang or require manual clicks inside Wine dialogs.
 *   Some apps need extra dependencies, fonts, runtimes, or DLL overrides that WinNest does not install yet.
