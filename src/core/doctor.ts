@@ -75,6 +75,8 @@ export type DoctorReport = {
     cabextract?: string;
     sevenZip?: string;
     vulkaninfo?: string;
+    mimeHandlerDesktopEntry?: string;
+    mimeDefaults?: Record<string, string>;
   };
   hints: FixHint[];
   missingSystemDeps: SystemDependencyCode[];
@@ -135,6 +137,9 @@ export async function createDoctorReport(logger = new Logger(globalLogPath("doct
   const xdgDesktopMenu = await findExecutable("xdg-desktop-menu");
   const updateDesktopDatabase = await findExecutable("update-desktop-database");
   const updateMimeDatabase = await findExecutable("update-mime-database");
+  const mimeHandlerDesktopEntryPath = join(paths.applicationsDir, "winnest-open.desktop");
+  const mimeHandlerDesktopEntry = (await fileExists(mimeHandlerDesktopEntryPath)) ? mimeHandlerDesktopEntryPath : undefined;
+  const mimeDefaults = xdgMime ? await queryMimeDefaults(xdgMime) : {};
   const winbind = (await findExecutable("ntlm_auth")) ?? (await findExecutable("winbindd"));
   const cabextract = await findExecutable("cabextract");
   const sevenZip = (await findExecutable("7z")) ?? (await findExecutable("7zz"));
@@ -197,6 +202,8 @@ export async function createDoctorReport(logger = new Logger(globalLogPath("doct
     xdgDesktopMenu,
     updateDesktopDatabase,
     updateMimeDatabase,
+    mimeHandlerDesktopEntry,
+    mimeDefaults,
     winbind,
     cabextract,
     sevenZip,
@@ -278,6 +285,16 @@ function printDoctor(report: DoctorReport): void {
       label: "MIME packages dir",
       ok: report.system.mimePackagesWritable,
       value: report.system.mimePackagesWritable ? "writable" : "not writable"
+    },
+    {
+      label: "WinNest MIME handler",
+      ok: Boolean(report.tools.mimeHandlerDesktopEntry),
+      value: report.tools.mimeHandlerDesktopEntry ? `found ${report.tools.mimeHandlerDesktopEntry}` : "not registered"
+    },
+    {
+      label: "MIME defaults",
+      ok: mimeDefaultCount(report.tools.mimeDefaults) > 0,
+      value: `${mimeDefaultCount(report.tools.mimeDefaults)}/3 set to WinNest`
     }
   ];
   const optionalChecks: Check[] = [
@@ -329,6 +346,10 @@ function printVerboseDoctor(report: DoctorReport): void {
   console.log(`    xdgDesktopMenu: ${report.tools.xdgDesktopMenu ?? "missing"}`);
   console.log(`    updateDesktopDatabase: ${report.tools.updateDesktopDatabase ?? "missing"}`);
   console.log(`    updateMimeDatabase: ${report.tools.updateMimeDatabase ?? "missing"}`);
+  console.log(`    mimeHandlerDesktopEntry: ${report.tools.mimeHandlerDesktopEntry ?? "missing"}`);
+  for (const [mimeType, desktopEntry] of Object.entries(report.tools.mimeDefaults ?? {})) {
+    console.log(`    ${mimeType}: ${desktopEntry || "unset"}`);
+  }
   console.log("  Runtime:");
   console.log(`    PATH: ${process.env.PATH ?? ""}`);
   console.log(`    node: ${report.system.nodeVersion}`);
@@ -461,6 +482,30 @@ function isWine32Missing(stderr: string): boolean {
   return /wine32 is missing/i.test(stderr) || /syswow64[\\/]+ntdll\.dll/i.test(stderr);
 }
 
+async function queryMimeDefaults(xdgMimePath: string): Promise<Record<string, string>> {
+  const mimeTypes = [
+    "application/x-ms-dos-executable",
+    "application/x-msi",
+    "application/vnd.microsoft.portable-executable"
+  ];
+  const defaults: Record<string, string> = {};
+
+  for (const mimeType of mimeTypes) {
+    try {
+      const result = await runCommand(xdgMimePath, ["query", "default", mimeType], { timeoutMs: 5000 });
+      defaults[mimeType] = result.exitCode === 0 ? result.stdout.trim() : "";
+    } catch {
+      defaults[mimeType] = "";
+    }
+  }
+
+  return defaults;
+}
+
+function mimeDefaultCount(defaults: Record<string, string> | undefined): number {
+  return Object.values(defaults ?? {}).filter((value) => value === "winnest-open.desktop").length;
+}
+
 function emptyPrefixCheck(value: string): PrefixCheck {
   return {
     ok: false,
@@ -479,16 +524,41 @@ function optionalTools(tools: {
   xdgDesktopMenu: string | undefined;
   updateDesktopDatabase: string | undefined;
   updateMimeDatabase: string | undefined;
+  mimeHandlerDesktopEntry: string | undefined;
+  mimeDefaults: Record<string, string>;
   winbind: string | undefined;
   cabextract: string | undefined;
   sevenZip: string | undefined;
   vulkaninfo: string | undefined;
 }): DoctorReport["tools"] {
   const result: DoctorReport["tools"] = {};
-  for (const [key, value] of Object.entries(tools)) {
-    if (value) {
-      result[key as keyof DoctorReport["tools"]] = value;
-    }
+  if (tools.xdgMime) {
+    result.xdgMime = tools.xdgMime;
+  }
+  if (tools.xdgDesktopMenu) {
+    result.xdgDesktopMenu = tools.xdgDesktopMenu;
+  }
+  if (tools.updateDesktopDatabase) {
+    result.updateDesktopDatabase = tools.updateDesktopDatabase;
+  }
+  if (tools.updateMimeDatabase) {
+    result.updateMimeDatabase = tools.updateMimeDatabase;
+  }
+  if (tools.mimeHandlerDesktopEntry) {
+    result.mimeHandlerDesktopEntry = tools.mimeHandlerDesktopEntry;
+  }
+  result.mimeDefaults = tools.mimeDefaults;
+  if (tools.winbind) {
+    result.winbind = tools.winbind;
+  }
+  if (tools.cabextract) {
+    result.cabextract = tools.cabextract;
+  }
+  if (tools.sevenZip) {
+    result.sevenZip = tools.sevenZip;
+  }
+  if (tools.vulkaninfo) {
+    result.vulkaninfo = tools.vulkaninfo;
   }
   return result;
 }
