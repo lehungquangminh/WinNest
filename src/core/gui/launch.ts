@@ -9,7 +9,9 @@ import { safeSpawnDetached } from "@/shared/spawn.js";
 import { findExecutable } from "@/shared/which.js";
 
 export type GuiLaunchOptions = {
-  installerPath?: string;
+  installerPath?: string | undefined;
+  appId?: string | undefined;
+  page?: string | undefined;
 };
 
 export async function launchGui(options: GuiLaunchOptions = {}): Promise<void> {
@@ -17,7 +19,12 @@ export async function launchGui(options: GuiLaunchOptions = {}): Promise<void> {
   const projectRoot = fileURLToPath(new URL("../../../", import.meta.url));
   const mainPath = join(projectRoot, "dist", "main", "index.js");
   const electronPath = await resolveElectronPath(projectRoot);
-  const args = [mainPath, ...(options.installerPath ? ["--install", options.installerPath] : [])];
+  const args = [
+    mainPath,
+    ...(options.installerPath ? ["--install", options.installerPath] : []),
+    ...(options.appId ? ["--app-id", options.appId] : []),
+    ...(options.page ? ["--page", options.page] : [])
+  ];
 
   await assertReadable(mainPath, "Electron main process was not built. Run `npm run build:gui` first.");
   await logger.info("launching Electron GUI", { electronPath, args });
@@ -27,7 +34,9 @@ export async function launchGui(options: GuiLaunchOptions = {}): Promise<void> {
     cwd: projectRoot,
     env: {
       ...process.env,
-      ...(options.installerPath ? { WINNEST_INSTALL_PATH: options.installerPath } : {})
+      ...(options.installerPath ? { WINNEST_INSTALL_PATH: options.installerPath } : {}),
+      ...(options.appId ? { WINNEST_APP_ID: options.appId } : {}),
+      ...(options.page ? { WINNEST_PAGE: options.page } : {})
     },
     logFile: globalLogPath("gui-spawn.log")
   });

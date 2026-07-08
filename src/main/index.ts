@@ -2,11 +2,14 @@ import { app, BrowserWindow, Menu, nativeImage } from "electron";
 import { fileURLToPath } from "node:url";
 import { registerIpc } from "@/main/ipc.js";
 
-let mainWindow: BrowserWindow | undefined;
 let pendingInstallPath: string | undefined = readInstallPath(process.argv);
+let pendingAppId: string | undefined = readArg(process.argv, "--app-id");
+let pendingPage: string | undefined = readArg(process.argv, "--page");
 
 const gotSingleInstanceLock = app.requestSingleInstanceLock(
-  pendingInstallPath ? { installPath: pendingInstallPath } : undefined
+  pendingInstallPath || pendingAppId
+    ? { installPath: pendingInstallPath, appId: pendingAppId, page: pendingPage }
+    : undefined
 );
 if (!gotSingleInstanceLock) {
   app.quit();
@@ -63,13 +66,19 @@ app.whenReady().then(async () => {
 });
 
 app.on("second-instance", (_event, argv, _workingDirectory, additionalData) => {
-  const installPathFromData =
-    additionalData && typeof additionalData === "object"
-      ? (additionalData as Record<string, unknown>)["installPath"]
-      : undefined;
-  const installPath = typeof installPathFromData === "string" ? installPathFromData : readInstallPath(argv);
+  const data = additionalData && typeof additionalData === "object" ? (additionalData as Record<string, unknown>) : {};
+  const installPath = typeof data["installPath"] === "string" ? data["installPath"] : readInstallPath(argv);
+  const appId = typeof data["appId"] === "string" ? data["appId"] : readArg(argv, "--app-id");
+  const page = typeof data["page"] === "string" ? data["page"] : readArg(argv, "--page");
+
   if (installPath) {
     pendingInstallPath = installPath;
+  }
+  if (appId) {
+    pendingAppId = appId;
+  }
+  if (page) {
+    pendingPage = page;
   }
 
   if (mainWindow) {
@@ -89,13 +98,23 @@ app.on("window-all-closed", () => {
   }
 });
 
+let mainWindow: BrowserWindow | undefined;
+
 function flushPendingInstallPath(): void {
-  if (!mainWindow || !pendingInstallPath) {
+  if (!mainWindow) {
     return;
   }
 
-  mainWindow.webContents.send("winnest:install-path", pendingInstallPath);
-  pendingInstallPath = undefined;
+  if (pendingInstallPath || pendingAppId || pendingPage) {
+    mainWindow.webContents.send("winnest:handoff-state", {
+      installerPath: pendingInstallPath,
+      appId: pendingAppId,
+      page: pendingPage
+    });
+    pendingInstallPath = undefined;
+    pendingAppId = undefined;
+    pendingPage = undefined;
+  }
 }
 
 function readInstallPath(args: readonly string[]): string | undefined {
@@ -106,5 +125,16 @@ function readInstallPath(args: readonly string[]): string | undefined {
   }
 
   const envValue = process.env["WINNEST_INSTALL_PATH"];
+  return envValue && envValue.length > 0 ? envValue : undefined;
+}
+
+function readArg(args: readonly string[], flag: string): string | undefined {
+  const index = args.indexOf(flag);
+  const value = index >= 0 ? args[index + 1] : undefined;
+  if (value && value.length > 0) {
+    return value;
+  }
+  const envName = flag.replace(/^--/, "WINNEST_").toUpperCase().replace(/-/g, "_");
+  const envValue = process.env[envName];
   return envValue && envValue.length > 0 ? envValue : undefined;
 }
