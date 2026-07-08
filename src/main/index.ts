@@ -1,5 +1,5 @@
 import { app, BrowserWindow, Menu, nativeImage } from "electron";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { registerIpc } from "@/main/ipc.js";
 
 let pendingInstallPath: string | undefined = readInstallPath(process.argv);
@@ -37,6 +37,9 @@ async function createWindow(): Promise<void> {
   mainWindow.webContents.on("console-message", (event, level, message, line, sourceId) => {
     console.log(`[RENDERER CONSOLE] [Level:${level}] ${message} (Source:${sourceId}:${line})`);
   });
+  mainWindow.webContents.on("did-fail-load", (_event, errorCode, errorDescription, validatedUrl) => {
+    console.error(`[RENDERER LOAD FAILED] ${errorCode} ${errorDescription} ${validatedUrl}`);
+  });
 
   mainWindow.webContents.on("did-finish-load", () => {
     flushPendingInstallPath();
@@ -50,7 +53,7 @@ async function createWindow(): Promise<void> {
   }
 
   const rendererHtml = fileURLToPath(new URL("../../dist-renderer/index.html", import.meta.url));
-  await mainWindow.loadFile(rendererHtml);
+  await mainWindow.loadURL(pathToFileURL(rendererHtml).toString());
 }
 
 app.whenReady().then(async () => {

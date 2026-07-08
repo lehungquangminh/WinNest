@@ -4,6 +4,7 @@ import Install from "@/renderer/pages/Install.js";
 import Detail from "@/renderer/pages/Detail.js";
 import Settings from "@/renderer/pages/Settings.js";
 import { HomeIcon, InstallIcon, SettingsIcon, WineIcon, CheckIcon } from "@/renderer/components/Icons.js";
+import { getInitialLanguage, translations, type Language } from "@/renderer/i18n.js";
 import type { ManagedApp } from "@/core/app.js";
 import type { DoctorReport } from "@/core/doctor.js";
 
@@ -11,6 +12,7 @@ export type Page = "home" | "install" | "detail" | "settings";
 
 export default function App(): React.JSX.Element {
   const [page, setPage] = useState<Page>("home");
+  const [language, setLanguageState] = useState<Language>(() => getInitialLanguage());
   const [selectedAppId, setSelectedAppId] = useState<string | undefined>();
   const [handoffInstallerPath, setHandoffInstallerPath] = useState<string | undefined>();
   const [handoffAppId, setHandoffAppId] = useState<string | undefined>();
@@ -19,6 +21,12 @@ export default function App(): React.JSX.Element {
   const [doctor, setDoctor] = useState<DoctorReport | undefined>();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | undefined>();
+  const t = translations[language];
+
+  function setLanguage(nextLanguage: Language): void {
+    setLanguageState(nextLanguage);
+    window.localStorage.setItem("winnest-language", nextLanguage);
+  }
 
   const refresh = useCallback(async () => {
     setIsRefreshing(true);
@@ -96,26 +104,30 @@ export default function App(): React.JSX.Element {
             onClick={() => setPage("home")}
           >
             <HomeIcon size={16} />
-            <span>Home</span>
+            <span>{t.nav.home}</span>
           </button>
           <button 
             className={`nav-item ${page === "install" ? "active" : ""}`} 
             onClick={() => setPage("install")}
           >
             <InstallIcon size={16} />
-            <span>Install App</span>
+            <span>{t.nav.install}</span>
           </button>
           <button 
             className={`nav-item ${page === "settings" ? "active" : ""}`} 
             onClick={() => setPage("settings")}
           >
             <SettingsIcon size={16} />
-            <span>Settings</span>
+            <span>{t.nav.settings}</span>
           </button>
         </nav>
+        <div className="language-switch" aria-label="Language">
+          <button className={language === "vi" ? "active" : ""} onClick={() => setLanguage("vi")}>VN</button>
+          <button className={language === "en" ? "active" : ""} onClick={() => setLanguage("en")}>EN</button>
+        </div>
         <div className="sidebar-footer">
           <CheckIcon size={12} className="status-icon-success" />
-          <span className="footer-text">Wine Runner Active</span>
+          <span className="footer-text">{t.nav.wineActive}</span>
         </div>
       </aside>
       <main className="content">
@@ -138,6 +150,7 @@ export default function App(): React.JSX.Element {
           <Install 
             initialInstallerPath={handoffInstallerPath}
             initialAppId={handoffAppId}
+            text={t.install}
             onClearInitialPath={() => {
               setHandoffInstallerPath(undefined);
               setHandoffAppId(undefined);
@@ -161,6 +174,9 @@ export default function App(): React.JSX.Element {
             report={doctor} 
             error={error} 
             isLoading={isRefreshing} 
+            language={language}
+            onLanguageChange={setLanguage}
+            text={t.settings}
             onRefresh={refresh}
           />
         )}

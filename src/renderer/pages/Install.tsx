@@ -5,12 +5,14 @@ import type { InstallCandidateList } from "@/core/install/candidate.js";
 import type { InstallStateFile } from "@/core/install/state.js";
 import type { AppRecipe } from "@/recipes/model.js";
 import { InstallIcon, InfoIcon, TerminalIcon, CheckIcon, LoaderIcon, XIcon, FolderIcon } from "@/renderer/components/Icons.js";
+import type { Translation } from "@/renderer/i18n.js";
 
 type InstallProps = {
   initialInstallerPath: string | undefined;
   initialAppId?: string | undefined;
   onClearInitialPath?: () => void;
   onInstalled: (appId: string) => void;
+  text: Translation["install"];
 };
 
 export default function Install(props: InstallProps): React.JSX.Element {
@@ -175,12 +177,12 @@ export default function Install(props: InstallProps): React.JSX.Element {
 
   function getStatusLabel() {
     switch (status) {
-      case "idle": return "Ready to install";
-      case "installing": return "Installing software...";
-      case "selecting-launcher": return "Choose launch executable";
-      case "done": return "Installation complete";
-      case "failed": return "Installation failed";
-      case "missing installer path": return "Path is required";
+      case "idle": return props.text.statusIdle;
+      case "installing": return props.text.statusInstalling;
+      case "selecting-launcher": return props.text.statusSelecting;
+      case "done": return props.text.statusDone;
+      case "failed": return props.text.statusFailed;
+      case "missing installer path": return props.text.statusMissingPath;
       default: return status;
     }
   }
@@ -189,8 +191,8 @@ export default function Install(props: InstallProps): React.JSX.Element {
     <section className="page animate-fade-in">
       <header className="page-header">
         <div>
-          <h1 className="page-title">Install Application</h1>
-          <p className="page-subtitle">Deploy a new Windows program inside an isolated Wine prefix sandbox.</p>
+          <h1 className="page-title">{props.text.title}</h1>
+          <p className="page-subtitle">{props.text.subtitle}</p>
         </div>
         <button 
           className="btn btn-primary" 
@@ -198,17 +200,17 @@ export default function Install(props: InstallProps): React.JSX.Element {
           disabled={status === "installing" || !installerPath.trim()}
         >
           <InstallIcon size={14} />
-          <span>{status === "installing" ? "Installing..." : "Install Now"}</span>
+          <span>{status === "installing" ? props.text.actionRunning : props.text.actionIdle}</span>
         </button>
       </header>
 
       <div className="grid-one-two">
         <div className="panel install-config-panel">
-          <h3 className="panel-title">Installer Configuration</h3>
+          <h3 className="panel-title">{props.text.configTitle}</h3>
           
           <div className="form-group">
             <label className="field-label" htmlFor="installer-input">
-              Installer Path
+              {props.text.pathLabel}
             </label>
             <div className="path-picker-row">
               <input 
@@ -216,7 +218,7 @@ export default function Install(props: InstallProps): React.JSX.Element {
                 className="text-input"
                 value={installerPath} 
                 onChange={(event) => setInstallerPath(event.target.value)} 
-                placeholder="/absolute/path/to/installer.exe" 
+                placeholder={props.text.pathPlaceholder} 
                 disabled={status === "installing"}
               />
               <button
@@ -226,41 +228,41 @@ export default function Install(props: InstallProps): React.JSX.Element {
                 disabled={status === "installing"}
               >
                 <FolderIcon size={14} />
-                <span>Browse</span>
+                <span>{props.text.browse}</span>
               </button>
             </div>
-            <span className="field-help">Choose a Windows setup `.exe` or `.msi` file from your Downloads folder or another location.</span>
+            <span className="field-help">{props.text.pathHelp}</span>
           </div>
 
           <div className="install-info-box">
             <InfoIcon size={16} />
             <div className="info-text">
-              <strong>Selected installer</strong>
-              <span>{installerPath.trim() || "No installer selected yet."}</span>
+              <strong>{props.text.selectedInstaller}</strong>
+              <span>{installerPath.trim() || props.text.noInstaller}</span>
             </div>
           </div>
 
           <div className="install-info-box">
             <InfoIcon size={16} />
             <div className="info-text">
-              <strong>Matched recipe</strong>
-              <span>{recipe ? recipe.name : "No recipe matched yet."}</span>
+              <strong>{props.text.matchedRecipe}</strong>
+              <span>{recipe ? recipe.name : props.text.noRecipe}</span>
               {recipe && recipe.expectedExecutables.length > 0 && (
-                <span>Expected executable: {recipe.expectedExecutables.join(", ")}</span>
+                <span>{props.text.expectedExecutable}: {recipe.expectedExecutables.join(", ")}</span>
               )}
               {recipe && recipe.notes.length > 0 && <span>{recipe.notes.join(" ")}</span>}
-              {recipe?.permissions.microphone && <span>Permission hint: microphone may be needed.</span>}
-              {recipe?.permissions.camera && <span>Permission hint: camera may be needed.</span>}
+              {recipe?.permissions.microphone && <span>{props.text.microphoneHint}</span>}
+              {recipe?.permissions.camera && <span>{props.text.cameraHint}</span>}
             </div>
           </div>
 
           <div className="install-info-box">
             <InfoIcon size={16} />
             <div className="info-text">
-              <strong>System status</strong>
-              <span>{doctor?.ok ? "Wine ready" : "Wine needs attention"}</span>
-              {installState && <span>Step: {installState.currentStep} / {installState.status}</span>}
-              {activeAppId && <span>App ID: {activeAppId}</span>}
+              <strong>{props.text.systemStatus}</strong>
+              <span>{doctor?.ok ? props.text.wineReady : props.text.wineAttention}</span>
+              {installState && <span>{props.text.step}: {installState.currentStep} / {installState.status}</span>}
+              {activeAppId && <span>{props.text.appId}: {activeAppId}</span>}
             </div>
           </div>
 
@@ -277,7 +279,7 @@ export default function Install(props: InstallProps): React.JSX.Element {
 
           {candidates && candidates.candidates.length > 0 && (
             <div className="candidate-list">
-              <h3 className="panel-title">Choose Launch Target</h3>
+              <h3 className="panel-title">{props.text.chooseLaunchTarget}</h3>
               {candidates.candidates.map((candidate) => (
                 <button
                   key={candidate.windowsPath}
@@ -286,7 +288,7 @@ export default function Install(props: InstallProps): React.JSX.Element {
                   onClick={() => void selectCandidate(candidate.windowsPath)}
                 >
                   <span className="candidate-path">{candidate.windowsPath}</span>
-                  <span className="candidate-meta">Score {candidate.score} · {candidate.reasons.join(", ")}</span>
+                  <span className="candidate-meta">{props.text.score} {candidate.score} · {candidate.reasons.join(", ")}</span>
                 </button>
               ))}
             </div>
@@ -301,15 +303,15 @@ export default function Install(props: InstallProps): React.JSX.Element {
                 disabled={status === "installing"} 
               />
               <span className="checkbox-custom"></span>
-              <span className="checkbox-label">Create desktop shortcut launcher</span>
+              <span className="checkbox-label">{props.text.desktopIcon}</span>
             </label>
           </div>
 
           <div className="install-info-box">
             <InfoIcon size={16} />
             <div className="info-text">
-              <strong>Isolated Wine Prefix</strong>
-              <span>WinNest generates a clean, dedicated prefix sandbox for each application to prevent DLL conflicts.</span>
+              <strong>{props.text.prefixTitle}</strong>
+              <span>{props.text.prefixText}</span>
             </div>
           </div>
         </div>
@@ -318,7 +320,7 @@ export default function Install(props: InstallProps): React.JSX.Element {
           <div className="console-header">
             <div className="console-title-group">
               <TerminalIcon size={14} className="console-icon" />
-              <span className="console-title">Installation Console Logs</span>
+              <span className="console-title">{props.text.consoleTitle}</span>
             </div>
             <div className="console-status-group">
               {status === "installing" && <LoaderIcon size={12} className="spin status-icon-warning" />}
@@ -330,7 +332,7 @@ export default function Install(props: InstallProps): React.JSX.Element {
             </div>
           </div>
           <div className="console-body">
-            <pre className="log">{log.join("\n") || "Console idle. Awaiting installer launch..."}</pre>
+            <pre className="log">{log.join("\n") || props.text.consoleIdle}</pre>
           </div>
         </div>
       </div>

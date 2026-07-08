@@ -162,6 +162,35 @@ body {
   opacity: 1;
 }
 
+.language-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  margin-top: 16px;
+  border: 1px solid var(--border-muted);
+  border-radius: var(--radius-md);
+  background: var(--bg-primary);
+}
+
+.language-switch button,
+.segmented-control button {
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 8px;
+  cursor: pointer;
+}
+
+.language-switch button.active,
+.segmented-control button.active {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
 .sidebar-footer {
   display: flex;
   align-items: center;
@@ -725,6 +754,11 @@ body {
   color: var(--text-primary);
 }
 
+.btn-icon-action:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 /* Copy Tooltip */
 .copy-tooltip {
   font-size: 9px;
@@ -773,6 +807,94 @@ body {
   font-size: 11px;
   color: var(--text-secondary);
   line-height: 1.4;
+}
+
+/* Settings */
+.settings-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.settings-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.settings-panel .panel-title {
+  margin-bottom: 0;
+}
+
+.settings-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.settings-panel-header svg {
+  color: var(--text-secondary);
+}
+
+.settings-description,
+.setting-hint {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.setting-row.compact {
+  padding: 10px 0;
+}
+
+.setting-row:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.setting-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.segmented-control {
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  min-width: 96px;
+  padding: 4px;
+  border: 1px solid var(--border-muted);
+  border-radius: var(--radius-md);
+  background: var(--bg-input);
+}
+
+.settings-status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.settings-status-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--border-muted);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 /* Two Column Installer Layout */
