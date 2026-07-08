@@ -1,0 +1,25 @@
+Package: winnest
+Version: 0.1.0
+Section: utils
+Priority: optional
+Architecture: amd64
+Maintainer: Lê Hùng Quang Minh <lhquangmink@gmail.com>
+Depends: nodejs (>= 20), wine, winbind, cabextract, xdg-utils
+Recommends: wine32:i386 | wine32, p7zip-full, libnotify-bin
+Description: Wine-based Windows app manager for Linux
+ WinNest lets users install Windows applications through Wine by opening
+ Windows installers directly from the Linux desktop.
+ .
+ Right-click a .exe or .msi file, choose "Open With WinNest", and the
+ original Windows installer appears through Wine. WinNest silently creates
+ an isolated Wine prefix, manages metadata, logs, launchers, and repair
+ diagnostics in the background.
+ .
+ Features:
+  - Isolated Wine prefix per application (no cross-app conflicts)
+  - Auto-detection of main executable after install
+  - Linux start-menu launchers for installed Windows apps
+  - Recipe system for known apps (7-Zip, Notepad++, WinSCP, IrfanView)
+  - MIME/Open With desktop integration
+  - Doctor diagnostics and system repair guidance
+  - Shell-safe argument passing (no shell injection risk)

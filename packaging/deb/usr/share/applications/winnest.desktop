@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=WinNest
+GenericName=Windows App Manager
+Comment=Install and run Windows applications on Linux with Wine
+Exec=winnest
+Icon=winnest
+Categories=Utility;System;
+Terminal=false
+StartupNotify=true
+Keywords=Wine;Windows;installer;apps;

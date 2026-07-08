@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -e
+# prerm: runs before package files are removed.
+# Nothing to clean up at this stage.
+# NOTE: Do NOT delete ~/.local/share/winnest/ — that is user data.
+exit 0

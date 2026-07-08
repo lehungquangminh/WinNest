@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=WinNest Windows Installer Handler
+Comment=Open Windows installers transparently with WinNest
+Exec=winnest-open %f
+Icon=winnest
+MimeType=application/x-ms-dos-executable;application/x-msi;application/vnd.microsoft.portable-executable;
+NoDisplay=true
+Terminal=false
+StartupNotify=true
