@@ -249,6 +249,91 @@ npm run start:gui
 
 ---
 
+## 📦 Installation (Debian / Ubuntu)
+
+### Install from .deb
+
+```bash
+sudo apt install ./release/winnest_0.1.0_amd64.deb
+```
+
+`apt` automatically installs required dependencies:
+- `nodejs` (≥ 20)
+- `wine`, `winbind`, `cabextract`, `xdg-utils`
+
+Recommended (for 32-bit app support):
+
+```bash
+sudo dpkg --add-architecture i386
+sudo apt update
+sudo apt install wine32:i386 p7zip-full libnotify-bin
+```
+
+### Verify installation
+
+```bash
+# Commands must be on PATH
+command -v winnest
+command -v winnest-open
+
+# Installed at
+ls /usr/bin/winnest /usr/bin/winnest-open
+
+# Application files
+ls /opt/winnest/
+
+# Run diagnostics
+winnest doctor --verbose
+
+# Check MIME handler
+xdg-mime query default application/x-ms-dos-executable
+xdg-mime query default application/x-msi
+xdg-mime query default application/vnd.microsoft.portable-executable
+```
+
+### Using Open With WinNest after install
+
+After installing the package:
+
+1. Right-click any `.exe` or `.msi` file in your file manager
+2. Select **Open With → WinNest Windows Installer Handler**
+3. The actual Windows installer appears through Wine immediately
+4. After the installer finishes, WinNest creates a Linux start-menu entry
+
+No `dev-install`, `npm link`, or manual `PATH` edits are needed after package installation.
+
+### Uninstalling
+
+```bash
+sudo apt remove winnest
+```
+
+Your installed Windows apps in `~/.local/share/winnest/` are **never deleted** by package removal. Only the `/usr/bin/winnest`, `/usr/bin/winnest-open`, and `/opt/winnest/` package files are removed.
+
+To also remove all your installed Windows apps and WinNest data:
+
+```bash
+rm -rf ~/.local/share/winnest
+```
+
+### Building the package yourself
+
+```bash
+git clone git@github.com:lehungquangminh/WinNest.git
+cd WinNest
+npm install
+npm run build:deb
+# Output: release/winnest_0.1.0_amd64.deb
+```
+
+To rebuild after source changes:
+
+```bash
+npm run build:deb -- --build
+```
+
+---
+
 ## 🛠️ Development & Building
 
 ### Prerequisites
