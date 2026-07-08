@@ -84,11 +84,21 @@ cp -r recipes/ "${STAGE}${INSTALL_ROOT}/recipes"
 info "Copying pages/ (web docs assets) …"
 cp -r pages/ "${STAGE}${INSTALL_ROOT}/pages"
 
-# NOTE: node_modules are NOT copied.
-# The CLI (dist/cli/) uses only Node.js built-in modules at runtime (node:fs, node:path, etc.)
-# The Electron GUI renderer (dist-renderer/) is a pre-bundled Vite build — no npm runtime deps.
-# The Electron main process (dist/main/) is bundled via tsc and uses only built-ins.
-# Therefore no node_modules directory is needed in the installed package.
+info "Copying Electron runtime …"
+ELECTRON_DIST="${PROJECT_ROOT}/node_modules/electron/dist"
+if [[ ! -x "${ELECTRON_DIST}/electron" ]]; then
+  info "Electron binary not present yet; asking electron package to resolve/download it …"
+  node -e "require('electron')" >/dev/null
+fi
+if [[ ! -x "${ELECTRON_DIST}/electron" ]]; then
+  fail "Electron runtime missing at node_modules/electron/dist/electron. Run npm install first."
+fi
+cp -r "${ELECTRON_DIST}" "${STAGE}${INSTALL_ROOT}/electron"
+
+# NOTE: node_modules are NOT copied wholesale.
+# The renderer is bundled by Vite and the CLI uses Node.js built-ins at runtime.
+# The packaged desktop GUI still needs the Electron runtime binary, so only
+# node_modules/electron/dist is copied into /opt/winnest/electron.
 
 # ── Wrapper scripts ───────────────────────────────────────────────────────────
 info "Writing /usr/bin/winnest …"
@@ -157,6 +167,11 @@ find "${STAGE}${INSTALL_ROOT}" -type d -exec chmod 755 {} +
 # Make the JS CLI entrypoints executable
 chmod 755 "${STAGE}${INSTALL_ROOT}/dist/cli/index.js" \
            "${STAGE}${INSTALL_ROOT}/dist/cli/open.js" || true
+chmod 755 "${STAGE}${INSTALL_ROOT}/electron/electron" \
+           "${STAGE}${INSTALL_ROOT}/electron/chrome_crashpad_handler" || true
+if [[ -f "${STAGE}${INSTALL_ROOT}/electron/chrome-sandbox" ]]; then
+  chmod 4755 "${STAGE}${INSTALL_ROOT}/electron/chrome-sandbox" || true
+fi
 
 # ── Calculate installed size ──────────────────────────────────────────────────
 INSTALLED_SIZE_KB="$(du -sk "${STAGE}" | cut -f1)"

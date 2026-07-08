@@ -52,12 +52,20 @@ async function resolveElectronPath(projectRoot: string): Promise<string> {
     return localElectron;
   }
 
+  const packagedElectron = join(projectRoot, "electron", "electron");
+  if (await canExecute(packagedElectron)) {
+    return packagedElectron;
+  }
+
   const globalElectron = await findExecutable("electron");
   if (globalElectron) {
     return globalElectron;
   }
 
-  throw new WinNestError("ELECTRON_NOT_FOUND", "Electron was not found. Run `npm install` first.");
+  throw new WinNestError(
+    "ELECTRON_NOT_FOUND",
+    "Electron runtime was not found. Rebuild the package with `npm run build:deb -- --build` or reinstall WinNest."
+  );
 }
 
 async function assertReadable(path: string, message: string): Promise<void> {
