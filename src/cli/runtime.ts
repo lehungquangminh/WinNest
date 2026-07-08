@@ -5,6 +5,7 @@ import { printAppInfo } from "@/core/info.js";
 import { runApp } from "@/core/run.js";
 import { repairApp } from "@/core/repair.js";
 import { repairSystem } from "@/core/repair-system.js";
+import { installSystemDeps } from "@/core/install-system-deps.js";
 import { resetApp } from "@/core/reset.js";
 import { rescanApp } from "@/core/rescan.js";
 import { setupWine } from "@/core/setup-wine.js";
@@ -45,6 +46,9 @@ export async function main(args: readonly string[]): Promise<void> {
       return;
     case "repair-system":
       await repairSystem({ json: args.includes("--json") });
+      return;
+    case "install-system-deps":
+      await installSystemDeps();
       return;
     case "reset":
       await resetApp(requiredArg(command, firstArg, "app-id"));

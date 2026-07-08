@@ -19,12 +19,20 @@ sudo apt update
 sudo apt install winetricks cabextract p7zip-full mesa-vulkan-drivers mesa-vulkan-drivers:i386
 ```
 
-WinNest does not install these packages automatically in the MVP. Use the diagnostics below to print distro-specific commands, then run the commands yourself:
+Use the diagnostics below to print distro-specific commands:
 
 ```bash
 winnest doctor --fix-hints
 winnest repair-system
 ```
+
+On Debian/Ubuntu/nonlaOS-like systems, WinNest can also run the real package commands:
+
+```bash
+winnest install-system-deps
+```
+
+If sudo asks for a password, type it in the terminal. WinNest never reads or stores it.
 
 On Debian, Ubuntu, and Ubuntu-compatible nonlaOS systems, start with the distro packages above. If the distro Wine is too old, follow the official WineHQ download instructions for Debian/Ubuntu: https://gitlab.winehq.org/wine/wine/-/wikis/Download
 
@@ -179,4 +187,4 @@ For failed installs, inspect logs first, then remove the app folder only if it i
 
 Never recursively delete arbitrary paths.
 
-Known MVP limitation: WinNest diagnoses missing system dependencies and prints commands, but it does not run `sudo apt install` automatically yet.
+Known MVP limitation: automatic system dependency installation currently supports Debian/Ubuntu/nonlaOS-like systems only.

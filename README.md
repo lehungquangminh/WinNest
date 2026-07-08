@@ -49,16 +49,17 @@ WinNest exposes a clean CLI to manage your Windows software catalog.
 | `winnest info <app-id>` | Retrieve detailed metadata, path configurations, and log locations for an app. |
 | `winnest repair <app-id>` | Repair broken prefix symlinks, desktop launchers, or configuration files. |
 | `winnest repair-system` | Print system dependency issues and distro-specific repair commands. |
+| `winnest install-system-deps` | Run real system package commands for Wine 32-bit support on Debian/Ubuntu-like systems. |
 | `winnest reset <app-id>` | Reset the application prefix configuration and database entries to defaults. |
 | `winnest uninstall <app-id>` | Completely remove the application, its Wine prefix, logs, and shortcuts. |
 | `winnest register-mime` | Register file manager MIME-type associations for the desktop. |
-| `winnest setup-wine` | Compatibility alias that prints Wine setup guidance. |
+| `winnest setup-wine` | Compatibility alias for `winnest install-system-deps`. |
 
 > [!NOTE]
 > `winnest-open <file-path>` is a dedicated fast-path helper program designed specifically for system file managers to open files using WinNest MIME types without loading the full CLI overhead.
 
 > [!IMPORTANT]
-> WinNest does not install system packages automatically in this MVP. Use `winnest doctor --fix-hints` or `winnest repair-system` to print commands, then run them yourself.
+> `winnest install-system-deps` and `winnest setup-wine` run real package commands on Debian/Ubuntu-like systems. If sudo asks for a password, type it in the terminal. WinNest never reads or stores sudo passwords.
 
 ## Dependency Repair Flow
 
@@ -75,6 +76,7 @@ Useful commands:
 winnest doctor --fix-hints
 winnest doctor --json
 winnest repair-system
+winnest install-system-deps
 winnest repair <app-id>
 ```
 
@@ -137,7 +139,7 @@ winnest run <app-id>
 
 *   Not every Windows app works under Wine.
 *   Wine must be installed separately for now.
-*   WinNest prints system dependency fix commands but does not run `sudo apt install` automatically yet.
+*   Automatic system dependency installation currently supports Debian/Ubuntu/nonlaOS-like systems only.
 *   Some installers may hang or require manual clicks inside Wine dialogs.
 *   Some apps need extra dependencies, fonts, runtimes, or DLL overrides that WinNest does not install yet.
 *   The executable scanner can still choose the wrong `.exe`; use `winnest rescan <app-id>` to correct it.

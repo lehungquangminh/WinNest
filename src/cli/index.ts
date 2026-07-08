@@ -26,6 +26,7 @@ Usage:
   winnest info <app-id>
   winnest repair <app-id>
   winnest repair-system [--json]
+  winnest install-system-deps
   winnest reset <app-id>
   winnest rescan <app-id>
   winnest uninstall <app-id>
