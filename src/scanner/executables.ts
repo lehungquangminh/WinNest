@@ -33,6 +33,7 @@ export type ExecutableScanOptions = {
   logger?: Logger;
   referenceTimeMs?: number;
   registryHints?: RegistryUninstallHint[];
+  expectedExecutableNames?: string[];
 };
 
 export async function scanExecutables(
@@ -55,7 +56,16 @@ export async function scanExecutables(
       }
 
       exeFilesFound += 1;
-      candidates.push(await scoreExecutable(prefixPath, path, appHint, options.referenceTimeMs, options.registryHints ?? []));
+      candidates.push(
+        await scoreExecutable(
+          prefixPath,
+          path,
+          appHint,
+          options.referenceTimeMs,
+          options.registryHints ?? [],
+          options.expectedExecutableNames ?? []
+        )
+      );
     });
   }
 
@@ -71,7 +81,8 @@ export async function scanExecutables(
       reasons: candidate.reasons,
       sizeBytes: candidate.sizeBytes,
       modifiedAt: candidate.modifiedAt
-    }))
+    })),
+    expectedExecutableNames: options.expectedExecutableNames ?? []
   });
 
   return sorted;
@@ -110,7 +121,8 @@ async function scoreExecutable(
   linuxPath: string,
   appHint: string,
   referenceTimeMs: number | undefined,
-  registryHints: readonly RegistryUninstallHint[]
+  registryHints: readonly RegistryUninstallHint[],
+  expectedExecutableNames: readonly string[]
 ): Promise<ExecutableCandidate> {
   const info = await stat(linuxPath);
   const name = basename(linuxPath);
@@ -121,6 +133,11 @@ async function scoreExecutable(
   const normalizedFolders = relativeFolders.map((part) => normalizeName(part)).filter((part) => part.length > 0);
   const reasons: string[] = [];
   let score = 20;
+
+  if (matchesExpectedExecutable(name, expectedExecutableNames)) {
+    score += 90;
+    reasons.push("matches recipe expected executable");
+  }
 
   if (linuxPath.includes(`${sep}Program Files${sep}`)) {
     score += 15;
@@ -185,6 +202,16 @@ async function scoreExecutable(
     sizeBytes: info.size,
     modifiedAt: info.mtime.toISOString()
   };
+}
+
+function matchesExpectedExecutable(name: string, expectedExecutableNames: readonly string[]): boolean {
+  const lowerName = name.toLowerCase();
+  const normalizedName = normalizeName(name);
+
+  return expectedExecutableNames.some((expected) => {
+    const lowerExpected = expected.toLowerCase();
+    return lowerName === lowerExpected || normalizedName === normalizeName(expected);
+  });
 }
 
 function matchesRegistryDisplayIcon(

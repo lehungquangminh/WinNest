@@ -10,14 +10,16 @@ export async function detectMainExecutable(
   prefixPath: string,
   appHint: string,
   logger: Logger,
-  options: { onSelectionRequired?: () => Promise<void>; referenceTimeMs?: number } = {}
+  options: { onSelectionRequired?: () => Promise<void>; referenceTimeMs?: number; expectedExecutableNames?: string[] } = {}
 ): Promise<ExecutableCandidate> {
   await scanShortcutFiles(prefixPath, logger);
   const registryHints = await scanRegistryUninstallEntries(prefixPath, logger);
-  const scanOptions =
-    options.referenceTimeMs === undefined
-      ? { logger, registryHints }
-      : { logger, referenceTimeMs: options.referenceTimeMs, registryHints };
+  const scanOptions = {
+    logger,
+    registryHints,
+    ...(options.referenceTimeMs === undefined ? {} : { referenceTimeMs: options.referenceTimeMs }),
+    ...(options.expectedExecutableNames === undefined ? {} : { expectedExecutableNames: options.expectedExecutableNames })
+  };
   const candidates = await scanExecutables(prefixPath, appHint, scanOptions);
   await logger.info("scanner candidates", {
     count: candidates.length,

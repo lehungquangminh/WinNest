@@ -76,6 +76,7 @@ export async function installApp(installerInputPath: string): Promise<ManagedApp
     await tracker.update(state, "running");
     const mainCandidate = await detectMainExecutable(prefixPath, appName, logger, {
       referenceTimeMs: startedAtMs,
+      ...(recipe ? { expectedExecutableNames: recipe.expectedExecutables } : {}),
       onSelectionRequired: async () => {
         state = "selecting-launcher";
         await tracker.update(state, "running");

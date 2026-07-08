@@ -10,6 +10,7 @@ import { WinNestError } from "@/shared/errors.js";
 import { appRoot } from "@/core/paths.js";
 import { acquireAppLock } from "@/core/lock.js";
 import { readApp, writeApp } from "@/core/state.js";
+import { findRecipeForApp } from "@/recipes/loader.js";
 
 export async function rescanApp(appId: string): Promise<void> {
   const app = await readApp(appId);
@@ -18,9 +19,14 @@ export async function rescanApp(appId: string): Promise<void> {
 
   try {
     await logger.info("rescan started", { appId: app.id, prefixPath: app.prefixPath });
+    const recipe = await findRecipeForApp(app.id, app.name, app.createdFrom);
     await scanShortcutFiles(app.prefixPath, logger);
     const registryHints = await scanRegistryUninstallEntries(app.prefixPath, logger);
-    const candidates = await scanExecutables(app.prefixPath, app.name, { logger, registryHints });
+    const candidates = await scanExecutables(app.prefixPath, app.name, {
+      logger,
+      registryHints,
+      ...(recipe ? { expectedExecutableNames: recipe.expectedExecutables } : {})
+    });
     if (candidates.length === 0) {
       throw new WinNestError("NO_LAUNCH_CANDIDATE", "No installed Windows executable was detected.");
     }
