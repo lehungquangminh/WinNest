@@ -4,7 +4,7 @@ import type { DoctorReport } from "@/core/doctor.js";
 import type { InstallCandidateList } from "@/core/install/candidate.js";
 import type { InstallStateFile } from "@/core/install/state.js";
 import type { AppRecipe } from "@/recipes/model.js";
-import { InstallIcon, InfoIcon, TerminalIcon, CheckIcon, LoaderIcon, XIcon } from "@/renderer/components/Icons.js";
+import { InstallIcon, InfoIcon, TerminalIcon, CheckIcon, LoaderIcon, XIcon, FolderIcon } from "@/renderer/components/Icons.js";
 
 type InstallProps = {
   initialInstallerPath: string | undefined;
@@ -75,6 +75,18 @@ export default function Install(props: InstallProps): React.JSX.Element {
     } catch (err) {
       setStatus("failed");
       setLog((lines) => [...lines, `[ERROR] Installation failed: ${err instanceof Error ? err.message : String(err)}`]);
+    }
+  }
+
+  async function chooseInstaller(): Promise<void> {
+    try {
+      const selectedPath = await window.winnest.invoke<string | undefined>("selectInstallerPath");
+      if (selectedPath) {
+        setInstallerPath(selectedPath);
+      }
+    } catch (err) {
+      setStatus("failed");
+      setLog((lines) => [...lines, `[ERROR] File picker failed: ${err instanceof Error ? err.message : String(err)}`]);
     }
   }
 
@@ -198,7 +210,7 @@ export default function Install(props: InstallProps): React.JSX.Element {
             <label className="field-label" htmlFor="installer-input">
               Installer Path
             </label>
-            <div className="input-wrapper">
+            <div className="path-picker-row">
               <input 
                 id="installer-input"
                 className="text-input"
@@ -207,8 +219,17 @@ export default function Install(props: InstallProps): React.JSX.Element {
                 placeholder="/absolute/path/to/installer.exe" 
                 disabled={status === "installing"}
               />
+              <button
+                className="btn btn-secondary"
+                type="button"
+                onClick={() => void chooseInstaller()}
+                disabled={status === "installing"}
+              >
+                <FolderIcon size={14} />
+                <span>Browse</span>
+              </button>
             </div>
-            <span className="field-help">Specify the absolute Linux path to the setup `.exe` or `.msi` file.</span>
+            <span className="field-help">Choose a Windows setup `.exe` or `.msi` file from your Downloads folder or another location.</span>
           </div>
 
           <div className="install-info-box">
@@ -272,7 +293,7 @@ export default function Install(props: InstallProps): React.JSX.Element {
           )}
 
           <div className="form-group">
-            <label className="checkbox-container">
+            <label className="checkbox-container option-row">
               <input 
                 type="checkbox" 
                 checked={desktopIcon} 

@@ -1,4 +1,5 @@
-import { ipcMain, shell } from "electron";
+import { BrowserWindow, dialog, ipcMain, shell } from "electron";
+import type { OpenDialogOptions } from "electron";
 import { readFile } from "node:fs/promises";
 import { appRoot } from "@/core/paths.js";
 import { createDoctorReport } from "@/core/doctor.js";
@@ -22,6 +23,7 @@ export type IpcAction =
   | "doctor"
   | "listApps"
   | "getAppInfo"
+  | "selectInstallerPath"
   | "startInstall"
   | "getInstallState"
   | "getLatestLog"
@@ -50,6 +52,8 @@ export function registerIpc(): void {
         return await listApps();
       case "getAppInfo":
         return await readApp(readAppId(payload));
+      case "selectInstallerPath":
+        return await selectInstallerPath(_event.sender);
       case "startInstall":
         return startInstall(payload);
       case "getInstallState":
@@ -91,6 +95,21 @@ export function registerIpc(): void {
         throw new WinNestError("UNKNOWN_IPC_ACTION", `Unknown IPC action: ${String(action)}`);
     }
   });
+}
+
+async function selectInstallerPath(sender: Electron.WebContents): Promise<string | undefined> {
+  const window = BrowserWindow.fromWebContents(sender);
+  const options: OpenDialogOptions = {
+    title: "Select Windows installer",
+    properties: ["openFile"],
+    filters: [
+      { name: "Windows installers", extensions: ["exe", "msi"] },
+      { name: "All files", extensions: ["*"] }
+    ]
+  };
+  const result = window ? await dialog.showOpenDialog(window, options) : await dialog.showOpenDialog(options);
+
+  return result.canceled ? undefined : result.filePaths[0];
 }
 
 function readCandidatePath(payload: unknown): string {

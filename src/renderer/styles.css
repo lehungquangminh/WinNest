@@ -783,6 +783,20 @@ body {
   align-items: start;
 }
 
+.install-config-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.install-config-panel .panel-title {
+  margin-bottom: 4px;
+}
+
+.install-config-panel .form-group {
+  margin-bottom: 0;
+}
+
 .form-group {
   display: flex;
   flex-direction: column;
@@ -798,6 +812,13 @@ body {
 
 .input-wrapper {
   position: relative;
+}
+
+.path-picker-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
 }
 
 .text-input {
@@ -838,6 +859,20 @@ body {
   color: var(--text-primary);
 }
 
+.option-row {
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-muted);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.option-row:hover {
+  border-color: var(--border-strong);
+  background: rgba(255, 255, 255, 0.035);
+}
+
 .checkbox-container input {
   display: none;
 }
@@ -845,6 +880,7 @@ body {
 .checkbox-custom {
   width: 16px;
   height: 16px;
+  flex: 0 0 16px;
   border-radius: 4px;
   border: 1px solid var(--border-strong);
   background: var(--bg-input);
@@ -891,7 +927,7 @@ body {
   border: 1px solid var(--border-muted);
   border-radius: var(--radius-md);
   padding: 14px;
-  margin-top: 12px;
+  margin-top: 0;
 }
 
 .install-info-box svg {
