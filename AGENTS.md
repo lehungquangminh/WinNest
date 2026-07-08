@@ -45,6 +45,15 @@ There is no full test framework yet. Put all new automated tests under `tests/`.
 
 History uses clear imperative messages, for example `Add install state tracking` and `fix: update contact email for reporting unacceptable behavior and security vulnerabilities`. Keep commits small and focused. Configure commits with `Lê Hùng Quang Minh <lhquangmink@gmail.com>`, not generated agent identity. Pull requests should include a concise summary, commands tested, known limitations, and screenshots only when UI work is introduced.
 
+## UI/UX & Design Guidelines
+
+The Electron frontend uses a strict, custom-designed dark visual system. Any agent modifying or adding frontend pages, React components, or stylesheets MUST read and strictly adhere to the guidelines documented in [DESIGN.md](DESIGN.md). Key constraints include:
+- Do not use generic neon glow effects, box-shadows, or pulsing animations. Keep status dots and indicators flat and matte.
+- Avoid nested cards ("card soup"). Keep layouts flat and clean.
+- Use outline vector icons (Check, Loader, X, Info) instead of status indicator dots.
+- Prevent CSS Grid layouts from collapsing or overflowing by declaring columns using `minmax(0, 1fr)` or similar flexible patterns.
+- Keep the user interface responsive and fast by leveraging lifted root state caching in `App.tsx` and updating views asynchronously.
+
 ## Security & Architecture Notes
 
 Treat Windows installers as untrusted. Do not ship proprietary Windows DLLs or claim universal compatibility. The CLI/core is the real product; future GUI code must call core logic through Electron IPC and must not call Wine directly.

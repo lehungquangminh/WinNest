@@ -124,8 +124,8 @@ body {
 }
 
 .logo-icon {
-    font-size: 42px;
-    color: var(--accent-red);
+    width: 42px;
+    height: 42px;
 }
 
 /* Identity */
@@ -743,7 +743,8 @@ body {
     }
     
     .logo-icon {
-        font-size: 28px;
+        width: 28px;
+        height: 28px;
     }
     
     .identity-block {
@@ -1104,9 +1105,9 @@ body {
     font-size: 16px;
 }
 
-.docs-logo i {
-    color: var(--accent-red);
-    font-size: 20px;
+.docs-logo img {
+    width: 20px;
+    height: 20px;
 }
 
 .docs-nav-items-top {

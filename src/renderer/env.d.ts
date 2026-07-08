@@ -1,4 +1,4 @@
-import type { WinNestApi } from "@/main/preload.js";
+import type { WinNestApi } from "@/main/preload.cjs";
 
 declare global {
   interface Window {

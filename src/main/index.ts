@@ -1,23 +1,32 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, Menu, nativeImage } from "electron";
 import { fileURLToPath } from "node:url";
 import { registerIpc } from "@/main/ipc.js";
 
 let mainWindow: BrowserWindow | undefined;
 
 async function createWindow(): Promise<void> {
-  const preload = fileURLToPath(new URL("./preload.js", import.meta.url));
+  const preload = fileURLToPath(new URL("./preload.cjs", import.meta.url));
+  const iconPath = fileURLToPath(new URL("../../pages/icon.png", import.meta.url));
+  const icon = nativeImage.createFromPath(iconPath);
   mainWindow = new BrowserWindow({
     width: 1040,
     height: 720,
     minWidth: 860,
     minHeight: 560,
     title: "WinNest",
+    icon,
     webPreferences: {
       preload,
       contextIsolation: true,
       nodeIntegration: false
     }
   });
+  mainWindow.setMenu(null);
+
+  mainWindow.webContents.on("console-message", (event, level, message, line, sourceId) => {
+    console.log(`[RENDERER CONSOLE] [Level:${level}] ${message} (Source:${sourceId}:${line})`);
+  });
+
 
   const devServerUrl = process.env["WINNEST_RENDERER_URL"];
   if (devServerUrl) {
@@ -30,6 +39,7 @@ async function createWindow(): Promise<void> {
 }
 
 app.whenReady().then(async () => {
+  Menu.setApplicationMenu(null);
   registerIpc();
   await createWindow();
 

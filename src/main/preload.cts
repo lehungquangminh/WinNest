@@ -1,8 +1,8 @@
 import { contextBridge, ipcRenderer } from "electron";
-import type { IpcAction } from "@/main/ipc.js";
+import type { IpcAction } from "./ipc.js";
 
 const api = {
-  invoke: async <T>(action: IpcAction, payload?: unknown): Promise<T> => {
+  async invoke<T>(action: IpcAction, payload?: unknown): Promise<T> {
     return (await ipcRenderer.invoke("winnest:invoke", action, payload)) as T;
   }
 };
