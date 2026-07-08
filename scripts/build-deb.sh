@@ -84,15 +84,11 @@ cp -r recipes/ "${STAGE}${INSTALL_ROOT}/recipes"
 info "Copying pages/ (web docs assets) …"
 cp -r pages/ "${STAGE}${INSTALL_ROOT}/pages"
 
-info "Copying node_modules/ (production only) …"
-# Prune to production deps only to keep package smaller
-npm prune --omit=dev --prefix="${PROJECT_ROOT}" 2>/dev/null || true
-cp -r node_modules/ "${STAGE}${INSTALL_ROOT}/node_modules"
-# Restore dev deps so the repo still works
-npm install --prefix="${PROJECT_ROOT}" 2>/dev/null || true
-
-info "Copying package.json …"
-cp package.json "${STAGE}${INSTALL_ROOT}/"
+# NOTE: node_modules are NOT copied.
+# The CLI (dist/cli/) uses only Node.js built-in modules at runtime (node:fs, node:path, etc.)
+# The Electron GUI renderer (dist-renderer/) is a pre-bundled Vite build — no npm runtime deps.
+# The Electron main process (dist/main/) is bundled via tsc and uses only built-ins.
+# Therefore no node_modules directory is needed in the installed package.
 
 # ── Wrapper scripts ───────────────────────────────────────────────────────────
 info "Writing /usr/bin/winnest …"
