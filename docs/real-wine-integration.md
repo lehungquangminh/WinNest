@@ -19,7 +19,37 @@ sudo apt update
 sudo apt install winetricks cabextract p7zip-full mesa-vulkan-drivers mesa-vulkan-drivers:i386
 ```
 
+WinNest does not install these packages automatically in the MVP. Use the diagnostics below to print distro-specific commands, then run the commands yourself:
+
+```bash
+winnest doctor --fix-hints
+winnest repair-system
+```
+
 On Debian, Ubuntu, and Ubuntu-compatible nonlaOS systems, start with the distro packages above. If the distro Wine is too old, follow the official WineHQ download instructions for Debian/Ubuntu: https://gitlab.winehq.org/wine/wine/-/wikis/Download
+
+## Dependency Categories
+
+System dependencies are installed on Linux outside Wine. Examples: `wine`, `wineboot`, `wineserver`, `wine32:i386`, `winbind`, `cabextract`, and `p7zip-full`.
+
+Wine/app dependencies are applied inside one app prefix. Examples: `corefonts`, `vcrun2019`, `vcrun2022`, `.NET`, DXVK, vkd3d, registry tweaks, and DLL overrides. Phase 3.5 models these as recipe hints; it does not implement a full winetricks replacement.
+
+## Why wine32:i386 Matters
+
+Some x64 installers still load 32-bit bootstrapper code or WoW64 components. On Debian-like systems, missing 32-bit Wine support often shows up in logs as:
+
+```txt
+wine32 is missing
+syswow64\\ntdll.dll
+```
+
+Fix on Debian/Ubuntu/nonlaOS-like systems:
+
+```bash
+sudo dpkg --add-architecture i386
+sudo apt update
+sudo apt install wine32:i386 winbind cabextract p7zip-full
+```
 
 ## Build WinNest
 
@@ -34,6 +64,8 @@ For local CLI testing, use:
 ```bash
 node dist/cli/index.js doctor
 node dist/cli/index.js doctor --verbose
+node dist/cli/index.js doctor --fix-hints
+node dist/cli/index.js doctor --json
 ```
 
 If WinNest is installed globally or packaged, use `winnest` instead of `node dist/cli/index.js`.
@@ -63,6 +95,7 @@ Run the same flow for Notepad++, 7-Zip, IrfanView, and WinSCP:
 
 ```bash
 winnest doctor --verbose
+winnest doctor --fix-hints
 winnest install ~/Downloads/winnest-test-installers/npp-installer.exe
 winnest list
 winnest info notepad-plus-plus
@@ -74,6 +107,23 @@ For the development helper:
 
 ```bash
 npm run test:real-install -- ~/Downloads/winnest-test-installers/npp-installer.exe
+```
+
+If install fails from a known Wine dependency issue, inspect:
+
+```bash
+winnest info <app-id>
+winnest repair <app-id>
+winnest repair-system
+```
+
+After installing missing system packages manually:
+
+```bash
+winnest doctor
+winnest repair <app-id>
+winnest rescan <app-id>
+winnest run <app-id>
 ```
 
 ## Inspect App Folders And Logs
@@ -128,3 +178,5 @@ For failed installs, inspect logs first, then remove the app folder only if it i
 ```
 
 Never recursively delete arbitrary paths.
+
+Known MVP limitation: WinNest diagnoses missing system dependencies and prints commands, but it does not run `sudo apt install` automatically yet.

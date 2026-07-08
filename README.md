@@ -48,16 +48,52 @@ WinNest exposes a clean CLI to manage your Windows software catalog.
 | `winnest list` | List all managed applications installed via WinNest. |
 | `winnest info <app-id>` | Retrieve detailed metadata, path configurations, and log locations for an app. |
 | `winnest repair <app-id>` | Repair broken prefix symlinks, desktop launchers, or configuration files. |
+| `winnest repair-system` | Print system dependency issues and distro-specific repair commands. |
 | `winnest reset <app-id>` | Reset the application prefix configuration and database entries to defaults. |
 | `winnest uninstall <app-id>` | Completely remove the application, its Wine prefix, logs, and shortcuts. |
 | `winnest register-mime` | Register file manager MIME-type associations for the desktop. |
-| `winnest setup-wine` | Install Wine, 32-bit Wine support, and desktop integration packages on apt-based Linux systems. |
+| `winnest setup-wine` | Compatibility alias that prints Wine setup guidance. |
 
 > [!NOTE]
 > `winnest-open <file-path>` is a dedicated fast-path helper program designed specifically for system file managers to open files using WinNest MIME types without loading the full CLI overhead.
 
 > [!IMPORTANT]
-> `winnest setup-wine` performs a real package installation. On non-root shells it runs `sudo` so the user can type their password directly in the terminal. WinNest never reads or stores sudo passwords.
+> WinNest does not install system packages automatically in this MVP. Use `winnest doctor --fix-hints` or `winnest repair-system` to print commands, then run them yourself.
+
+## Dependency Repair Flow
+
+WinNest tracks two dependency categories:
+
+*   **System dependencies** live on Linux outside Wine, such as `wine`, `wineboot`, `wineserver`, `wine32:i386`, `winbind`, `cabextract`, and `p7zip-full`.
+*   **Wine/app dependencies** live inside a specific Wine prefix, such as `corefonts`, `vcrun2022`, `.NET`, DXVK, registry tweaks, and DLL overrides. These are modeled as recipe hints first.
+
+Many Windows installers still need 32-bit Wine/ WoW64 support even when the app installer is marked x64. On Debian, Ubuntu, and nonlaOS-like systems, a missing `wine32:i386` package commonly appears as `syswow64\\ntdll.dll` or `wine32 is missing` in Wine logs.
+
+Useful commands:
+
+```bash
+winnest doctor --fix-hints
+winnest doctor --json
+winnest repair-system
+winnest repair <app-id>
+```
+
+Typical Debian/Ubuntu/nonlaOS fix:
+
+```bash
+sudo dpkg --add-architecture i386
+sudo apt update
+sudo apt install wine32:i386 winbind cabextract p7zip-full
+```
+
+After fixing system packages, retry with:
+
+```bash
+winnest doctor
+winnest repair <app-id>
+winnest rescan <app-id>
+winnest run <app-id>
+```
 
 ---
 
@@ -101,6 +137,7 @@ WinNest exposes a clean CLI to manage your Windows software catalog.
 
 *   Not every Windows app works under Wine.
 *   Wine must be installed separately for now.
+*   WinNest prints system dependency fix commands but does not run `sudo apt install` automatically yet.
 *   Some installers may hang or require manual clicks inside Wine dialogs.
 *   Some apps need extra dependencies, fonts, runtimes, or DLL overrides that WinNest does not install yet.
 *   The executable scanner can still choose the wrong `.exe`; use `winnest rescan <app-id>` to correct it.
