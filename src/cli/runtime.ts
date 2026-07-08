@@ -41,7 +41,6 @@ export async function main(args: readonly string[]): Promise<void> {
       return;
     case "repair":
       await repairApp(requiredArg(command, firstArg, "app-id"));
-      console.log(`Repaired ${firstArg}`);
       return;
     case "reset":
       await resetApp(requiredArg(command, firstArg, "app-id"));
