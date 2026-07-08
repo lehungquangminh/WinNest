@@ -99,7 +99,7 @@ export async function runDoctor(options: DoctorOptions = {}): Promise<void> {
     printVerboseDoctor(report);
   }
 
-  if (options.fixHints || report.hints.length > 0) {
+  if (options.fixHints) {
     printFixHints(report.hints);
   }
 
