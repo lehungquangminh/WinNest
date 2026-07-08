@@ -8,6 +8,7 @@ export type WinNestPaths = {
   globalLogsRoot: string;
   applicationsDir: string;
   mimePackagesDir: string;
+  desktopDir: string;
 };
 
 function envPath(name: string): string | undefined {
@@ -25,7 +26,8 @@ export function getPaths(): WinNestPaths {
     appsRoot: join(dataHome, "winnest", "apps"),
     globalLogsRoot: join(dataHome, "winnest", "logs"),
     applicationsDir: join(dataHome, "applications"),
-    mimePackagesDir: join(dataHome, "mime", "packages")
+    mimePackagesDir: join(dataHome, "mime", "packages"),
+    desktopDir: join(home, "Desktop")
   };
 }
 

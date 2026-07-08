@@ -1,4 +1,5 @@
 import type { CliCommand } from "@/cli/command.js";
+import { createDesktopIconCommand, removeDesktopIconCommand } from "@/cli/commands/desktop-icon.js";
 import { doctorCommand } from "@/cli/commands/doctor.js";
 import { infoCommand } from "@/cli/commands/info.js";
 import { installCommand } from "@/cli/commands/install.js";
@@ -22,15 +23,15 @@ export const COMMANDS: readonly CliCommand[] = [
   },
   {
     name: "install",
-    usage: "install <installer-path>",
+    usage: "install <installer-path> [--desktop-icon]",
     description: "Install a Windows .exe or .msi into a managed Wine prefix.",
-    run: async ({ command, args }) => installCommand(command, args[0])
+    run: async ({ command, args }) => installCommand(command, args)
   },
   {
     name: "open",
     usage: "open <file-path>",
     description: "File-manager entry point for opening a Windows installer.",
-    run: async ({ command, args }) => installCommand(command, args[0])
+    run: async ({ command, args }) => installCommand(command, args)
   },
   {
     name: "run",
@@ -76,6 +77,18 @@ export const COMMANDS: readonly CliCommand[] = [
     usage: "reset <app-id>",
     description: "Reset only the app Wine prefix while keeping metadata, logs, and installers.",
     run: async ({ command, args }) => resetCommand(command, args[0])
+  },
+  {
+    name: "create-desktop-icon",
+    usage: "create-desktop-icon <app-id>",
+    description: "Create a desktop icon for an installed app.",
+    run: async ({ command, args }) => createDesktopIconCommand(command, args[0])
+  },
+  {
+    name: "remove-desktop-icon",
+    usage: "remove-desktop-icon <app-id>",
+    description: "Remove a desktop icon for an installed app.",
+    run: async ({ command, args }) => removeDesktopIconCommand(command, args[0])
   },
   {
     name: "rescan",

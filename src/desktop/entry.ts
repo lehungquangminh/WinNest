@@ -8,6 +8,7 @@ import { runCommand } from "@/shared/spawn.js";
 
 export type DesktopEntryOptions = {
   categories?: string[];
+  targetPath?: string;
 };
 
 export async function createDesktopEntry(
@@ -15,7 +16,7 @@ export async function createDesktopEntry(
   logger: Logger,
   options: DesktopEntryOptions = {}
 ): Promise<string> {
-  const filePath = join(getPaths().applicationsDir, `winnest-${app.id}.desktop`);
+  const filePath = options.targetPath ?? join(getPaths().applicationsDir, `winnest-${app.id}.desktop`);
   const iconName = `winnest-${app.id}`;
   const categories = formatCategories(options.categories);
   const content = `[Desktop Entry]
@@ -51,4 +52,15 @@ function formatCategories(categories: readonly string[] | undefined): string {
 
 function sanitizeDesktopValue(value: string): string {
   return value.replace(/[\r\n]/g, " ").trim();
+}
+
+export function desktopEntryFileName(app: ManagedApp): string {
+  return `${sanitizeFileName(app.name)}.desktop`;
+}
+
+function sanitizeFileName(value: string): string {
+  return value
+    .replace(/[\/\\:\0]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim() || "Windows App";
 }

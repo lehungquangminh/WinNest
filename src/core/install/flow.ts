@@ -5,6 +5,7 @@ import { appLogPath } from "@/logging/paths.js";
 import { Logger } from "@/logging/logger.js";
 import { WinNestError, toWinNestError } from "@/shared/errors.js";
 import { createDesktopEntry } from "@/desktop/entry.js";
+import { createDesktopIcon } from "@/desktop/icon.js";
 import { detectMainExecutable } from "@/scanner/detector.js";
 import { createPrefix } from "@/wine/prefix.js";
 import { runInstaller } from "@/wine/process.js";
@@ -20,7 +21,11 @@ import { collectErrorText, diagnoseWineFailure } from "@/core/install/diagnosis.
 import type { AppRecipe } from "@/recipes/model.js";
 import type { ManagedApp } from "@/core/app.js";
 
-export async function installApp(installerInputPath: string): Promise<ManagedApp> {
+export type InstallOptions = {
+  desktopIcon?: boolean;
+};
+
+export async function installApp(installerInputPath: string, options: InstallOptions = {}): Promise<ManagedApp> {
   let state: InstallStep = "validating";
   const startedAtMs = Date.now();
   const installerPath = resolve(installerInputPath);
@@ -111,6 +116,13 @@ export async function installApp(installerInputPath: string): Promise<ManagedApp
     const desktopEntryPath = await createDesktopEntry(app, logger, recipe ? { categories: recipe.categories } : {});
     app = { ...app, desktopEntryPath, updatedAt: new Date().toISOString() };
     await writeApp(app);
+    if (options.desktopIcon) {
+      try {
+        await createDesktopIcon(app, logger);
+      } catch (error) {
+        await logger.warn("desktop icon creation failed", { appId, error });
+      }
+    }
 
     state = "done";
     await tracker.update(state, "done");
