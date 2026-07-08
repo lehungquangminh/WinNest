@@ -21,7 +21,7 @@ export default function Install(props: InstallProps): React.JSX.Element {
   const [activeAppId, setActiveAppId] = useState<string | undefined>();
   const [installState, setInstallState] = useState<InstallStateFile | undefined>();
   const [candidates, setCandidates] = useState<InstallCandidateList | undefined>();
-  const pollTimer = useRef<number | undefined>();
+  const pollTimer = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     if (props.initialInstallerPath) {

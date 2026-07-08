@@ -1,6 +1,6 @@
 import { constants } from "node:fs";
 import { access, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
-import { arch, release, tmpdir, type } from "node:os";
+import { arch, release, type } from "node:os";
 import { join } from "node:path";
 import { getPaths } from "@/core/paths.js";
 import { globalLogPath } from "@/logging/paths.js";
@@ -384,7 +384,9 @@ async function checkTemporaryPrefix(
     return emptyPrefixCheck("skipped");
   }
 
-  const prefixPath = await mkdtemp(join(tmpdir(), "winnest-prefix-"));
+  const tempRoot = join(getPaths().dataRoot, "cache");
+  await mkdir(tempRoot, { recursive: true });
+  const prefixPath = await mkdtemp(join(tempRoot, "doctor-prefix-"));
   try {
     const result = await runCommand(winebootPath, ["-u"], {
       logger,
