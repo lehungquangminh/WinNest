@@ -129,27 +129,82 @@
                 <h2 class="section-title">Setup & System Installation</h2>
                 
                 <p class="text-block">
-                    WinNest is developed using <span class="highlight-text">TypeScript</span> running on the Node.js platform. To install and run the project locally, please ensure that your system meets the following prerequisites:
+                    The recommended user installation path is the official <span class="highlight-text">WinNest APT repository</span>. This lets the package manager install Wine, wine32, winbind, cabextract, and desktop integration tools instead of asking users to guess system packages manually.
                 </p>
 
                 <ul class="bullet-list">
-                    <li><strong>Node.js</strong>: LTS version 20 or higher.</li>
-                    <li><strong>Wine & Wineserver</strong>: Installed on the host system (Wine 8.0+).</li>
-                    <li><strong>Operating System</strong>: Common Linux distributions (Ubuntu, Arch Linux, Fedora, etc.).</li>
+                    <li><strong>Operating system</strong>: Debian, Ubuntu, nonlaOS, or a Debian-like distribution.</li>
+                    <li><strong>Architecture</strong>: amd64 with i386 enabled so APT can install <code class="code-badge">wine32:i386</code>.</li>
+                    <li><strong>Wine</strong>: declared as a WinNest package dependency when using the official repository.</li>
                 </ul>
 
-                <h3 style="font-size: 16px; font-weight: 600; color: var(--text-highlight); margin: 24px 0 12px 0;">Local Build Process:</h3>
+                <h3 style="font-size: 16px; font-weight: 600; color: var(--text-highlight); margin: 24px 0 12px 0;">Recommended APT repository install:</h3>
+                <p class="text-block">Run these commands once to add the repository and install WinNest:</p>
+
+                <div class="terminal-block">
+                    <div class="terminal-header">
+                        <span class="terminal-title">bash --install</span>
+                    </div>
+                    <div class="terminal-body" style="color: var(--text-primary);">
+<span class="terminal-prompt"># 1. Enable i386 so APT can install wine32</span>
+<span class="terminal-cmd">sudo dpkg --add-architecture i386</span>
+<span class="terminal-cmd">sudo apt update</span>
+
+<span class="terminal-prompt"># 2. Add the WinNest signing key</span>
+<span class="terminal-cmd">sudo install -d -m 0755 /etc/apt/keyrings</span>
+<span class="terminal-cmd">curl -fsSL https://repo.winnest.app/winnest.gpg \</span>
+<span class="terminal-cmd">  | sudo gpg --dearmor -o /etc/apt/keyrings/winnest.gpg</span>
+
+<span class="terminal-prompt"># 3. Add the WinNest repository</span>
+<span class="terminal-cmd">echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/winnest.gpg] https://repo.winnest.app/debian stable main" \</span>
+<span class="terminal-cmd">  | sudo tee /etc/apt/sources.list.d/winnest.list >/dev/null</span>
+
+<span class="terminal-prompt"># 4. Install WinNest and required dependencies</span>
+<span class="terminal-cmd">sudo apt update</span>
+<span class="terminal-cmd">sudo apt install winnest</span>
+</div>
+                </div>
+
+                <div class="callout-box info">
+                    <h5 class="callout-title">Why i386 matters</h5>
+                    <p class="callout-desc">
+                        Many Windows installers still need 32-bit Wine support even when the installer is x64. Without <code class="code-badge">wine32:i386</code>, installs may fail with <code class="code-badge">syswow64\\ntdll.dll</code> errors or exit unexpectedly.
+                    </p>
+                </div>
+
+                <h3 style="font-size: 16px; font-weight: 600; color: var(--text-highlight); margin: 24px 0 12px 0;">Maintainer release build:</h3>
+                <p class="text-block">These commands are for release maintainers, not the main end-user install flow:</p>
+
+                <div class="terminal-block">
+                    <div class="terminal-header">
+                        <span class="terminal-title">bash --release</span>
+                    </div>
+                    <div class="terminal-body" style="color: var(--text-primary);">
+<span class="terminal-prompt"># Build a local .deb package</span>
+<span class="terminal-cmd">npm run build:deb -- --build</span>
+
+<span class="terminal-prompt"># Generate APT repository metadata under release/apt/</span>
+<span class="terminal-cmd">npm run build:apt-repo</span>
+
+<span class="terminal-prompt"># Install the standalone .deb locally when testing</span>
+<span class="terminal-cmd">sudo dpkg --add-architecture i386</span>
+<span class="terminal-cmd">sudo apt update</span>
+<span class="terminal-cmd">sudo apt install ./release/winnest_0.1.0_amd64.deb</span>
+</div>
+                </div>
+
+                <h3 style="font-size: 16px; font-weight: 600; color: var(--text-highlight); margin: 24px 0 12px 0;">Local development process:</h3>
                 <p class="text-block">Enter the following commands inside the WinNest project root folder:</p>
 
                 <div class="terminal-block">
                     <div class="terminal-header">
-                        <span class="terminal-title">bash --setup</span>
+                        <span class="terminal-title">bash --development</span>
                     </div>
                     <div class="terminal-body" style="color: var(--text-primary);">
-<span class="terminal-prompt"># 1. Install dependencies</span>
+<span class="terminal-prompt"># 1. Install Node.js development dependencies</span>
 <span class="terminal-cmd">npm install</span>
 
-<span class="terminal-prompt"># 2. Run TypeScript static typechecking (no emit)</span>
+<span class="terminal-prompt"># 2. Run TypeScript static typechecking</span>
 <span class="terminal-cmd">npm run check</span>
 
 <span class="terminal-prompt"># 3. Compile TypeScript to JavaScript (outputs under dist/)</span>

@@ -118,17 +118,17 @@
                         <span class="mono-tag">winnest doctor</span>
                     </div>
                     <p class="doc-command-desc">
-                        Diagnoses the Linux host environment. It verifies that Wine and wineserver are installed, checks Node.js runtime version, and checks folder write permissions for creating desktop shortcuts.
+                        Diagnoses the Linux host environment. It checks Wine, wineboot, wineserver, 32-bit/64-bit support, data folder permissions, desktop tools, and dependencies such as winbind, cabextract, and 7z. Use <code class="code-badge">--verbose</code> for resolved paths, <code class="code-badge">--fix-hints</code> for repair commands, or <code class="code-badge">--json</code> for machine-readable output.
                     </p>
                 </div>
 
                 <!-- Install Command -->
                 <div class="doc-command-block" id="install">
                     <div class="doc-command-header">
-                        <span class="mono-tag">winnest install &lt;installer-path&gt;</span>
+                        <span class="mono-tag">winnest install &lt;installer-path&gt; [--desktop-icon]</span>
                     </div>
                     <p class="doc-command-desc">
-                        Installs a new application. WinNest generates a unique application ID, creates a new Wine prefix, caches the installer path, and safely launches the installer. Once done, it scans the virtual Registry to auto-generate desktop launchers and `.desktop` shortcuts.
+                        Installs a new application. WinNest generates a unique app ID, locks the app folder, writes <code class="code-badge">install-state.json</code>, creates an isolated prefix, runs the installer through Wine, scans shortcuts/executables, applies matching recipes, and creates a Linux launcher. Add <code class="code-badge">--desktop-icon</code> to create a user Desktop shortcut after installation.
                     </p>
                 </div>
 
@@ -148,7 +148,17 @@
                         <span class="mono-tag">winnest open &lt;file-path&gt;</span>
                     </div>
                     <p class="doc-command-desc">
-                        Opens a document/file using the registered Windows application inside WinNest (e.g. double-click `.docx` to open in MS Word, `.psd` in Photoshop). This command uses the lightweight <span class="highlight-text">`winnest-open`</span> binary helper to minimize opening delays.
+                        Opens a Windows file through WinNest. For <code class="code-badge">.exe</code> or <code class="code-badge">.msi</code> installers, the lightweight <span class="highlight-text">winnest-open</span> helper can hand off to the GUI with <code class="code-badge">--gui</code> or force terminal mode with <code class="code-badge">--cli</code>. This is the primary path for double-clicking installers from a file manager.
+                    </p>
+                </div>
+
+                <!-- GUI Command -->
+                <div class="doc-command-block" id="gui">
+                    <div class="doc-command-header">
+                        <span class="mono-tag">winnest gui [--install &lt;installer-path&gt;]</span>
+                    </div>
+                    <p class="doc-command-desc">
+                        Opens the WinNest Electron shell. When <code class="code-badge">--install</code> is provided, the install screen starts with that installer path preselected for file manager handoff. The GUI talks to the shared core through IPC and does not call Wine directly.
                     </p>
                 </div>
 
@@ -172,6 +182,16 @@
                     </p>
                 </div>
 
+                <!-- Rescan Command -->
+                <div class="doc-command-block" id="rescan">
+                    <div class="doc-command-header">
+                        <span class="mono-tag">winnest rescan &lt;app-id&gt;</span>
+                    </div>
+                    <p class="doc-command-desc">
+                        Rescans an app prefix to choose the main executable again. Use this when the initial scanner selected the wrong target, or after changes inside the Wine prefix require updating <code class="code-badge">mainExe</code> and launchers.
+                    </p>
+                </div>
+
                 <!-- Repair Command -->
                 <div class="doc-command-block" id="repair">
                     <div class="doc-command-header">
@@ -179,6 +199,16 @@
                     </div>
                     <p class="doc-command-desc">
                         Repairs a broken application configuration. It restores corrupted symlinks inside the prefix, recreates missing desktop entry shortcuts, and fixes malformed metadata in `app.json`.
+                    </p>
+                </div>
+
+                <!-- Repair-System Command -->
+                <div class="doc-command-block" id="repair-system">
+                    <div class="doc-command-header">
+                        <span class="mono-tag">winnest repair-system [--json]</span>
+                    </div>
+                    <p class="doc-command-desc">
+                        Checks host system dependencies and prints distro-specific repair instructions, such as enabling i386 and installing <code class="code-badge">wine32:i386</code>, winbind, and cabextract. It does not run sudo automatically; users copy the commands when needed.
                     </p>
                 </div>
 
@@ -209,6 +239,16 @@
                     </div>
                     <p class="doc-command-desc">
                         Registers MIME type configurations and file association links with the Linux Desktop environment, ensuring file managers automatically associate specific Windows extensions with WinNest.
+                    </p>
+                </div>
+
+                <!-- Desktop Icon Commands -->
+                <div class="doc-command-block" id="desktop-icons">
+                    <div class="doc-command-header">
+                        <span class="mono-tag">winnest create-desktop-icon &lt;app-id&gt;</span>
+                    </div>
+                    <p class="doc-command-desc">
+                        Creates a user Desktop shortcut that still runs through the stable command <code class="code-badge">winnest run &lt;app-id&gt;</code>. Use <code class="code-badge">winnest remove-desktop-icon &lt;app-id&gt;</code> to remove that shortcut without deleting the app.
                     </p>
                 </div>
             </section>

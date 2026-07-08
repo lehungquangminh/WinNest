@@ -118,17 +118,17 @@
                         <span class="mono-tag">winnest doctor</span>
                     </div>
                     <p class="doc-command-desc">
-                        Chẩn đoán toàn diện môi trường hoạt động của máy chủ Linux. Lệnh này kiểm tra xem Wine có được cài đặt hay không, kiểm tra sự hiện diện của `wineserver` (dùng để quản lý các prefix và đồng bộ), xác minh phiên bản Node.js hiện hành và kiểm tra quyền ghi của người dùng trên đường dẫn desktop shortcut.
+                        Chẩn đoán toàn diện môi trường Linux. Lệnh này kiểm tra Wine, wineboot, wineserver, hỗ trợ 32-bit/64-bit, quyền ghi thư mục dữ liệu, công cụ desktop và các dependency như winbind, cabextract, 7z. Dùng <code class="code-badge">--verbose</code> để xem đường dẫn chi tiết, <code class="code-badge">--fix-hints</code> để in lệnh sửa lỗi, hoặc <code class="code-badge">--json</code> cho output máy đọc.
                     </p>
                 </div>
 
                 <!-- Install Command -->
                 <div class="doc-command-block" id="install">
                     <div class="doc-command-header">
-                        <span class="mono-tag">winnest install &lt;installer-path&gt;</span>
+                        <span class="mono-tag">winnest install &lt;installer-path&gt; [--desktop-icon]</span>
                     </div>
                     <p class="doc-command-desc">
-                        Thực hiện cài đặt phần mềm mới. WinNest sẽ tự tạo một ID ứng dụng duy nhất, khởi tạo thư mục prefix, copy installer gốc vào thư mục cache, sau đó an toàn chạy trình cài đặt thông qua Wine. Khi trình cài đặt thoát, WinNest sẽ thực hiện quét Registry ảo của prefix để tự động ánh xạ các shortcut ứng dụng và tạo file `.desktop` tương ứng trên Linux Desktop.
+                        Thực hiện cài đặt phần mềm mới. WinNest tự tạo ID ứng dụng duy nhất, khóa thư mục app, lưu <code class="code-badge">install-state.json</code>, tạo prefix riêng, chạy installer qua Wine, quét shortcut/executable, áp dụng recipe nếu khớp và tạo launcher Linux. Thêm <code class="code-badge">--desktop-icon</code> nếu muốn tạo shortcut ngoài Desktop sau khi cài.
                     </p>
                 </div>
 
@@ -148,7 +148,17 @@
                         <span class="mono-tag">winnest open &lt;file-path&gt;</span>
                     </div>
                     <p class="doc-command-desc">
-                        Mở một tệp tin dữ liệu thông qua ứng dụng Windows phù hợp trong WinNest. Đây là điểm tích hợp chính cho file manager của Linux (nhấp đúp tệp `.docx` để mở bằng MS Word ảo hoặc `.psd` bằng Photoshop ảo). Lệnh gọi này cũng có chương trình phụ trợ siêu nhẹ mang tên <span class="highlight-text">`winnest-open`</span> nhằm tối thiểu hóa độ trễ khi mở tệp.
+                        Mở file Windows thông qua WinNest. Với tệp <code class="code-badge">.exe</code> hoặc <code class="code-badge">.msi</code>, helper <span class="highlight-text">winnest-open</span> có thể chuyển sang GUI bằng <code class="code-badge">--gui</code> hoặc ép dùng CLI bằng <code class="code-badge">--cli</code>. Đây là đường đi chính cho thao tác nhấp đúp installer từ file manager.
+                    </p>
+                </div>
+
+                <!-- GUI Command -->
+                <div class="doc-command-block" id="gui">
+                    <div class="doc-command-header">
+                        <span class="mono-tag">winnest gui [--install &lt;installer-path&gt;]</span>
+                    </div>
+                    <p class="doc-command-desc">
+                        Mở Electron shell của WinNest. Nếu truyền <code class="code-badge">--install</code>, màn hình cài đặt sẽ nhận sẵn đường dẫn installer để hỗ trợ handoff từ file manager. GUI chỉ gọi core qua IPC, không gọi Wine trực tiếp.
                     </p>
                 </div>
 
@@ -172,6 +182,16 @@
                     </p>
                 </div>
 
+                <!-- Rescan Command -->
+                <div class="doc-command-block" id="rescan">
+                    <div class="doc-command-header">
+                        <span class="mono-tag">winnest rescan &lt;app-id&gt;</span>
+                    </div>
+                    <p class="doc-command-desc">
+                        Quét lại prefix của app để tìm executable chính. Lệnh này hữu ích khi scanner chọn sai file sau lần cài đầu, hoặc khi user sửa cài đặt bên trong Wine rồi cần cập nhật lại <code class="code-badge">mainExe</code> và launcher.
+                    </p>
+                </div>
+
                 <!-- Repair Command -->
                 <div class="doc-command-block" id="repair">
                     <div class="doc-command-header">
@@ -179,6 +199,16 @@
                     </div>
                     <p class="doc-command-desc">
                         Sửa chữa cấu hình ứng dụng bị hỏng. Lệnh này tự động khôi phục lại các liên kết symlinks của prefix bị đứt gãy, dựng lại các file launcher `.desktop` bị mất và sửa các trường metadata trong file `app.json` bị sai lệch.
+                    </p>
+                </div>
+
+                <!-- Repair-System Command -->
+                <div class="doc-command-block" id="repair-system">
+                    <div class="doc-command-header">
+                        <span class="mono-tag">winnest repair-system [--json]</span>
+                    </div>
+                    <p class="doc-command-desc">
+                        Kiểm tra dependency hệ thống và in hướng dẫn sửa lỗi theo distro, ví dụ bật i386 và cài <code class="code-badge">wine32:i386</code>, winbind, cabextract. Lệnh này không tự chạy sudo; người dùng tự copy lệnh nếu cần.
                     </p>
                 </div>
 
@@ -209,6 +239,16 @@
                     </div>
                     <p class="doc-command-desc">
                         Đăng ký định dạng MIME và liên kết mở rộng tệp tin với hệ điều hành Linux Desktop để đảm bảo các tệp tin đặc thù của Windows có thể nhận diện WinNest làm trình khởi chạy mặc định một cách tự động.
+                    </p>
+                </div>
+
+                <!-- Desktop Icon Commands -->
+                <div class="doc-command-block" id="desktop-icons">
+                    <div class="doc-command-header">
+                        <span class="mono-tag">winnest create-desktop-icon &lt;app-id&gt;</span>
+                    </div>
+                    <p class="doc-command-desc">
+                        Tạo shortcut ngoài thư mục Desktop của người dùng với lệnh chạy ổn định <code class="code-badge">winnest run &lt;app-id&gt;</code>. Dùng <code class="code-badge">winnest remove-desktop-icon &lt;app-id&gt;</code> để gỡ shortcut này mà không xóa app.
                     </p>
                 </div>
             </section>

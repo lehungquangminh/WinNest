@@ -129,27 +129,82 @@
                 <h2 class="section-title">Thiết lập & Cài đặt hệ thống</h2>
                 
                 <p class="text-block">
-                    WinNest được phát triển bằng ngôn ngữ <span class="highlight-text">TypeScript</span> chạy trên nền tảng Node.js. Để cài đặt và chạy thử nghiệm cục bộ, vui lòng đảm bảo hệ thống của bạn đã cài đặt các điều kiện tiên quyết sau:
+                    Cách cài chính thức cho người dùng cuối là thêm <span class="highlight-text">APT repository</span> của WinNest rồi cài bằng trình quản lý gói. Cách này giúp hệ thống tự kéo đúng Wine, wine32, winbind, cabextract và các công cụ desktop cần thiết thay vì để người dùng tự đoán từng gói.
                 </p>
 
                 <ul class="bullet-list">
-                    <li><strong>Node.js</strong>: Phiên bản LTS 20 hoặc cao hơn.</li>
-                    <li><strong>Wine & Wineserver</strong>: Cài đặt hệ thống sẵn có (Wine 8.0+).</li>
-                    <li><strong>Hệ điều hành</strong>: Các bản phân phối Linux phổ biến (Ubuntu, Arch Linux, Fedora...).</li>
+                    <li><strong>Hệ điều hành</strong>: Debian, Ubuntu, nonlaOS hoặc distro Debian-like.</li>
+                    <li><strong>Kiến trúc</strong>: amd64, bật thêm i386 để APT cài được gói <code class="code-badge">wine32:i386</code>.</li>
+                    <li><strong>Wine</strong>: được khai báo là dependency của gói WinNest, không cần cài thủ công trước nếu dùng repo chính thức.</li>
                 </ul>
 
-                <h3 style="font-size: 16px; font-weight: 600; color: var(--text-highlight); margin: 24px 0 12px 0;">Quy trình build cục bộ:</h3>
+                <h3 style="font-size: 16px; font-weight: 600; color: var(--text-highlight); margin: 24px 0 12px 0;">Cài đặt khuyến nghị bằng APT repository:</h3>
+                <p class="text-block">Chạy các lệnh sau một lần để thêm repository và cài WinNest:</p>
+
+                <div class="terminal-block">
+                    <div class="terminal-header">
+                        <span class="terminal-title">bash --install</span>
+                    </div>
+                    <div class="terminal-body" style="color: var(--text-primary);">
+<span class="terminal-prompt"># 1. Bật kiến trúc i386 để APT kéo được wine32</span>
+<span class="terminal-cmd">sudo dpkg --add-architecture i386</span>
+<span class="terminal-cmd">sudo apt update</span>
+
+<span class="terminal-prompt"># 2. Thêm khóa ký gói của WinNest</span>
+<span class="terminal-cmd">sudo install -d -m 0755 /etc/apt/keyrings</span>
+<span class="terminal-cmd">curl -fsSL https://repo.winnest.app/winnest.gpg \</span>
+<span class="terminal-cmd">  | sudo gpg --dearmor -o /etc/apt/keyrings/winnest.gpg</span>
+
+<span class="terminal-prompt"># 3. Thêm repository WinNest</span>
+<span class="terminal-cmd">echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/winnest.gpg] https://repo.winnest.app/debian stable main" \</span>
+<span class="terminal-cmd">  | sudo tee /etc/apt/sources.list.d/winnest.list >/dev/null</span>
+
+<span class="terminal-prompt"># 4. Cài WinNest và các dependency bắt buộc</span>
+<span class="terminal-cmd">sudo apt update</span>
+<span class="terminal-cmd">sudo apt install winnest</span>
+</div>
+                </div>
+
+                <div class="callout-box info">
+                    <h5 class="callout-title">Vì sao cần i386?</h5>
+                    <p class="callout-desc">
+                        Nhiều installer Windows vẫn cần lớp Wine 32-bit dù file cài đặt là x64. Nếu thiếu <code class="code-badge">wine32:i386</code>, WinNest có thể báo lỗi dạng <code class="code-badge">syswow64\\ntdll.dll</code> hoặc installer tự thoát.
+                    </p>
+                </div>
+
+                <h3 style="font-size: 16px; font-weight: 600; color: var(--text-highlight); margin: 24px 0 12px 0;">Build cho maintainer:</h3>
+                <p class="text-block">Các lệnh này dành cho người đóng gói release, không phải flow chính cho người dùng cuối:</p>
+
+                <div class="terminal-block">
+                    <div class="terminal-header">
+                        <span class="terminal-title">bash --release</span>
+                    </div>
+                    <div class="terminal-body" style="color: var(--text-primary);">
+<span class="terminal-prompt"># Tạo gói .deb local</span>
+<span class="terminal-cmd">npm run build:deb -- --build</span>
+
+<span class="terminal-prompt"># Tạo metadata repository APT dưới release/apt/</span>
+<span class="terminal-cmd">npm run build:apt-repo</span>
+
+<span class="terminal-prompt"># Cài gói .deb rời để test cục bộ nếu cần</span>
+<span class="terminal-cmd">sudo dpkg --add-architecture i386</span>
+<span class="terminal-cmd">sudo apt update</span>
+<span class="terminal-cmd">sudo apt install ./release/winnest_0.1.0_amd64.deb</span>
+</div>
+                </div>
+
+                <h3 style="font-size: 16px; font-weight: 600; color: var(--text-highlight); margin: 24px 0 12px 0;">Quy trình phát triển cục bộ:</h3>
                 <p class="text-block">Nhập các lệnh sau trong thư mục gốc của WinNest:</p>
 
                 <div class="terminal-block">
                     <div class="terminal-header">
-                        <span class="terminal-title">bash --setup</span>
+                        <span class="terminal-title">bash --development</span>
                     </div>
                     <div class="terminal-body" style="color: var(--text-primary);">
-<span class="terminal-prompt"># 1. Cài đặt các thư viện phụ thuộc</span>
+<span class="terminal-prompt"># 1. Cài dependency Node.js cho dev</span>
 <span class="terminal-cmd">npm install</span>
 
-<span class="terminal-prompt"># 2. Kiểm tra kiểu tĩnh TypeScript (Không build ra file)</span>
+<span class="terminal-prompt"># 2. Kiểm tra kiểu tĩnh TypeScript</span>
 <span class="terminal-cmd">npm run check</span>
 
 <span class="terminal-prompt"># 3. Biên dịch TypeScript sang JavaScript (Thư mục dist/)</span>
