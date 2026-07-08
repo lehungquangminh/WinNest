@@ -55,6 +55,7 @@ WinNest exposes a clean CLI to manage your Windows software catalog.
 | `winnest register-mime` | Register file manager MIME-type associations for the desktop. |
 | `winnest create-desktop-icon <app-id>` | Create a desktop launcher icon under `~/Desktop` if the desktop folder exists. |
 | `winnest remove-desktop-icon <app-id>` | Remove a WinNest desktop launcher icon. |
+| `winnest gui --install <installer-path>` | Open the Electron shell directly on the install screen. |
 | `winnest setup-wine` | Compatibility alias for `winnest install-system-deps`. |
 
 > [!NOTE]
@@ -107,7 +108,14 @@ Register file-manager handling for Windows installers:
 winnest register-mime
 ```
 
-After registration, clicking an installer-like `.exe` or `.msi` should route through `winnest-open %f`. WinNest installs into an isolated app folder, writes `app.json`, creates an app-menu launcher, and keeps the launcher command stable:
+After registration, clicking an installer-like `.exe` or `.msi` should route through `winnest-open %f`. From a file manager without a terminal, WinNest opens the Electron install screen with the installer path already selected. From a terminal, you can force either mode:
+
+```bash
+winnest-open ~/Downloads/setup.exe --gui
+winnest-open ~/Downloads/setup.exe --cli
+```
+
+WinNest installs into an isolated app folder, writes `app.json`, creates an app-menu launcher, and keeps the launcher command stable:
 
 ```ini
 Exec=winnest run <app-id>
@@ -128,7 +136,13 @@ npm run build:gui
 npm run start:gui
 ```
 
-The GUI is a shell over the same core logic. It does not call Wine directly from the renderer.
+To test install handoff directly:
+
+```bash
+winnest gui --install ~/Downloads/setup.exe
+```
+
+The GUI is a shell over the same core logic. It does not call Wine directly from the renderer. The install screen polls existing install state and log files through Electron IPC, and uses the same scanner candidate data when manual launcher selection is needed.
 
 ---
 
@@ -179,7 +193,7 @@ The GUI is a shell over the same core logic. It does not call Wine directly from
 *   Start Menu `.lnk` discovery is logged, but target parsing is still limited/TODO.
 *   Registry uninstall detection is best-effort and only used as a scanner hint.
 *   Portable `.exe` app capsules are not implemented yet.
-*   GUI install progress is minimal; deeper live log and launcher picker integration is still planned.
+*   File manager behavior can vary by desktop environment; use "Open With -> WinNest" after `winnest register-mime` if double-click defaults to another app.
 *   WinNest does not strongly sandbox Windows apps yet.
 *   Windows apps may access files exposed through the Wine prefix.
 

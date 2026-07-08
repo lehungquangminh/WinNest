@@ -169,7 +169,28 @@ Register MIME integration:
 winnest register-mime
 ```
 
-Then click a `.exe` or `.msi` from the file manager and confirm `winnest-open %f` opens WinNest.
+Then click a `.exe` or `.msi` from the file manager and confirm `winnest-open %f` opens WinNest. File-manager launches normally have no TTY, so WinNest should open the Electron install screen with the clicked installer path already selected.
+
+To test the same handoff from a terminal:
+
+```bash
+winnest-open ~/Downloads/winnest-test-installers/npp-installer.exe --gui
+winnest-open ~/Downloads/winnest-test-installers/npp-installer.exe --cli
+winnest gui --install ~/Downloads/winnest-test-installers/npp-installer.exe
+```
+
+Expected GUI behavior:
+
+```txt
+Install screen opens
+Selected installer shows the clicked path
+Matched recipe is shown when available
+Wine status is visible
+Install progress and latest logs update while the core install runs
+If scanner confidence is low, candidates are shown for manual launcher selection
+```
+
+Desktop environments differ. If double-click still opens another app, use right click -> Open With -> WinNest in Dolphin, Nautilus, or Thunar after rerunning `winnest register-mime`.
 
 Installer-like files are routed into the install flow. Portable `.exe` capsules are not supported yet; WinNest reports that limitation instead of silently treating every executable as an installer.
 
@@ -204,12 +225,12 @@ Current shell scope:
 
 ```txt
 Home: app list and Wine status
-Install: installer path entry and basic status
+Install: installer path entry, handoff path, progress polling, logs, diagnosis, launcher candidates
 Detail: run, rescan, repair, reset, uninstall, desktop icon actions, files/logs
 Settings: doctor summary and paths
 ```
 
-Known limitation: file-manager handoff to a GUI install window is not fully implemented yet. `winnest-open` keeps the CLI fallback and logs clear errors.
+`winnest-open` keeps CLI fallback support. Use `--gui` to force Electron handoff and `--cli` to force terminal install flow.
 
 ## Post-Dependency Validation Result
 
