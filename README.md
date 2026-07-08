@@ -59,7 +59,7 @@ WinNest exposes a clean CLI to manage your Windows software catalog.
 | `winnest setup-wine` | Compatibility alias for `winnest install-system-deps`. |
 
 > [!NOTE]
-> `winnest-open <file-path>` is a dedicated fast-path helper program designed specifically for system file managers to open files using WinNest MIME types without loading the full CLI overhead.
+> `winnest-open <file-path>` is the MIME handler that runs **transparently by default** — it launches the actual Windows installer directly through Wine without opening the WinNest GUI first. Use `--gui` to see the WinNest install screen.
 
 > [!IMPORTANT]
 > `winnest install-system-deps` and `winnest setup-wine` run real package commands on Debian/Ubuntu-like systems. If sudo asks for a password, type it in the terminal. WinNest never reads or stores sudo passwords.
@@ -100,9 +100,51 @@ winnest rescan <app-id>
 winnest run <app-id>
 ```
 
+## How WinNest Opens Installers
+
+When you **right-click a `.exe` or `.msi` file → Open With → WinNest**, here is what happens:
+
+```
+Open With WinNest
+  → WinNest silently creates a managed app folder and isolated Wine prefix
+  → WinNest launches the actual Windows installer through Wine
+  → You see the original installer UI, exactly as on Windows
+  → Click Next / Install inside the Windows installer
+  → After it exits, WinNest scans the prefix
+  → WinNest creates a Linux start-menu launcher
+  → Optional desktop icon if configured
+```
+
+WinNest acts as a **transparent system layer**, not an app you open first.
+
+### winnest-open Modes
+
+| Flag | Behavior |
+|:---|:---|
+| *(none)* | **Transparent mode** (default) — launches Wine installer directly |
+| `--transparent` | Explicit transparent mode, same as no flag |
+| `--gui` | Opens WinNest Electron install window first |
+| `--cli` | Runs install in current terminal |
+
+Examples:
+
+```bash
+# Default: transparent — Windows installer appears immediately
+winnest-open /path/to/setup.exe
+
+# Explicit transparent
+winnest-open /path/to/setup.exe --transparent
+
+# Open WinNest GUI install window
+winnest-open /path/to/setup.exe --gui
+
+# Install via current terminal
+winnest-open /path/to/setup.exe --cli
+```
+
 ## Desktop Integration
 
-Register file-manager handling for Windows installers:
+Register file-manager MIME handling for Windows installers:
 
 ```bash
 winnest register-mime
@@ -110,52 +152,85 @@ winnest register-mime
 
 ### Executable Discovery & Development Link
 
-If a file manager double-click fails or displays an error like **`Could not find the program 'winnest-open'`**, it means the `winnest-open` binary is registered as the system MIME handler but cannot be resolved in your current `PATH` environment variable.
+If a file manager invocation fails with **`Could not find the program 'winnest-open'`**, the `winnest-open` wrapper is missing from your `PATH`.
 
-* **During Development**: 
-  By default, `winnest-open` is not in your global `PATH`. You can link it using:
+* **During Development**:
   ```bash
-  # Option 1: Create wrapper symlinks in user-local bin (~/.local/bin)
-  node dist/cli/index.js dev-install
-  
-  # Option 2: Use npm link globally
-  npm run link:dev
-  ```
-  Ensure that `~/.local/bin` (or the global npm prefix path) is in your shell `PATH` variable. You can verify this by running:
-  ```bash
+  # Create wrapper scripts in ~/.local/bin pointing at the built project
+  winnest dev-install
+
+  # Verify it is discoverable
   command -v winnest-open
   ```
-* **In Production**:
-  The compiled `.deb` package installs the `winnest` and `winnest-open` binaries directly to `/usr/bin`, making them automatically resolvable system-wide.
+* **In Production**: The `.deb` package places binaries in `/usr/bin` automatically.
 
 ### Verifying Handoff Readiness
 
-You can diagnose if your desktop integration is ready by running:
 ```bash
 winnest doctor --verbose
 ```
-This will report `Desktop handoff: ready: yes/no` and point out any missing commands or configuration issues.
 
-`winnest register-mime` will validate that `winnest-open` is in your `PATH` before writing desktop files. To override this check, use the `--force` option:
+This reports `Desktop handoff: ready: yes/no` and identifies any missing commands. `winnest register-mime` also validates `winnest-open` is in `PATH` before writing desktop files:
+
 ```bash
+# Validate then register
+winnest register-mime
+
+# Force registration even if winnest-open is not yet in PATH
 winnest register-mime --force
 ```
 
-### Testing Double-Click & Handoff Simulation
+### KDE / Desktop Security Policy Blocking
 
-After running `winnest dev-install` and `winnest register-mime`, clicking an installer-like `.exe` or `.msi` in your file manager (such as Nautilus, Dolphin, or Thunar) should automatically launch the Electron install screen.
+Some desktop environments (especially KDE Dolphin) block double-clicking `.exe` files with:
 
-You can simulate what desktop environments do from a terminal to verify path, space, and unicode compatibility:
+```
+For security reasons, launching executables is not allowed in this context.
+```
+
+This is a **desktop security policy**, not a WinNest failure. WinNest itself works fine. The correct workflow is:
+
+1. **Right-click** the `.exe` file
+2. Select **Open With**
+3. Choose **WinNest**
+4. Optionally set WinNest as the default handler
+
+If the desktop allows double-click handler associations, that works too. Not all file managers permit executable double-click by policy.
+
+### Testing Transparent Open
+
 ```bash
-winnest-open ~/Downloads/setup.exe --gui
-# Or test using the simulate-open command:
-winnest simulate-open "~/Downloads/Bộ cài/Test App (2026)/setup.exe"
+# Transparent (default): Windows installer opens directly
+winnest-open /path/to/setup.exe
+
+# Explicit transparent
+winnest-open /path/to/setup.exe --transparent
+
+# GUI mode: WinNest install window opens first
+winnest-open /path/to/setup.exe --gui
+
+# Simulate file manager handoff (tests path/unicode/spaces survival)
+winnest simulate-open "/path/to/Bộ cài/Test App (2026)/setup.exe"
+```
+
+### Inspecting Logs
+
+```bash
+# Global open log
+cat ~/.local/share/winnest/logs/open.log
+
+# Per-app install log
+cat ~/.local/share/winnest/apps/<app-id>/logs/install.log
+
+# Diagnose full system
+winnest doctor --verbose
 ```
 
 ### Desktop Environment Caveats
 
-* **Dolphin (KDE)** / **Nautilus (GNOME)** / **Thunar (XFCE)**: Default association can sometimes be overridden by wine-extension associations. If double-clicking doesn't launch WinNest, right-click the `.exe` file, select **Open With**, and choose **WinNest** (setting it as the default application for executables).
-* **Single Instance Handoff**: If the Electron GUI is already running, launching another installer will focus the existing window, send the new path, and switch to the installation screen without opening multiple windows or corrupting current state.
+* **KDE Dolphin / Nautilus / Thunar / Caja**: If double-click is blocked by desktop security policy, use **Right-click → Open With → WinNest**.
+* **MIME handler conflicts**: Wine may register its own `.exe` handler. If WinNest gets overridden, re-run `winnest register-mime` and set WinNest as default via your file manager settings.
+* **Single instance**: If WinNest GUI is already open, a second file launch focuses the existing window and routes the new path to the install screen.
 
 Desktop icons are opt-in:
 
@@ -165,20 +240,12 @@ winnest create-desktop-icon <app-id>
 winnest remove-desktop-icon <app-id>
 ```
 
-The minimal Electron shell can be built and started for app list, install entry, settings, and app actions:
+Build and start the Electron GUI for app management:
 
 ```bash
 npm run build:gui
 npm run start:gui
 ```
-
-To test install handoff directly:
-
-```bash
-winnest gui --install ~/Downloads/setup.exe
-```
-
-The GUI is a shell over the same core logic. It does not call Wine directly from the renderer. The install screen polls existing install state and log files through Electron IPC, and uses the same scanner candidate data when manual launcher selection is needed.
 
 ---
 
@@ -235,10 +302,13 @@ The GUI is a shell over the same core logic. It does not call Wine directly from
 
 ## Real Validation Snapshot
 
-After installing `wine32:i386`, `winbind`, and `cabextract` on Debian 13, WinNest validated:
+Validated on Debian 13 with wine-10.0 (wine32:i386, winbind, cabextract installed):
 
 *   Wine 32-bit and 64-bit prefix support: OK.
-*   Notepad++ `8.9.6.4` x64 installer: installed and launched.
-*   WinSCP `6.5.6` installer: installed and launched.
-*   Scanner selected `C:/Program Files/Notepad++/notepad++.exe`.
-*   Scanner selected `C:/Program Files (x86)/WinSCP/WinSCP.exe`.
+*   Notepad++ `8.9.6.4` x64: transparent install → `notepad++.exe` auto-selected → launcher created → `winnest run` works.
+*   WinSCP `6.5.6`: transparent install → `WinSCP.exe` auto-selected → launcher created → `winnest run` works.
+*   7-Zip `26.02` x64: transparent install → **`7zFM.exe` auto-selected without user prompt** (primary recipe match, score 155 vs 135) → launcher created → `winnest run` works.
+*   Scanner auto-selection: recipe primary executable selected in `automatic-primary-recipe` mode for known apps.
+*   `winnest-open setup.exe` (no flags): Windows installer appears directly, no WinNest GUI.
+*   `winnest-open setup.exe --gui`: WinNest Electron install window appears first.
+*   No-TTY file manager handoff: transparent mode runs without requiring terminal input.
