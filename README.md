@@ -53,6 +53,8 @@ WinNest exposes a clean CLI to manage your Windows software catalog.
 | `winnest reset <app-id>` | Reset the application prefix configuration and database entries to defaults. |
 | `winnest uninstall <app-id>` | Completely remove the application, its Wine prefix, logs, and shortcuts. |
 | `winnest register-mime` | Register file manager MIME-type associations for the desktop. |
+| `winnest create-desktop-icon <app-id>` | Create a desktop launcher icon under `~/Desktop` if the desktop folder exists. |
+| `winnest remove-desktop-icon <app-id>` | Remove a WinNest desktop launcher icon. |
 | `winnest setup-wine` | Compatibility alias for `winnest install-system-deps`. |
 
 > [!NOTE]
@@ -96,6 +98,37 @@ winnest repair <app-id>
 winnest rescan <app-id>
 winnest run <app-id>
 ```
+
+## Desktop Integration
+
+Register file-manager handling for Windows installers:
+
+```bash
+winnest register-mime
+```
+
+After registration, clicking an installer-like `.exe` or `.msi` should route through `winnest-open %f`. WinNest installs into an isolated app folder, writes `app.json`, creates an app-menu launcher, and keeps the launcher command stable:
+
+```ini
+Exec=winnest run <app-id>
+```
+
+Desktop icons are opt-in:
+
+```bash
+winnest install ~/Downloads/setup.exe --desktop-icon
+winnest create-desktop-icon <app-id>
+winnest remove-desktop-icon <app-id>
+```
+
+The minimal Electron shell can be built and started for app list, install entry, settings, and app actions:
+
+```bash
+npm run build:gui
+npm run start:gui
+```
+
+The GUI is a shell over the same core logic. It does not call Wine directly from the renderer.
 
 ---
 
@@ -145,5 +178,17 @@ winnest run <app-id>
 *   The executable scanner can still choose the wrong `.exe`; use `winnest rescan <app-id>` to correct it.
 *   Start Menu `.lnk` discovery is logged, but target parsing is still limited/TODO.
 *   Registry uninstall detection is best-effort and only used as a scanner hint.
+*   Portable `.exe` app capsules are not implemented yet.
+*   GUI install progress is minimal; deeper live log and launcher picker integration is still planned.
 *   WinNest does not strongly sandbox Windows apps yet.
 *   Windows apps may access files exposed through the Wine prefix.
+
+## Real Validation Snapshot
+
+After installing `wine32:i386`, `winbind`, and `cabextract` on Debian 13, WinNest validated:
+
+*   Wine 32-bit and 64-bit prefix support: OK.
+*   Notepad++ `8.9.6.4` x64 installer: installed and launched.
+*   WinSCP `6.5.6` installer: installed and launched.
+*   Scanner selected `C:/Program Files/Notepad++/notepad++.exe`.
+*   Scanner selected `C:/Program Files (x86)/WinSCP/WinSCP.exe`.

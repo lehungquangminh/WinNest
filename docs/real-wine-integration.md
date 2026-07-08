@@ -171,6 +171,68 @@ winnest register-mime
 
 Then click a `.exe` or `.msi` from the file manager and confirm `winnest-open %f` opens WinNest.
 
+Installer-like files are routed into the install flow. Portable `.exe` capsules are not supported yet; WinNest reports that limitation instead of silently treating every executable as an installer.
+
+Create optional desktop icons:
+
+```bash
+winnest install ~/Downloads/winnest-test-installers/npp-installer.exe --desktop-icon
+winnest create-desktop-icon <app-id>
+winnest remove-desktop-icon <app-id>
+```
+
+App menu and desktop launchers must call:
+
+```ini
+Exec=winnest run <app-id>
+```
+
+They must not call raw Wine directly.
+
+## Electron Shell
+
+The Electron shell is a small management surface over the same CLI/core logic:
+
+```bash
+npm run build:gui
+npm run start:gui
+```
+
+Renderer code talks to Electron main process IPC. It must not call Wine, filesystem APIs, or core modules directly.
+
+Current shell scope:
+
+```txt
+Home: app list and Wine status
+Install: installer path entry and basic status
+Detail: run, rescan, repair, reset, uninstall, desktop icon actions, files/logs
+Settings: doctor summary and paths
+```
+
+Known limitation: file-manager handoff to a GUI install window is not fully implemented yet. `winnest-open` keeps the CLI fallback and logs clear errors.
+
+## Post-Dependency Validation Result
+
+After installing the previously missing Debian packages:
+
+```txt
+wine32:i386
+winbind
+cabextract
+```
+
+Validation result:
+
+```txt
+Wine version: wine-10.0 (Debian 10.0~repack-6)
+64-bit Wine support: OK
+32-bit Wine support: OK
+Notepad++ 8.9.6.4 x64: installed and launched
+WinSCP 6.5.6: installed and launched
+Notepad++ mainExe: C:/Program Files/Notepad++/notepad++.exe
+WinSCP mainExe: C:/Program Files (x86)/WinSCP/WinSCP.exe
+```
+
 ## Cleanup
 
 For a clean uninstall:
