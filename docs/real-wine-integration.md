@@ -169,6 +169,29 @@ Register MIME integration:
 winnest register-mime
 ```
 
+### Development Link & Troubleshooting
+
+If you receive the error **`Could not find the program 'winnest-open'`** when double-clicking in a file manager, it means the `winnest-open` binary is registered but cannot be resolved in your terminal's/desktop environment's `PATH`.
+
+* **Development Fix**:
+  Run the local developer install script to place executable wrappers in `~/.local/bin`:
+  ```bash
+  node dist/cli/index.js dev-install
+  ```
+  Ensure that `~/.local/bin` is in your `PATH` variable (add `export PATH="$HOME/.local/bin:$PATH"` in your `.bashrc` or `.zshrc` if missing).
+  Verify resolution using:
+  ```bash
+  command -v winnest-open
+  ```
+* **Production Fix**:
+  The final `.deb` packages will install real binaries directly under `/usr/bin/` so they are globally resolvable.
+
+* **Safe Registration**:
+  `winnest register-mime` requires `winnest-open` to be present in your `PATH` to prevent silent registration of broken handlers. Bypass this check during development if needed using:
+  ```bash
+  winnest register-mime --force
+  ```
+
 Then click a `.exe` or `.msi` from the file manager and confirm `winnest-open %f` opens WinNest. File-manager launches normally have no TTY, so WinNest should open the Electron install screen with the clicked installer path already selected.
 
 To test the same handoff from a terminal:

@@ -108,18 +108,54 @@ Register file-manager handling for Windows installers:
 winnest register-mime
 ```
 
-After registration, clicking an installer-like `.exe` or `.msi` should route through `winnest-open %f`. From a file manager without a terminal, WinNest opens the Electron install screen with the installer path already selected. From a terminal, you can force either mode:
+### Executable Discovery & Development Link
 
+If a file manager double-click fails or displays an error like **`Could not find the program 'winnest-open'`**, it means the `winnest-open` binary is registered as the system MIME handler but cannot be resolved in your current `PATH` environment variable.
+
+* **During Development**: 
+  By default, `winnest-open` is not in your global `PATH`. You can link it using:
+  ```bash
+  # Option 1: Create wrapper symlinks in user-local bin (~/.local/bin)
+  node dist/cli/index.js dev-install
+  
+  # Option 2: Use npm link globally
+  npm run link:dev
+  ```
+  Ensure that `~/.local/bin` (or the global npm prefix path) is in your shell `PATH` variable. You can verify this by running:
+  ```bash
+  command -v winnest-open
+  ```
+* **In Production**:
+  The compiled `.deb` package installs the `winnest` and `winnest-open` binaries directly to `/usr/bin`, making them automatically resolvable system-wide.
+
+### Verifying Handoff Readiness
+
+You can diagnose if your desktop integration is ready by running:
+```bash
+winnest doctor --verbose
+```
+This will report `Desktop handoff: ready: yes/no` and point out any missing commands or configuration issues.
+
+`winnest register-mime` will validate that `winnest-open` is in your `PATH` before writing desktop files. To override this check, use the `--force` option:
+```bash
+winnest register-mime --force
+```
+
+### Testing Double-Click & Handoff Simulation
+
+After running `winnest dev-install` and `winnest register-mime`, clicking an installer-like `.exe` or `.msi` in your file manager (such as Nautilus, Dolphin, or Thunar) should automatically launch the Electron install screen.
+
+You can simulate what desktop environments do from a terminal to verify path, space, and unicode compatibility:
 ```bash
 winnest-open ~/Downloads/setup.exe --gui
-winnest-open ~/Downloads/setup.exe --cli
+# Or test using the simulate-open command:
+winnest simulate-open "~/Downloads/Bộ cài/Test App (2026)/setup.exe"
 ```
 
-WinNest installs into an isolated app folder, writes `app.json`, creates an app-menu launcher, and keeps the launcher command stable:
+### Desktop Environment Caveats
 
-```ini
-Exec=winnest run <app-id>
-```
+* **Dolphin (KDE)** / **Nautilus (GNOME)** / **Thunar (XFCE)**: Default association can sometimes be overridden by wine-extension associations. If double-clicking doesn't launch WinNest, right-click the `.exe` file, select **Open With**, and choose **WinNest** (setting it as the default application for executables).
+* **Single Instance Handoff**: If the Electron GUI is already running, launching another installer will focus the existing window, send the new path, and switch to the installation screen without opening multiple windows or corrupting current state.
 
 Desktop icons are opt-in:
 
