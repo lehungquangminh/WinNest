@@ -78,6 +78,14 @@ export type DoctorReport = {
     mimeHandlerDesktopEntry?: string;
     mimeDefaults?: Record<string, string>;
   };
+  commands: {
+    winnest: { status: "found" | "missing"; path: string | undefined };
+    winnestOpen: { status: "found" | "missing"; path: string | undefined };
+  };
+  desktopHandoff: {
+    ready: boolean;
+    issue: string | undefined;
+  };
   hints: FixHint[];
   missingSystemDeps: SystemDependencyCode[];
   version: string;
@@ -145,6 +153,44 @@ export async function createDoctorReport(logger = new Logger(globalLogPath("doct
   const sevenZip = (await findExecutable("7z")) ?? (await findExecutable("7zz"));
   const vulkaninfo = await findExecutable("vulkaninfo");
   const prefixCheck = await checkTemporaryPrefix(runner.winebootPath, logger);
+
+  const winnestPath = await findExecutable("winnest");
+  const winnestOpenPath = await findExecutable("winnest-open");
+
+  const commands = {
+    winnest: {
+      status: winnestPath ? ("found" as const) : ("missing" as const),
+      path: winnestPath
+    },
+    winnestOpen: {
+      status: winnestOpenPath ? ("found" as const) : ("missing" as const),
+      path: winnestOpenPath
+    }
+  };
+
+  let handoffReady = true;
+  let handoffIssue: string | undefined = undefined;
+
+  if (!winnestOpenPath) {
+    handoffReady = false;
+    handoffIssue = "winnest-open missing from PATH";
+  } else if (!mimeHandlerDesktopEntry) {
+    handoffReady = false;
+    handoffIssue = "winnest-open.desktop file missing";
+  } else {
+    const missingMimes = Object.entries(mimeDefaults)
+      .filter(([_, val]) => val !== "winnest-open.desktop")
+      .map(([key]) => key);
+    if (missingMimes.length > 0) {
+      handoffReady = false;
+      handoffIssue = `MIME handlers not set to WinNest: ${missingMimes.join(", ")}`;
+    }
+  }
+
+  const desktopHandoff = {
+    ready: handoffReady,
+    issue: handoffIssue
+  };
 
   const wineIssues: string[] = [];
   const missingSystemDeps: SystemDependencyCode[] = [];
@@ -239,6 +285,8 @@ export async function createDoctorReport(logger = new Logger(globalLogPath("doct
     },
     wine,
     tools,
+    commands,
+    desktopHandoff,
     hints: createSystemFixHints(distro, missingSystemDeps),
     missingSystemDeps,
     version: WINNEST_VERSION
@@ -308,6 +356,32 @@ function printDoctor(report: DoctorReport): void {
   printSection("System", systemChecks);
   printSection("Wine", wineChecks);
   printSection("Desktop integration", desktopChecks);
+
+  console.log("");
+  console.log("CLI commands:");
+  console.log(`  winnest: ${report.commands.winnest.path ? `found ${report.commands.winnest.path}` : "missing"}`);
+  console.log(`  winnest-open: ${report.commands.winnestOpen.path ? `found ${report.commands.winnestOpen.path}` : "missing"}`);
+
+  console.log("");
+  console.log("MIME handler:");
+  const mimeTypes = [
+    "application/x-ms-dos-executable",
+    "application/x-msi",
+    "application/vnd.microsoft.portable-executable"
+  ];
+  for (const mimeType of mimeTypes) {
+    const desktop = report.tools.mimeDefaults?.[mimeType];
+    const status = desktop === "winnest-open.desktop" ? "WinNest" : desktop ? "other" : "missing";
+    console.log(`  ${mimeType}: ${status}`);
+  }
+
+  console.log("");
+  console.log("Desktop handoff:");
+  console.log(`  ready: ${report.desktopHandoff.ready ? "yes" : "no"}`);
+  if (report.desktopHandoff.issue) {
+    console.log(`  issue: ${report.desktopHandoff.issue}`);
+  }
+
   printSection("Optional tools", optionalChecks);
   printSection("WinNest", [{ label: "version", ok: true, value: report.version }]);
 }
