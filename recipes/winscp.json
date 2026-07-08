@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "winscp",
+  "name": "WinSCP",
+  "match": {
+    "installerNames": ["winscp", "win scp"],
+    "publisherNames": ["Martin Prikryl", "WinSCP"]
+  },
+  "systemDeps": ["wine32"],
+  "wineDeps": [],
+  "permissions": {
+    "downloads": true
+  },
+  "notes": [
+    "Network drive and shell integration behavior may differ from native Windows."
+  ],
+  "expectedExecutables": ["WinSCP.exe"]
+}

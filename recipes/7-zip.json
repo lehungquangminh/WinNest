@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "7-zip",
+  "name": "7-Zip",
+  "match": {
+    "installerNames": ["7z", "7zip", "7-zip"],
+    "publisherNames": ["Igor Pavlov", "7-Zip"]
+  },
+  "systemDeps": [],
+  "wineDeps": [],
+  "permissions": {
+    "downloads": true
+  },
+  "notes": [],
+  "expectedExecutables": ["7zFM.exe", "7zG.exe"]
+}

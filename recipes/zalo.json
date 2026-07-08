@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "zalo",
+  "name": "Zalo",
+  "match": {
+    "installerNames": ["zalo", "zalo setup", "zalosetup"],
+    "publisherNames": ["VNG", "Zalo"]
+  },
+  "systemDeps": ["wine32", "winbind"],
+  "wineDeps": [],
+  "permissions": {
+    "microphone": true,
+    "camera": true,
+    "downloads": true
+  },
+  "notes": [
+    "Voice and video calling may require microphone/camera integration.",
+    "System tray behavior may depend on desktop environment."
+  ],
+  "expectedExecutables": ["Zalo.exe"]
+}

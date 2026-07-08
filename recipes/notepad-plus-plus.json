@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "notepad-plus-plus",
+  "name": "Notepad++",
+  "match": {
+    "installerNames": ["npp", "notepad++", "notepad-plus-plus", "notepad plus plus"],
+    "publisherNames": ["Notepad++"]
+  },
+  "systemDeps": ["wine32"],
+  "wineDeps": [],
+  "permissions": {
+    "downloads": true
+  },
+  "notes": [],
+  "expectedExecutables": ["notepad++.exe"]
+}
