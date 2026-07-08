@@ -249,25 +249,42 @@ npm run start:gui
 
 ---
 
-## 📦 Installation (Debian / Ubuntu)
+## 📦 Installation (Debian / Ubuntu / nonlaOS)
 
-### Install from .deb
+### Recommended: install from the WinNest APT repository
 
-```bash
-sudo apt install ./release/winnest_0.1.0_amd64.deb
-```
-
-`apt` automatically installs required dependencies:
-- `nodejs` (≥ 20)
-- `wine`, `winbind`, `cabextract`, `xdg-utils`
-
-Recommended (for 32-bit app support):
+Enable i386 first so APT can install `wine32` correctly:
 
 ```bash
 sudo dpkg --add-architecture i386
 sudo apt update
-sudo apt install wine32:i386 p7zip-full libnotify-bin
 ```
+
+Add the WinNest repository and install:
+
+```bash
+sudo install -d -m 0755 /etc/apt/keyrings
+curl -fsSL https://repo.winnest.app/winnest.gpg \
+  | sudo gpg --dearmor -o /etc/apt/keyrings/winnest.gpg
+
+echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/winnest.gpg] https://repo.winnest.app/debian stable main" \
+  | sudo tee /etc/apt/sources.list.d/winnest.list >/dev/null
+
+sudo apt update
+sudo apt install winnest
+```
+
+This lets APT install WinNest with required Wine, 32-bit Wine, MIME, desktop, and Electron runtime dependencies.
+
+### Standalone .deb fallback
+
+```bash
+sudo dpkg --add-architecture i386
+sudo apt update
+sudo apt install ./release/winnest_0.1.0_amd64.deb
+```
+
+The standalone `.deb` is mainly for local testing and early releases. The APT repository is the preferred user-facing install path.
 
 ### Verify installation
 
@@ -324,6 +341,13 @@ cd WinNest
 npm install
 npm run build:deb
 # Output: release/winnest_0.1.0_amd64.deb
+```
+
+To generate a local static APT repository:
+
+```bash
+npm run build:apt-repo
+# Output: release/apt/
 ```
 
 To rebuild after source changes:

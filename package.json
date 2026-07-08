@@ -12,6 +12,7 @@
     "build": "tsc -p tsconfig.json && tsc-alias -p tsconfig.json",
     "build:gui": "npm run build && vite build",
     "build:deb": "bash scripts/build-deb.sh",
+    "build:apt-repo": "bash scripts/build-apt-repo.sh",
     "check": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.tests.json --noEmit",
     "dev:cli": "node --enable-source-maps ./dist/cli/index.js",
     "start:gui": "electron ./dist/main/index.js",

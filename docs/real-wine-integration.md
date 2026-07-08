@@ -4,19 +4,29 @@ This guide verifies WinNest against real Windows installers under Wine. Do not c
 
 ## System Packages
 
-Required:
-
-```bash
-sudo apt update
-sudo apt install wine wine64 wine32:i386 xdg-utils desktop-file-utils shared-mime-info
-```
-
-Recommended for broader Wine compatibility:
+For normal users, install WinNest from the APT repository so dependencies are resolved by APT:
 
 ```bash
 sudo dpkg --add-architecture i386
 sudo apt update
-sudo apt install winetricks cabextract p7zip-full mesa-vulkan-drivers mesa-vulkan-drivers:i386
+
+sudo install -d -m 0755 /etc/apt/keyrings
+curl -fsSL https://repo.winnest.app/winnest.gpg \
+  | sudo gpg --dearmor -o /etc/apt/keyrings/winnest.gpg
+
+echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/winnest.gpg] https://repo.winnest.app/debian stable main" \
+  | sudo tee /etc/apt/sources.list.d/winnest.list >/dev/null
+
+sudo apt update
+sudo apt install winnest
+```
+
+For local development without the repo, install the same core dependencies manually:
+
+```bash
+sudo dpkg --add-architecture i386
+sudo apt update
+sudo apt install wine wine64 wine32:i386 winbind cabextract p7zip-full xdg-utils desktop-file-utils shared-mime-info
 ```
 
 Use the diagnostics below to print distro-specific commands:
