@@ -8,6 +8,7 @@ import { InstallIcon, InfoIcon, TerminalIcon, CheckIcon, LoaderIcon, XIcon } fro
 
 type InstallProps = {
   initialInstallerPath: string | undefined;
+  onClearInitialPath?: () => void;
   onInstalled: (appId: string) => void;
 };
 
@@ -26,6 +27,7 @@ export default function Install(props: InstallProps): React.JSX.Element {
   useEffect(() => {
     if (props.initialInstallerPath) {
       setInstallerPath(props.initialInstallerPath);
+      props.onClearInitialPath?.();
     }
   }, [props.initialInstallerPath]);
 

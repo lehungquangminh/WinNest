@@ -127,6 +127,7 @@ export default function App(): React.JSX.Element {
         {page === "install" && (
           <Install 
             initialInstallerPath={handoffInstallerPath}
+            onClearInitialPath={() => setHandoffInstallerPath(undefined)}
             onInstalled={async (appId) => {
               await refresh();
               setSelectedAppId(appId);
