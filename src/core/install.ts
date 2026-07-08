@@ -13,6 +13,10 @@ import { writeApp } from "@/core/state.js";
 import { createInstallTracker, type InstallStep } from "@/core/install-state.js";
 import { acquireAppLock } from "@/core/lock.js";
 import { reserveAppFolder } from "@/core/id.js";
+import { createDoctorReport, printFixHints } from "@/core/doctor.js";
+import { matchRecipeForInstaller } from "@/recipes/loader.js";
+import { createSystemFixHints, type SystemDependencyCode } from "@/system/fix-hints.js";
+import type { AppRecipe } from "@/recipes/model.js";
 import type { ManagedApp } from "@/core/app.js";
 
 export async function installApp(installerInputPath: string): Promise<ManagedApp> {
@@ -30,6 +34,18 @@ export async function installApp(installerInputPath: string): Promise<ManagedApp
   await validateInstaller(installerPath);
   await logger.info("app id allocated", { appId, root });
   await logger.info("install started", { state, installerPath, installerKind, appId });
+  const recipe = await matchRecipeForInstaller(installerPath);
+  if (recipe) {
+    await logger.info("recipe matched", {
+      recipeId: recipe.id,
+      recipeName: recipe.name,
+      systemDeps: recipe.systemDeps,
+      wineDeps: recipe.wineDeps,
+      expectedExecutables: recipe.expectedExecutables
+    });
+  } else {
+    await logger.info("no recipe matched", { installerPath });
+  }
 
   try {
     state = "creating-app-folder";
@@ -48,6 +64,8 @@ export async function installApp(installerInputPath: string): Promise<ManagedApp
     state = "booting-prefix";
     await tracker.update(state, "running");
     await createPrefix(prefixPath, logger);
+
+    await warnAboutRecipeDependencies(recipe, logger);
 
     state = "running-installer";
     await tracker.update(state, "running");
@@ -80,7 +98,7 @@ export async function installApp(installerInputPath: string): Promise<ManagedApp
       createdFrom: installerPath,
       createdAt: now,
       updatedAt: now,
-      deps: [],
+      deps: recipe ? [...recipe.systemDeps, ...recipe.wineDeps] : [],
       desktopEntryPath: undefined
     };
     await writeApp(app);
@@ -105,6 +123,66 @@ export async function installApp(installerInputPath: string): Promise<ManagedApp
     throw error;
   } finally {
     await lock.release();
+  }
+}
+
+async function warnAboutRecipeDependencies(recipe: AppRecipe | undefined, logger: Logger): Promise<void> {
+  if (!recipe || recipe.systemDeps.length === 0) {
+    return;
+  }
+
+  const report = await createDoctorReport(logger);
+  const missingDeps = recipe.systemDeps.filter((dep): dep is SystemDependencyCode =>
+    isRecipeSystemDepMissing(dep, report)
+  );
+  if (missingDeps.length === 0) {
+    await logger.info("recipe system dependencies satisfied", {
+      recipeId: recipe.id,
+      systemDeps: recipe.systemDeps
+    });
+    return;
+  }
+
+  const hints = createSystemFixHints(report.system.distro, missingDeps);
+  await logger.warn("recipe system dependencies missing", {
+    recipeId: recipe.id,
+    recipeName: recipe.name,
+    missingDeps
+  });
+
+  console.warn("");
+  console.warn(`WinNest matched recipe: ${recipe.name}`);
+  console.warn("");
+  console.warn("This app may need system dependencies that are currently missing:");
+  for (const dep of missingDeps) {
+    console.warn(`  - ${dep}`);
+  }
+  console.warn("");
+  console.warn("You can continue, but installation may fail.");
+  printFixHints(hints);
+  console.warn("");
+}
+
+function isRecipeSystemDepMissing(dep: string, report: Awaited<ReturnType<typeof createDoctorReport>>): dep is SystemDependencyCode {
+  switch (dep) {
+    case "wine":
+      return !report.wine.winePath;
+    case "wineboot":
+      return !report.wine.winebootPath;
+    case "wineserver":
+      return !report.wine.wineserverPath;
+    case "wine32":
+      return !report.wine.support32;
+    case "winbind":
+      return !report.tools.winbind;
+    case "cabextract":
+      return !report.tools.cabextract;
+    case "p7zip":
+      return !report.tools.sevenZip;
+    case "vulkaninfo":
+      return !report.tools.vulkaninfo;
+    default:
+      return false;
   }
 }
 
