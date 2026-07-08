@@ -16,6 +16,7 @@ import { reserveAppFolder } from "@/core/id.js";
 import { createDoctorReport, printFixHints } from "@/core/doctor.js";
 import { matchRecipeForInstaller } from "@/recipes/loader.js";
 import { createSystemFixHints, type SystemDependencyCode } from "@/system/fix-hints.js";
+import { collectErrorText, diagnoseWineFailure } from "@/core/diagnosis.js";
 import type { AppRecipe } from "@/recipes/model.js";
 import type { ManagedApp } from "@/core/app.js";
 
@@ -115,11 +116,21 @@ export async function installApp(installerInputPath: string): Promise<ManagedApp
     return app;
   } catch (error) {
     const winNestError = toWinNestError(error);
+    const report = await createDoctorReport(logger);
+    const diagnosis = diagnoseWineFailure(collectErrorText(winNestError), report.hints);
     await tracker.update("failed", "failed", {
-      code: winNestError.code,
-      message: winNestError.message
+      code: diagnosis.code,
+      message: diagnosis.message,
+      hints: diagnosis.hints,
+      diagnosis: diagnosis.code
     });
-    await logger.error("install failed", { state, error });
+    await logger.error("install failed", {
+      state,
+      error,
+      originalCode: winNestError.code,
+      originalMessage: winNestError.message,
+      diagnosis
+    });
     throw error;
   } finally {
     await lock.release();

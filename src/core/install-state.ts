@@ -20,6 +20,8 @@ export type InstallStatus = "running" | "done" | "failed";
 export type InstallStateError = {
   code: string;
   message: string;
+  hints?: string[];
+  diagnosis?: string;
 };
 
 export type InstallStateFile = {
