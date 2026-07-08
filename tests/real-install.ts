@@ -1,7 +1,7 @@
 import { readdir, stat } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
 import { runDoctor } from "@/core/doctor.js";
-import { installApp } from "@/core/install.js";
+import { installApp } from "@/core/install/flow.js";
 import { appRoot } from "@/core/paths.js";
 import { readApp } from "@/core/state.js";
 import { toWinNestError } from "@/shared/errors.js";

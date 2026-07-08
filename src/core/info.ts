@@ -3,7 +3,7 @@ import { access, readdir, readFile, stat } from "node:fs/promises";
 import { basename, join } from "node:path";
 import { appRoot } from "@/core/paths.js";
 import { readApp } from "@/core/state.js";
-import { installStatePath, type InstallStateFile } from "@/core/install-state.js";
+import { installStatePath, type InstallStateFile } from "@/core/install/state.js";
 import { windowsPathToLinux } from "@/wine/path.js";
 
 export async function printAppInfo(appId: string): Promise<void> {

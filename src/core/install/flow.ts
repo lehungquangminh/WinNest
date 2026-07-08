@@ -10,13 +10,13 @@ import { createPrefix } from "@/wine/prefix.js";
 import { runInstaller } from "@/wine/process.js";
 import { detectSystemWine } from "@/wine/runner.js";
 import { writeApp } from "@/core/state.js";
-import { createInstallTracker, type InstallStep } from "@/core/install-state.js";
+import { createInstallTracker, type InstallStep } from "@/core/install/state.js";
 import { acquireAppLock } from "@/core/lock.js";
 import { reserveAppFolder } from "@/core/id.js";
 import { createDoctorReport, printFixHints } from "@/core/doctor.js";
 import { matchRecipeForInstaller } from "@/recipes/loader.js";
 import { createSystemFixHints, type SystemDependencyCode } from "@/system/fix-hints.js";
-import { collectErrorText, diagnoseWineFailure } from "@/core/diagnosis.js";
+import { collectErrorText, diagnoseWineFailure } from "@/core/install/diagnosis.js";
 import type { AppRecipe } from "@/recipes/model.js";
 import type { ManagedApp } from "@/core/app.js";
 
