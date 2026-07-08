@@ -18,7 +18,11 @@ export async function main(args: readonly string[]): Promise<void> {
 
   switch (command) {
     case "doctor":
-      await runDoctor({ verbose: args.includes("--verbose") });
+      await runDoctor({
+        verbose: args.includes("--verbose"),
+        fixHints: args.includes("--fix-hints"),
+        json: args.includes("--json")
+      });
       return;
     case "install":
       await installCommand(firstArg);

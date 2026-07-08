@@ -18,7 +18,7 @@ function printHelp(): void {
   console.log(`WinNest
 
 Usage:
-  winnest doctor
+  winnest doctor [--verbose] [--fix-hints] [--json]
   winnest install <installer-path>
   winnest open <file-path>
   winnest run <app-id>
