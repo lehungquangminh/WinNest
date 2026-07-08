@@ -14,6 +14,8 @@ import { setupCommand } from "@/cli/commands/setup.js";
 import { systemDepsCommand } from "@/cli/commands/system-deps.js";
 import { systemRepairCommand } from "@/cli/commands/system-repair.js";
 import { uninstallCommand } from "@/cli/commands/uninstall.js";
+import { devInstallCommand } from "@/cli/commands/dev-install.js";
+import { simulateOpenCommand } from "@/cli/commands/simulate-open.js";
 
 export const COMMANDS: readonly CliCommand[] = [
   {
@@ -112,9 +114,21 @@ export const COMMANDS: readonly CliCommand[] = [
   },
   {
     name: "register-mime",
-    usage: "register-mime",
+    usage: "register-mime [--force]",
     description: "Register WinNest as a handler for Windows installers.",
-    run: async () => mimeCommand()
+    run: async ({ args }) => mimeCommand(args)
+  },
+  {
+    name: "dev-install",
+    usage: "dev-install",
+    description: "Install local development executable wrapper scripts in ~/.local/bin.",
+    run: async () => devInstallCommand()
+  },
+  {
+    name: "simulate-open",
+    usage: "simulate-open <installer-path>",
+    description: "Simulate file manager double-click handoff via PATH winnest-open.",
+    run: async ({ args }) => simulateOpenCommand(args[0])
   },
   {
     name: "setup-wine",

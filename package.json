@@ -15,7 +15,9 @@
     "dev:cli": "node --enable-source-maps ./dist/cli/index.js",
     "start:gui": "electron ./dist/main/index.js",
     "test:path-torture": "tsx tests/path-torture.ts",
-    "test:real-install": "tsx tests/real-install.ts"
+    "test:real-install": "tsx tests/real-install.ts",
+    "link:dev": "npm link",
+    "unlink:dev": "npm unlink -g winnest"
   },
   "engines": {
     "node": ">=20"
