@@ -84,6 +84,8 @@ cp -r recipes/ "${STAGE}${INSTALL_ROOT}/recipes"
 
 info "Copying pages/ (web docs assets) …"
 cp -r pages/ "${STAGE}${INSTALL_ROOT}/pages"
+rm -rf "${STAGE}${INSTALL_ROOT}/pages/debian" \
+       "${STAGE}${INSTALL_ROOT}/pages/winnest.gpg"
 
 info "Copying Electron runtime …"
 ELECTRON_DIST="${PROJECT_ROOT}/node_modules/electron/dist"
