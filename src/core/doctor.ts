@@ -1,5 +1,5 @@
 import { constants } from "node:fs";
-import { access, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { access, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { arch, release, type } from "node:os";
 import { join } from "node:path";
 import { getPaths } from "@/core/paths.js";
@@ -40,6 +40,15 @@ type PrefixCheck = {
   support32: boolean;
 };
 
+type MimeHandlerScope = "user" | "local" | "system";
+
+type MimeHandlerCheck = {
+  path: string | undefined;
+  scope: MimeHandlerScope | undefined;
+  valid: boolean;
+  issue: string | undefined;
+};
+
 export type DoctorReport = {
   ok: boolean;
   system: {
@@ -76,6 +85,9 @@ export type DoctorReport = {
     sevenZip?: string;
     vulkaninfo?: string;
     mimeHandlerDesktopEntry?: string;
+    mimeHandlerScope?: MimeHandlerScope;
+    mimeHandlerValid: boolean;
+    mimeHandlerIssue?: string;
     mimeDefaults?: Record<string, string>;
   };
   commands: {
@@ -145,8 +157,7 @@ export async function createDoctorReport(logger = new Logger(globalLogPath("doct
   const xdgDesktopMenu = await findExecutable("xdg-desktop-menu");
   const updateDesktopDatabase = await findExecutable("update-desktop-database");
   const updateMimeDatabase = await findExecutable("update-mime-database");
-  const mimeHandlerDesktopEntryPath = join(paths.applicationsDir, "winnest-open.desktop");
-  const mimeHandlerDesktopEntry = (await fileExists(mimeHandlerDesktopEntryPath)) ? mimeHandlerDesktopEntryPath : undefined;
+  const mimeHandler = await findMimeHandlerDesktopEntry(paths.applicationsDir);
   const mimeDefaults = xdgMime ? await queryMimeDefaults(xdgMime) : {};
   const winbind = (await findExecutable("ntlm_auth")) ?? (await findExecutable("winbindd"));
   const cabextract = await findExecutable("cabextract");
@@ -174,9 +185,9 @@ export async function createDoctorReport(logger = new Logger(globalLogPath("doct
   if (!winnestOpenPath) {
     handoffReady = false;
     handoffIssue = "winnest-open missing from PATH";
-  } else if (!mimeHandlerDesktopEntry) {
+  } else if (!mimeHandler.valid) {
     handoffReady = false;
-    handoffIssue = "winnest-open.desktop file missing";
+    handoffIssue = mimeHandler.issue ?? "winnest-open.desktop file missing";
   } else {
     const missingMimes = Object.entries(mimeDefaults)
       .filter(([_, val]) => val !== "winnest-open.desktop")
@@ -248,7 +259,10 @@ export async function createDoctorReport(logger = new Logger(globalLogPath("doct
     xdgDesktopMenu,
     updateDesktopDatabase,
     updateMimeDatabase,
-    mimeHandlerDesktopEntry,
+    mimeHandlerDesktopEntry: mimeHandler.path,
+    mimeHandlerScope: mimeHandler.scope,
+    mimeHandlerValid: mimeHandler.valid,
+    mimeHandlerIssue: mimeHandler.issue,
     mimeDefaults,
     winbind,
     cabextract,
@@ -336,8 +350,8 @@ function printDoctor(report: DoctorReport): void {
     },
     {
       label: "WinNest MIME handler",
-      ok: Boolean(report.tools.mimeHandlerDesktopEntry),
-      value: report.tools.mimeHandlerDesktopEntry ? `found ${report.tools.mimeHandlerDesktopEntry}` : "not registered"
+      ok: report.tools.mimeHandlerValid,
+      value: formatMimeHandler(report)
     },
     {
       label: "MIME defaults",
@@ -421,6 +435,9 @@ function printVerboseDoctor(report: DoctorReport): void {
   console.log(`    updateDesktopDatabase: ${report.tools.updateDesktopDatabase ?? "missing"}`);
   console.log(`    updateMimeDatabase: ${report.tools.updateMimeDatabase ?? "missing"}`);
   console.log(`    mimeHandlerDesktopEntry: ${report.tools.mimeHandlerDesktopEntry ?? "missing"}`);
+  console.log(`    mimeHandlerScope: ${report.tools.mimeHandlerScope ?? "none"}`);
+  console.log(`    mimeHandlerValid: ${yesNo(report.tools.mimeHandlerValid)}`);
+  console.log(`    mimeHandlerIssue: ${report.tools.mimeHandlerIssue ?? "none"}`);
   for (const [mimeType, desktopEntry] of Object.entries(report.tools.mimeDefaults ?? {})) {
     console.log(`    ${mimeType}: ${desktopEntry || "unset"}`);
   }
@@ -531,6 +548,76 @@ async function fileExists(path: string): Promise<boolean> {
   }
 }
 
+async function findMimeHandlerDesktopEntry(userApplicationsDir: string): Promise<MimeHandlerCheck> {
+  const candidates: Array<{ path: string; scope: MimeHandlerScope }> = [
+    { path: join(userApplicationsDir, "winnest-open.desktop"), scope: "user" },
+    { path: "/usr/local/share/applications/winnest-open.desktop", scope: "local" },
+    { path: "/usr/share/applications/winnest-open.desktop", scope: "system" }
+  ];
+
+  let firstInvalid: MimeHandlerCheck | undefined;
+
+  for (const candidate of candidates) {
+    const validation = await validateMimeHandlerDesktopEntry(candidate.path);
+    if (!validation.exists) {
+      continue;
+    }
+
+    const check: MimeHandlerCheck = {
+      path: candidate.path,
+      scope: candidate.scope,
+      valid: validation.valid,
+      issue: validation.issue
+    };
+
+    if (check.valid) {
+      return check;
+    }
+
+    firstInvalid ??= check;
+  }
+
+  return (
+    firstInvalid ?? {
+      path: undefined,
+      scope: undefined,
+      valid: false,
+      issue: "winnest-open.desktop file missing"
+    }
+  );
+}
+
+async function validateMimeHandlerDesktopEntry(path: string): Promise<{
+  exists: boolean;
+  valid: boolean;
+  issue: string | undefined;
+}> {
+  let content: string;
+  try {
+    content = await readFile(path, "utf8");
+  } catch {
+    return { exists: false, valid: false, issue: undefined };
+  }
+
+  if (!/^\s*\[Desktop Entry\]\s*$/m.test(content)) {
+    return { exists: true, valid: false, issue: `invalid ${path}` };
+  }
+
+  const execMatch = content.match(/^\s*Exec\s*=\s*(.+)\s*$/m);
+  if (!execMatch) {
+    return { exists: true, valid: false, issue: `invalid ${path}` };
+  }
+
+  const execValue = execMatch[1];
+  const command = execValue ? execValue.trim().split(/\s+/)[0]?.replace(/^["']|["']$/g, "") : undefined;
+  const executableName = command?.split("/").pop();
+  if (executableName !== "winnest-open") {
+    return { exists: true, valid: false, issue: `invalid ${path}` };
+  }
+
+  return { exists: true, valid: true, issue: undefined };
+}
+
 function yesNo(value: boolean): string {
   return value ? "yes" : "no";
 }
@@ -541,6 +628,18 @@ function formatTool(path: string | undefined, optional = false): string {
   }
 
   return optional ? "missing optional" : "missing";
+}
+
+function formatMimeHandler(report: DoctorReport): string {
+  if (report.tools.mimeHandlerValid && report.tools.mimeHandlerDesktopEntry) {
+    return `found ${report.tools.mimeHandlerDesktopEntry}`;
+  }
+
+  if (report.tools.mimeHandlerDesktopEntry) {
+    return `invalid ${report.tools.mimeHandlerDesktopEntry}`;
+  }
+
+  return "not registered";
 }
 
 function trimForConsole(value: string): string {
@@ -599,13 +698,16 @@ function optionalTools(tools: {
   updateDesktopDatabase: string | undefined;
   updateMimeDatabase: string | undefined;
   mimeHandlerDesktopEntry: string | undefined;
+  mimeHandlerScope: MimeHandlerScope | undefined;
+  mimeHandlerValid: boolean;
+  mimeHandlerIssue: string | undefined;
   mimeDefaults: Record<string, string>;
   winbind: string | undefined;
   cabextract: string | undefined;
   sevenZip: string | undefined;
   vulkaninfo: string | undefined;
 }): DoctorReport["tools"] {
-  const result: DoctorReport["tools"] = {};
+  const result: DoctorReport["tools"] = { mimeHandlerValid: tools.mimeHandlerValid };
   if (tools.xdgMime) {
     result.xdgMime = tools.xdgMime;
   }
@@ -620,6 +722,12 @@ function optionalTools(tools: {
   }
   if (tools.mimeHandlerDesktopEntry) {
     result.mimeHandlerDesktopEntry = tools.mimeHandlerDesktopEntry;
+  }
+  if (tools.mimeHandlerScope) {
+    result.mimeHandlerScope = tools.mimeHandlerScope;
+  }
+  if (tools.mimeHandlerIssue) {
+    result.mimeHandlerIssue = tools.mimeHandlerIssue;
   }
   result.mimeDefaults = tools.mimeDefaults;
   if (tools.winbind) {
