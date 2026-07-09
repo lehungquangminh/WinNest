@@ -90,11 +90,44 @@ winnest rescan <app-id>
 
 ## Troubleshooting
 
-Run:
+General diagnostics:
 
 ```bash
 winnest doctor --verbose --fix-hints
 winnest repair-system
+```
+
+If `winnest-open` is not found after installing the package:
+
+```bash
+command -v winnest
+command -v winnest-open
+sudo apt install ./winnest_0.1.0_amd64.deb
+hash -r
+```
+
+If Wine reports missing 32-bit support or `syswow64\\ntdll.dll`:
+
+```bash
+sudo dpkg --add-architecture i386
+sudo apt update
+sudo apt install wine32:i386 winbind cabextract p7zip-full
+winnest doctor --verbose
+```
+
+If file manager handoff is not available:
+
+```bash
+winnest register-mime
+xdg-mime query default application/x-ms-dos-executable
+xdg-mime query default application/x-msi
+xdg-mime query default application/vnd.microsoft.portable-executable
+```
+
+Expected MIME default:
+
+```txt
+winnest-open.desktop
 ```
 
 If the main executable is wrong or missing:
