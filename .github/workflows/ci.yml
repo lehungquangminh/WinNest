@@ -57,6 +57,9 @@ jobs:
       - name: Build APT repository metadata
         run: npm run build:apt-repo
 
+      - name: Stage APT repository for Pages
+        run: npm run publish:apt-pages
+
       - name: Upload release artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -67,4 +70,7 @@ jobs:
             release/apt/dists/stable/Release
             release/apt/dists/stable/main/binary-amd64/Packages
             release/apt/dists/stable/main/binary-amd64/Packages.gz
+            pages/debian/dists/stable/Release
+            pages/debian/dists/stable/main/binary-amd64/Packages
+            pages/debian/dists/stable/main/binary-amd64/Packages.gz
           if-no-files-found: error

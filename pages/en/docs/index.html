@@ -152,11 +152,11 @@
 
 <span class="terminal-prompt"># 2. Add the WinNest signing key</span>
 <span class="terminal-cmd">sudo install -d -m 0755 /etc/apt/keyrings</span>
-<span class="terminal-cmd">curl -fsSL https://repo.winnest.app/winnest.gpg \</span>
+<span class="terminal-cmd">curl -fsSL https://winnest.dismon.me/winnest.gpg \</span>
 <span class="terminal-cmd">  | sudo gpg --dearmor -o /etc/apt/keyrings/winnest.gpg</span>
 
 <span class="terminal-prompt"># 3. Add the WinNest repository</span>
-<span class="terminal-cmd">echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/winnest.gpg] https://repo.winnest.app/debian stable main" \</span>
+<span class="terminal-cmd">echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/winnest.gpg] https://winnest.dismon.me/debian stable main" \</span>
 <span class="terminal-cmd">  | sudo tee /etc/apt/sources.list.d/winnest.list >/dev/null</span>
 
 <span class="terminal-prompt"># 4. Install WinNest and required dependencies</span>
@@ -185,6 +185,9 @@
 
 <span class="terminal-prompt"># Generate APT repository metadata under release/apt/</span>
 <span class="terminal-cmd">npm run build:apt-repo</span>
+
+<span class="terminal-prompt"># Stage the repository into pages/debian/ for GitHub Pages</span>
+<span class="terminal-cmd">npm run publish:apt-pages</span>
 
 <span class="terminal-prompt"># Install the standalone .deb locally when testing</span>
 <span class="terminal-cmd">sudo dpkg --add-architecture i386</span>

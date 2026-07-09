@@ -13,6 +13,7 @@
     "build:gui": "npm run build && vite build",
     "build:deb": "bash scripts/build-deb.sh",
     "build:apt-repo": "bash scripts/build-apt-repo.sh",
+    "publish:apt-pages": "bash scripts/publish-apt-pages.sh",
     "qa:deb": "bash scripts/qa-deb.sh",
     "checksums": "bash scripts/checksums.sh",
     "check": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.tests.json --noEmit",

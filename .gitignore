@@ -6,5 +6,7 @@ dist-renderer/
 release/
 packaging/deb/stage/
 packaging/deb/build/
+pages/debian/
+pages/winnest.gpg
 *.deb
 *.tmp

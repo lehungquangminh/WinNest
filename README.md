@@ -284,10 +284,10 @@ Add the WinNest repository and install:
 
 ```bash
 sudo install -d -m 0755 /etc/apt/keyrings
-curl -fsSL https://repo.winnest.app/winnest.gpg \
+curl -fsSL https://winnest.dismon.me/winnest.gpg \
   | sudo gpg --dearmor -o /etc/apt/keyrings/winnest.gpg
 
-echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/winnest.gpg] https://repo.winnest.app/debian stable main" \
+echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/winnest.gpg] https://winnest.dismon.me/debian stable main" \
   | sudo tee /etc/apt/sources.list.d/winnest.list >/dev/null
 
 sudo apt update
@@ -368,6 +368,13 @@ To generate a local static APT repository:
 ```bash
 npm run build:apt-repo
 # Output: release/apt/
+```
+
+To stage that repository for GitHub Pages:
+
+```bash
+npm run publish:apt-pages
+# Output: pages/debian/ and pages/winnest.gpg when a signing key is configured
 ```
 
 To rebuild after source changes:

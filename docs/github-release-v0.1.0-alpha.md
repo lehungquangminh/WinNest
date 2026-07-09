@@ -41,7 +41,7 @@ The original Windows installer should open through Wine. After it exits, WinNest
 - Low-confidence candidate selection without a terminal is still limited.
 - No strong sandbox yet.
 - Wine and system dependencies are required.
-- The APT repository metadata is not part of this release artifact unless separately published and signed.
+- The APT repository is hosted from GitHub Pages at `https://winnest.dismon.me/debian` once signed repository metadata is deployed.
 
 ## Verify Checksum
 

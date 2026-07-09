@@ -27,13 +27,55 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install Debian packaging tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y apt-utils dpkg-dev
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Import APT signing key
+        env:
+          WINNEST_APT_GPG_PRIVATE_KEY: ${{ secrets.WINNEST_APT_GPG_PRIVATE_KEY }}
+        run: |
+          if [ -z "${WINNEST_APT_GPG_PRIVATE_KEY}" ]; then
+            echo "::error::WINNEST_APT_GPG_PRIVATE_KEY secret is required to publish the APT repository on GitHub Pages."
+            exit 1
+          fi
+          printf '%s' "${WINNEST_APT_GPG_PRIVATE_KEY}" | gpg --batch --import
+
+      - name: Build Debian package
+        run: npm run build:deb
+
+      - name: Build signed APT repository
+        env:
+          WINNEST_APT_GPG_KEY: ${{ secrets.WINNEST_APT_GPG_KEY }}
+        run: |
+          if [ -z "${WINNEST_APT_GPG_KEY}" ]; then
+            echo "::error::WINNEST_APT_GPG_KEY secret is required to sign the APT repository."
+            exit 1
+          fi
+          npm run build:apt-repo
+
+      - name: Stage APT repository for GitHub Pages
+        env:
+          WINNEST_APT_GPG_KEY: ${{ secrets.WINNEST_APT_GPG_KEY }}
+        run: npm run publish:apt-pages -- --require-signed
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Deploy only the contents of the pages/ directory
+          # pages/ includes the website plus generated /debian APT repository.
           path: './pages'
 
       - name: Deploy to GitHub Pages

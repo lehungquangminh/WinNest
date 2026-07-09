@@ -15,6 +15,7 @@ npm run build:deb
 npm run qa:deb
 npm run checksums
 npm run build:apt-repo
+npm run publish:apt-pages
 ```
 
 Expected local artifacts:
@@ -23,6 +24,7 @@ Expected local artifacts:
 release/winnest_0.1.0_amd64.deb
 release/SHA256SUMS
 release/apt/
+pages/debian/
 ```
 
 These artifacts are ignored by Git and should be uploaded through the release process, not committed.
@@ -103,6 +105,7 @@ The workflow runs:
 - `npm run qa:deb`
 - `npm run checksums`
 - `npm run build:apt-repo`
+- `npm run publish:apt-pages`
 
 ## Tag Readiness
 

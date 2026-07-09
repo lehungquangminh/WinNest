@@ -15,10 +15,10 @@ Add the WinNest signing key and repository:
 
 ```bash
 sudo install -d -m 0755 /etc/apt/keyrings
-curl -fsSL https://repo.winnest.app/winnest.gpg \
+curl -fsSL https://winnest.dismon.me/winnest.gpg \
   | sudo gpg --dearmor -o /etc/apt/keyrings/winnest.gpg
 
-echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/winnest.gpg] https://repo.winnest.app/debian stable main" \
+echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/winnest.gpg] https://winnest.dismon.me/debian stable main" \
   | sudo tee /etc/apt/sources.list.d/winnest.list >/dev/null
 
 sudo apt update
@@ -61,19 +61,38 @@ This writes `Release.gpg` and `InRelease` beside `Release`.
 
 ## Publishing
 
-Upload the contents of `release/apt/` to the repository host so that this URL exists:
+WinNest hosts the repository from GitHub Pages. `npm run publish:apt-pages` stages `release/apt/` into `pages/debian/`, so this URL exists after the Pages workflow deploys:
 
 ```txt
-https://repo.winnest.app/debian/dists/stable/Release
+https://winnest.dismon.me/debian/dists/stable/Release
 ```
 
 The public signing key should be downloadable as:
 
 ```txt
-https://repo.winnest.app/winnest.gpg
+https://winnest.dismon.me/winnest.gpg
 ```
 
 Do not publish unsigned repository metadata for normal users.
+
+## GitHub Pages Deployment
+
+The Pages workflow builds the `.deb`, signs the APT metadata, stages the repository under `pages/debian/`, then uploads `pages/`.
+
+Required GitHub repository secrets:
+
+```txt
+WINNEST_APT_GPG_PRIVATE_KEY
+WINNEST_APT_GPG_KEY
+```
+
+Local staging:
+
+```bash
+npm run build:deb
+WINNEST_APT_GPG_KEY="maintainer@example.com" npm run build:apt-repo
+WINNEST_APT_GPG_KEY="maintainer@example.com" npm run publish:apt-pages -- --require-signed
+```
 
 ## Why Not Only A Standalone .deb?
 
