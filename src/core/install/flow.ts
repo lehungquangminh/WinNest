@@ -10,6 +10,7 @@ import { detectMainExecutable } from "@/scanner/detector.js";
 import { createPrefix } from "@/wine/prefix.js";
 import { runInstaller } from "@/wine/process.js";
 import { detectSystemWine } from "@/wine/runner.js";
+import { provisionPrefixFonts } from "@/wine/fonts.js";
 import { writeApp } from "@/core/state.js";
 import { createInstallTracker, type InstallStep } from "@/core/install/state.js";
 import { acquireAppLock } from "@/core/lock.js";
@@ -49,7 +50,8 @@ export async function installApp(installerInputPath: string, options: InstallOpt
       recipeName: recipe.name,
       systemDeps: recipe.systemDeps,
       wineDeps: recipe.wineDeps,
-      expectedExecutables: recipe.expectedExecutables
+      expectedExecutables: recipe.expectedExecutables,
+      launchArgs: recipe.launchArgs ?? []
     });
   } else {
     await logger.info("no recipe matched", { installerPath });
@@ -72,6 +74,7 @@ export async function installApp(installerInputPath: string, options: InstallOpt
     state = "booting-prefix";
     await tracker.update(state, "running");
     await createPrefix(prefixPath, logger);
+    await provisionPrefixFonts(prefixPath, logger);
 
     await warnAboutRecipeDependencies(recipe, logger);
 
@@ -109,6 +112,7 @@ export async function installApp(installerInputPath: string, options: InstallOpt
       createdAt: now,
       updatedAt: now,
       deps: recipe ? [...recipe.systemDeps, ...recipe.wineDeps] : [],
+      ...(recipe?.launchArgs && recipe.launchArgs.length > 0 ? { launchArgs: [...recipe.launchArgs] } : {}),
       desktopEntryPath: undefined
     };
     await writeApp(app);

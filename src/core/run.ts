@@ -18,9 +18,14 @@ export async function runApp(appId: string): Promise<void> {
   const lock = await acquireAppLock(appRoot(app.id), "run");
   const logger = new Logger(appLogPath(appId, "run.log"));
   try {
-    await logger.info("run started", { appId, mainExe: app.mainExe, prefixPath: app.prefixPath });
+    await logger.info("run started", {
+      appId,
+      mainExe: app.mainExe,
+      launchArgs: app.launchArgs ?? [],
+      prefixPath: app.prefixPath
+    });
     await validateMainExe(app.prefixPath, app.mainExe);
-    await runWindowsExe(app.prefixPath, app.mainExe, logger);
+    await runWindowsExe(app.prefixPath, app.mainExe, logger, app.launchArgs ?? []);
     await logger.info("run finished", { appId });
   } finally {
     await lock.release();

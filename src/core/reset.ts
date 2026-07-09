@@ -4,6 +4,7 @@ import { Logger } from "@/logging/logger.js";
 import { WinNestError } from "@/shared/errors.js";
 import { stopPrefix } from "@/wine/control.js";
 import { createPrefix } from "@/wine/prefix.js";
+import { provisionPrefixFonts } from "@/wine/fonts.js";
 import { detectSystemWine } from "@/wine/runner.js";
 import { appRoot } from "@/core/paths.js";
 import { acquireAppLock } from "@/core/lock.js";
@@ -30,6 +31,7 @@ export async function resetApp(appId: string): Promise<void> {
     await logger.warn("removing prefix", { prefixPath: paths.prefixPath });
     await rm(paths.prefixPath, { recursive: true, force: true });
     await createPrefix(paths.prefixPath, logger);
+    await provisionPrefixFonts(paths.prefixPath, logger);
     await writeApp({
       ...app,
       status: "failed",

@@ -20,6 +20,7 @@ export type AppRecipe = {
   notes: string[];
   expectedExecutables: string[];
   categories: string[];
+  launchArgs?: string[];
 };
 
 export function isAppRecipe(value: unknown): value is AppRecipe {
@@ -38,7 +39,8 @@ export function isAppRecipe(value: unknown): value is AppRecipe {
     isRecipePermissions(record["permissions"]) &&
     isStringArray(record["notes"]) &&
     isStringArray(record["expectedExecutables"]) &&
-    isStringArray(record["categories"])
+    isStringArray(record["categories"]) &&
+    (record["launchArgs"] === undefined || isStringArray(record["launchArgs"]))
   );
 }
 

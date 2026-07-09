@@ -14,6 +14,7 @@ export type ManagedApp = {
   createdAt: string;
   updatedAt: string;
   deps: string[];
+  launchArgs?: string[];
   desktopEntryPath: string | undefined;
 };
 
@@ -38,6 +39,8 @@ export function isManagedApp(value: unknown): value is ManagedApp {
     typeof record["updatedAt"] === "string" &&
     Array.isArray(record["deps"]) &&
     record["deps"].every((dep) => typeof dep === "string") &&
+    (record["launchArgs"] === undefined ||
+      (Array.isArray(record["launchArgs"]) && record["launchArgs"].every((arg) => typeof arg === "string"))) &&
     (typeof record["desktopEntryPath"] === "string" || record["desktopEntryPath"] === undefined)
   );
 }

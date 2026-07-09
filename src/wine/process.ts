@@ -47,13 +47,19 @@ function isWine32Missing(stderr: string): boolean {
   return stderr.includes("wine32 is missing") || stderr.includes("syswow64\\\\ntdll.dll");
 }
 
-export async function runWindowsExe(prefixPath: string, windowsExe: string, logger: Logger): Promise<void> {
+export async function runWindowsExe(
+  prefixPath: string,
+  windowsExe: string,
+  logger: Logger,
+  launchArgs: readonly string[] = []
+): Promise<void> {
   const runner = await detectSystemWine();
   if (!runner.winePath) {
     throw new WinNestError("WINE_NOT_FOUND", "Wine was not found on this system.");
   }
 
-  const result = await runCommand(runner.winePath, [windowsExe], {
+  const args = [windowsExe, ...launchArgs];
+  const result = await runCommand(runner.winePath, args, {
     logger,
     env: buildWineEnv(prefixPath),
     stdin: "ignore"
@@ -62,6 +68,7 @@ export async function runWindowsExe(prefixPath: string, windowsExe: string, logg
   if (result.exitCode !== 0) {
     throw new WinNestError("APP_RUN_FAILED", "Windows app exited with an error.", {
       windowsExe,
+      launchArgs,
       exitCode: result.exitCode,
       stderr: result.stderr
     });

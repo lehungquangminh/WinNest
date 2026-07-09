@@ -3,10 +3,11 @@ import { access } from "node:fs/promises";
 import { appLogPath } from "@/logging/paths.js";
 import { Logger } from "@/logging/logger.js";
 import { createPrefix } from "@/wine/prefix.js";
+import { provisionPrefixFonts } from "@/wine/fonts.js";
 import { windowsPathToLinux } from "@/wine/path.js";
 import { appRoot } from "@/core/paths.js";
 import { acquireAppLock } from "@/core/lock.js";
-import { readApp } from "@/core/state.js";
+import { readApp, writeApp } from "@/core/state.js";
 import { createDoctorReport, formatMissingDependencies, printFixHints } from "@/core/doctor.js";
 import { findRecipeForApp } from "@/recipes/loader.js";
 
@@ -56,6 +57,25 @@ export async function repairApp(appId: string): Promise<void> {
     console.log("  running wineboot for this prefix");
     await createPrefix(app.prefixPath, logger);
     await logger.info("repair prefix boot completed", { appId, prefixPath: app.prefixPath });
+    console.log("  provisioning Wine font fallbacks");
+    await provisionPrefixFonts(app.prefixPath, logger);
+
+    const recipeLaunchArgs = recipe?.launchArgs ?? [];
+    if (!stringArraysEqual(app.launchArgs ?? [], recipeLaunchArgs)) {
+      const updatedApp = { ...app, updatedAt: new Date().toISOString() };
+      if (recipeLaunchArgs.length > 0) {
+        updatedApp.launchArgs = [...recipeLaunchArgs];
+      } else {
+        delete updatedApp.launchArgs;
+      }
+      await writeApp(updatedApp);
+      console.log(`  launch arguments: ${recipeLaunchArgs.length > 0 ? recipeLaunchArgs.join(" ") : "cleared"}`);
+      await logger.info("repair synced recipe launch arguments", {
+        appId,
+        recipeId: recipe?.id,
+        launchArgs: recipeLaunchArgs
+      });
+    }
 
     if (report.hints.length > 0) {
       printFixHints(report.hints);
@@ -72,6 +92,10 @@ export async function repairApp(appId: string): Promise<void> {
   } finally {
     await lock.release();
   }
+}
+
+function stringArraysEqual(left: readonly string[], right: readonly string[]): boolean {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
 }
 
 async function resolveMainExe(

@@ -23,6 +23,7 @@ export async function printAppInfo(appId: string): Promise<void> {
   console.log(`Main executable: ${app.mainExe}`);
   console.log(`Main executable exists: ${mainExeResolution.exists ? "yes" : "no"}`);
   console.log(`Main executable path: ${mainExeResolution.linuxPath ?? "unresolved"}`);
+  console.log(`Launch arguments: ${app.launchArgs?.length ? app.launchArgs.join(" ") : "none"}`);
   console.log(`Desktop launcher: ${app.desktopEntryPath ?? "none"}`);
   console.log(`Created from: ${app.createdFrom}`);
   console.log(`Created at: ${app.createdAt}`);

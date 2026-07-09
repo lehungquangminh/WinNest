@@ -15,8 +15,14 @@
   },
   "notes": [
     "Voice and video calling may require microphone/camera integration.",
-    "System tray behavior may depend on desktop environment."
+    "System tray behavior may depend on desktop environment.",
+    "Chromium GPU rendering is disabled by default to avoid blank white windows under Wine."
   ],
   "expectedExecutables": ["Zalo.exe"],
-  "categories": ["Network", "Chat"]
+  "categories": ["Network", "Chat"],
+  "launchArgs": [
+    "--disable-gpu",
+    "--disable-gpu-compositing",
+    "--disable-features=UseSkiaRenderer,CanvasOopRasterization"
+  ]
 }

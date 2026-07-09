@@ -43,7 +43,8 @@ export async function scanExecutables(
 ): Promise<ExecutableCandidate[]> {
   const roots = [
     join(prefixPath, "drive_c", "Program Files"),
-    join(prefixPath, "drive_c", "Program Files (x86)")
+    join(prefixPath, "drive_c", "Program Files (x86)"),
+    ...(await getUserLocalProgramRoots(prefixPath))
   ];
   const candidates: ExecutableCandidate[] = [];
   const directoriesScanned: string[] = [];
@@ -156,9 +157,19 @@ async function scoreExecutable(
     reasons.push("inside Program Files (x86)");
   }
 
+  if (linuxPath.includes(`${sep}AppData${sep}Local${sep}Programs${sep}`)) {
+    score += 12;
+    reasons.push("inside user local programs");
+  }
+
   if (normalizedFolders.some((folder) => BUILT_IN_APP_FOLDERS.includes(folder))) {
     score -= 60;
     reasons.push("inside Wine built-in application folder");
+  }
+
+  if (normalizedFolders.some((folder) => folder === "plugins" || folder === "plugin")) {
+    score -= 30;
+    reasons.push("inside plugin folder");
   }
 
   if (normalizedHint && normalizedName.includes(normalizedHint)) {
@@ -209,6 +220,22 @@ async function scoreExecutable(
     sizeBytes: info.size,
     modifiedAt: info.mtime.toISOString()
   };
+}
+
+async function getUserLocalProgramRoots(prefixPath: string): Promise<string[]> {
+  const usersRoot = join(prefixPath, "drive_c", "users");
+  let entries;
+  try {
+    entries = await readdir(usersRoot, { withFileTypes: true });
+  } catch {
+    return [];
+  }
+
+  return entries
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .filter((name) => !["Public", "Default"].includes(name))
+    .map((name) => join(usersRoot, name, "AppData", "Local", "Programs"));
 }
 
 function indexOfExpectedExecutable(name: string, expectedExecutableNames: readonly string[]): number {
