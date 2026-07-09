@@ -379,6 +379,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 12px;
 }
 
 .terminal-buttons {
@@ -403,25 +404,55 @@ body {
     color: var(--text-muted);
 }
 
+.terminal-copy {
+    appearance: none;
+    border: 1px solid var(--border-muffled);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-muted);
+    border-radius: 6px;
+    padding: 5px 9px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.terminal-copy:hover {
+    color: var(--text-highlight);
+    border-color: var(--border-active);
+    background: rgba(255, 255, 255, 0.05);
+}
+
 .terminal-body {
     padding: 24px;
     font-family: var(--font-mono);
     font-size: 13.5px;
     line-height: 1.6;
     color: #A7F3D0; /* Retro light emerald terminal text */
-    min-height: 180px;
+    min-height: 0;
     position: relative;
+    overflow-x: auto;
+    white-space: nowrap;
 }
 
 .terminal-prompt {
+    display: block;
     color: var(--text-muted);
     user-select: none;
-    margin-right: 8px;
+    margin: 14px 0 4px;
+    white-space: pre;
+}
+
+.terminal-prompt:first-child {
+    margin-top: 0;
 }
 
 .terminal-cmd {
+    display: block;
     color: var(--text-highlight);
     font-weight: 500;
+    white-space: pre;
 }
 
 .terminal-output {
@@ -1164,5 +1195,4 @@ body {
         margin-bottom: 24px;
     }
 }
-
 

@@ -5,6 +5,7 @@
 
 document.addEventListener("DOMContentLoaded", () => {
     initTerminalSimulation();
+    initTerminalCopyButtons();
 });
 
 /**
@@ -67,4 +68,58 @@ function initTerminalSimulation() {
     }
 
     runScript();
+}
+
+function initTerminalCopyButtons() {
+    const terminalBlocks = document.querySelectorAll(".terminal-block");
+    terminalBlocks.forEach((block) => {
+        const header = block.querySelector(".terminal-header");
+        const body = block.querySelector(".terminal-body");
+        if (!header || !body || header.querySelector(".terminal-copy")) return;
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "terminal-copy";
+        button.textContent = "Copy";
+        button.setAttribute("aria-label", "Copy terminal commands");
+
+        button.addEventListener("click", async () => {
+            const commandLines = Array.from(body.querySelectorAll(".terminal-cmd"))
+                .map((item) => item.textContent?.trimEnd() ?? "")
+                .filter(Boolean);
+            const text = commandLines.length > 0 ? commandLines.join("\n") : body.textContent.trim();
+
+            try {
+                await copyText(text);
+                button.textContent = "Copied";
+                setTimeout(() => {
+                    button.textContent = "Copy";
+                }, 1600);
+            } catch {
+                button.textContent = "Failed";
+                setTimeout(() => {
+                    button.textContent = "Copy";
+                }, 1600);
+            }
+        });
+
+        header.appendChild(button);
+    });
+}
+
+async function copyText(text) {
+    if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        return;
+    }
+
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.setAttribute("readonly", "");
+    textarea.style.position = "fixed";
+    textarea.style.opacity = "0";
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand("copy");
+    document.body.removeChild(textarea);
 }
